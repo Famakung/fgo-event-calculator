@@ -1,0 +1,1170 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FGO Event Shop Calculator</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=stylesheet"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #f8f9fc;
+        --card: #ffffff;
+        --text: #1a1a2e;
+        --text-secondary: #6b7280;
+        --border: #e5e7eb;
+        --bronze: #cd7f32;
+        --bronze-bg: #fef3e7;
+        --silver: #71717a;
+        --silver-bg: #f4f4f5;
+        --gold: #eab308;
+        --gold-bg: #fefce8;
+        --accent: #6366f1;
+        --accent-light: #eef2ff;
+        --shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+        --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+        --radius: 16px;
+        --radius-sm: 10px;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        min-height: 100vh;
+        background: var(--bg);
+        font-family: "DM Sans", sans-serif;
+        color: var(--text);
+        line-height: 1.5;
+      }
+
+      .container {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 40px 20px;
+      }
+
+      /* Header */
+      .header {
+        text-align: center;
+        margin-bottom: 40px;
+      }
+
+      .badge {
+        display: inline-block;
+        background: var(--accent-light);
+        color: var(--accent);
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 6px 14px;
+        border-radius: 100px;
+        margin-bottom: 16px;
+        letter-spacing: 0.02em;
+      }
+
+      .title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 8px;
+      }
+
+      .subtitle {
+        font-size: 1rem;
+        color: var(--text-secondary);
+      }
+
+      /* Cards */
+      .card {
+        background: var(--card);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 28px;
+        margin-bottom: 20px;
+        border: 1px solid var(--border);
+      }
+
+      .card-title {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 20px;
+      }
+
+      /* Material Grid */
+      .materials-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        min-width: 0;
+      }
+
+      .material-card {
+        padding: 16px 12px;
+        border-radius: var(--radius-sm);
+        text-align: center;
+        transition:
+          transform 0.2s ease,
+          box-shadow 0.2s ease;
+        min-width: 0;
+        overflow: hidden;
+      }
+
+      .material-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-sm);
+      }
+
+      .material-card.bronze {
+        background: var(--bronze-bg);
+      }
+      .material-card.silver {
+        background: var(--silver-bg);
+      }
+      .material-card.gold {
+        background: var(--gold-bg);
+      }
+
+      .material-icon-wrapper {
+        width: 56px;
+        height: 60px;
+        margin: 0 auto 10px;
+        position: relative;
+      }
+
+      .material-icon {
+        width: 56px;
+        height: 60px;
+        border-radius: 6px;
+        overflow: hidden;
+        background: #e5e7eb;
+        position: relative;
+      }
+
+      .material-icon .bg-layer {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+
+      .material-icon .fg-layer {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 50px;
+        height: 50px;
+        transform: translate(-50%, -50%);
+        object-fit: contain;
+      }
+
+      .material-name {
+        font-weight: 600;
+        font-size: 0.875rem;
+        margin-bottom: 16px;
+      }
+
+      .material-card.bronze .material-name {
+        color: #92400e;
+      }
+      .material-card.silver .material-name {
+        color: #3f3f46;
+      }
+      .material-card.gold .material-name {
+        color: #854d0e;
+      }
+
+      /* Inputs */
+      .input-row {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 6px;
+      }
+
+      .input-row:last-child {
+        margin-bottom: 0;
+      }
+
+      .input-label {
+        font-size: 0.65rem;
+        color: var(--text-secondary);
+        font-weight: 500;
+        min-width: 38px;
+        text-align: left;
+      }
+
+      .input-field {
+        flex: 1;
+        min-width: 0;
+        background: white;
+        border: 1.5px solid var(--border);
+        border-radius: 6px;
+        padding: 6px 8px;
+        font-family: "Space Mono", monospace;
+        font-size: 0.8rem;
+        color: var(--text);
+        text-align: center;
+        transition:
+          border-color 0.2s ease,
+          box-shadow 0.2s ease;
+      }
+
+      .input-field:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-light);
+      }
+
+      /* Drop Rates */
+      .drop-rates-3col {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 12px;
+      }
+
+      .rate-item {
+        background: var(--bg);
+        padding: 16px;
+        border-radius: var(--radius-sm);
+      }
+
+      .rate-label {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .rate-icon {
+        width: 18px;
+        height: 18px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        font-weight: 700;
+      }
+
+      .rate-icon.more {
+        background: #22c55e;
+        color: white;
+      }
+      .rate-icon.less {
+        background: #f97316;
+        color: white;
+      }
+
+      .rate-input {
+        width: 100%;
+        background: white;
+        border: 1.5px solid var(--border);
+        border-radius: 8px;
+        padding: 10px 12px;
+        font-family: "Space Mono", monospace;
+        font-size: 1rem;
+        color: var(--text);
+        transition:
+          border-color 0.2s ease,
+          box-shadow 0.2s ease;
+      }
+
+      .rate-input:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-light);
+      }
+
+      .calculated-value {
+        font-family: "Space Mono", monospace;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text);
+        text-align: center;
+        padding: 10px 12px;
+      }
+
+      /* Base Row */
+      .base-row {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+      }
+
+      .base-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .base-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+      }
+
+      .base-input {
+        width: 90px;
+        text-align: center;
+      }
+
+      /* Quest Drops Grid */
+      .quest-drops-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+      }
+
+      .quest-drops-item {
+        background: var(--bg);
+        padding: 16px;
+        border-radius: var(--radius-sm);
+        border: 2px solid transparent;
+      }
+
+      .quest-drops-item.bronze {
+        border-color: var(--bronze);
+      }
+
+      .quest-drops-item.silver {
+        border-color: var(--silver);
+      }
+
+      .quest-drops-item.gold {
+        border-color: var(--gold);
+      }
+
+      .quest-drops-title {
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-align: center;
+        margin-bottom: 12px;
+      }
+
+      .quest-drops-item.bronze .quest-drops-title {
+        color: var(--bronze);
+      }
+
+      .quest-drops-item.silver .quest-drops-title {
+        color: var(--silver);
+      }
+
+      .quest-drops-item.gold .quest-drops-title {
+        color: #ca8a04;
+      }
+
+      .drop-line {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 0;
+      }
+
+      .mini-icon {
+        width: 28px;
+        height: 30px;
+        flex-shrink: 0;
+        position: relative;
+      }
+
+      .mini-icon .bg-layer {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+
+      .mini-icon .fg-layer {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 24px;
+        height: 24px;
+        transform: translate(-50%, -50%);
+        object-fit: contain;
+      }
+
+      .drop-material {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        flex: 1;
+      }
+
+      .drop-value {
+        font-family: "Space Mono", monospace;
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: var(--text);
+      }
+
+      /* Button */
+      .calculate-btn {
+        width: 100%;
+        padding: 16px 32px;
+        background: var(--accent);
+        color: white;
+        border: none;
+        border-radius: var(--radius-sm);
+        font-family: "DM Sans", sans-serif;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+
+      .calculate-btn:hover {
+        background: #4f46e5;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+      }
+
+      .calculate-btn:active {
+        transform: translateY(0);
+      }
+
+      .btn-icon {
+        font-size: 1.2rem;
+      }
+
+      /* Results */
+      .results {
+        display: none;
+      }
+
+      .results.visible {
+        display: block;
+        animation: fadeUp 0.4s ease;
+      }
+
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(16px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Deficit */
+      .deficit-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+
+      .deficit-item {
+        text-align: center;
+        padding: 16px;
+        border-radius: var(--radius-sm);
+      }
+
+      .deficit-item.bronze {
+        background: var(--bronze-bg);
+      }
+      .deficit-item.silver {
+        background: var(--silver-bg);
+      }
+      .deficit-item.gold {
+        background: var(--gold-bg);
+      }
+
+      .deficit-label {
+        font-size: 0.7rem;
+        color: var(--text-secondary);
+        margin-bottom: 4px;
+      }
+
+      .deficit-value {
+        font-family: "Space Mono", monospace;
+        font-size: 1.5rem;
+        font-weight: 700;
+      }
+
+      .deficit-item.bronze .deficit-value {
+        color: var(--bronze);
+      }
+      .deficit-item.silver .deficit-value {
+        color: var(--silver);
+      }
+      .deficit-item.gold .deficit-value {
+        color: #ca8a04;
+      }
+
+      /* Quest Results */
+      .quest-results {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border-radius: var(--radius-sm);
+        padding: 24px;
+      }
+
+      .quest-title {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-align: center;
+        margin-bottom: 20px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .quest-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+      }
+
+      .quest-item {
+        background: white;
+        padding: 20px 16px;
+        border-radius: var(--radius-sm);
+        text-align: center;
+        border: 2px solid transparent;
+        transition: all 0.2s ease;
+      }
+
+      .quest-item.bronze {
+        border-color: var(--bronze);
+      }
+      .quest-item.silver {
+        border-color: var(--silver);
+      }
+      .quest-item.gold {
+        border-color: var(--gold);
+      }
+
+      .quest-item:hover {
+        transform: scale(1.02);
+      }
+
+      .quest-name {
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+
+      .quest-item.bronze .quest-name {
+        color: var(--bronze);
+      }
+      .quest-item.silver .quest-name {
+        color: var(--silver);
+      }
+      .quest-item.gold .quest-name {
+        color: #ca8a04;
+      }
+
+      .quest-count {
+        font-family: "Space Mono", monospace;
+        font-size: 2.5rem;
+        font-weight: 700;
+        line-height: 1;
+        color: var(--text);
+      }
+
+      .quest-label {
+        font-size: 0.7rem;
+        color: var(--text-secondary);
+        margin-top: 4px;
+      }
+
+      /* Footer */
+      .footer {
+        text-align: center;
+        margin-top: 32px;
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+      }
+
+      /* Responsive */
+      @media (max-width: 600px) {
+        .container {
+          padding: 24px 16px;
+        }
+
+        .title {
+          font-size: 1.5rem;
+        }
+
+        .materials-grid,
+        .deficit-grid,
+        .quest-grid {
+          grid-template-columns: 1fr;
+          gap: 10px;
+        }
+
+        .drop-rates-3col,
+        .quest-drops-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .card {
+          padding: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header class="header">
+        <div class="badge">Event Shop Planner</div>
+        <h1 class="title">FGO Calculator</h1>
+        <p class="subtitle">Optimize your event item farming</p>
+      </header>
+
+      <div class="card">
+        <div class="card-title">Shop Requirements</div>
+        <div class="materials-grid">
+          <div class="material-card bronze">
+            <div class="material-icon-wrapper">
+              <div class="material-icon" id="bronzeIcon"></div>
+            </div>
+            <div class="input-row">
+              <label class="input-label">Require</label>
+              <input
+                type="number"
+                class="input-field"
+                id="bronzeNeed"
+                value="400"
+              />
+            </div>
+            <div class="input-row">
+              <label class="input-label">Held</label>
+              <input
+                type="number"
+                class="input-field"
+                id="bronzeHave"
+                value="155"
+              />
+            </div>
+            <div class="input-row">
+              <label class="input-label">Bonus</label>
+              <input
+                type="number"
+                class="input-field"
+                id="bronzeBonus"
+                value="0"
+              />
+            </div>
+          </div>
+
+          <div class="material-card silver">
+            <div class="material-icon-wrapper">
+              <div class="material-icon" id="silverIcon"></div>
+            </div>
+            <div class="input-row">
+              <label class="input-label">Require</label>
+              <input
+                type="number"
+                class="input-field"
+                id="silverNeed"
+                value="800"
+              />
+            </div>
+            <div class="input-row">
+              <label class="input-label">Held</label>
+              <input
+                type="number"
+                class="input-field"
+                id="silverHave"
+                value="115"
+              />
+            </div>
+            <div class="input-row">
+              <label class="input-label">Bonus</label>
+              <input
+                type="number"
+                class="input-field"
+                id="silverBonus"
+                value="0"
+              />
+            </div>
+          </div>
+
+          <div class="material-card gold">
+            <div class="material-icon-wrapper">
+              <div class="material-icon" id="goldIcon"></div>
+            </div>
+            <div class="input-row">
+              <label class="input-label">Require</label>
+              <input
+                type="number"
+                class="input-field"
+                id="goldNeed"
+                value="400"
+              />
+            </div>
+            <div class="input-row">
+              <label class="input-label">Held</label>
+              <input
+                type="number"
+                class="input-field"
+                id="goldHave"
+                value="94"
+              />
+            </div>
+            <div class="input-row">
+              <label class="input-label">Bonus</label>
+              <input
+                type="number"
+                class="input-field"
+                id="goldBonus"
+                value="0"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Drop Rates per Run</div>
+        <div class="base-row">
+          <div class="base-item">
+            <label class="base-label">Base</label>
+            <input
+              type="number"
+              class="rate-input base-input"
+              id="baseDrop"
+              value="3"
+            />
+          </div>
+          <div class="base-item">
+            <label class="base-label">Primary %</label>
+            <input
+              type="number"
+              class="rate-input base-input"
+              id="primaryMultiplier"
+              value="1500"
+            />
+          </div>
+          <div class="base-item">
+            <label class="base-label">Secondary %</label>
+            <input
+              type="number"
+              class="rate-input base-input"
+              id="secondaryMultiplier"
+              value="225"
+            />
+          </div>
+        </div>
+        <div class="quest-drops-grid">
+          <div class="quest-drops-item bronze">
+            <div class="quest-drops-title">Bronze Quest</div>
+            <div class="drop-line">
+              <span class="mini-icon" id="bronzeQuest_bronze_icon"></span>
+              <span class="drop-material" id="bronzeQuest_bronze_label"
+                >3(+0)</span
+              >
+              <span class="drop-value" id="bronzeQuest_bronze">45</span>
+            </div>
+            <div class="drop-line">
+              <span class="mini-icon" id="bronzeQuest_silver_icon"></span>
+              <span class="drop-material" id="bronzeQuest_silver_label"
+                >3(+0)</span
+              >
+              <span class="drop-value" id="bronzeQuest_silver">6.75</span>
+            </div>
+          </div>
+          <div class="quest-drops-item silver">
+            <div class="quest-drops-title">Silver Quest</div>
+            <div class="drop-line">
+              <span class="mini-icon" id="silverQuest_silver_icon"></span>
+              <span class="drop-material" id="silverQuest_silver_label"
+                >3(+0)</span
+              >
+              <span class="drop-value" id="silverQuest_silver">45</span>
+            </div>
+            <div class="drop-line">
+              <span class="mini-icon" id="silverQuest_gold_icon"></span>
+              <span class="drop-material" id="silverQuest_gold_label"
+                >3(+0)</span
+              >
+              <span class="drop-value" id="silverQuest_gold">6.75</span>
+            </div>
+          </div>
+          <div class="quest-drops-item gold">
+            <div class="quest-drops-title">Gold Quest</div>
+            <div class="drop-line">
+              <span class="mini-icon" id="goldQuest_gold_icon"></span>
+              <span class="drop-material" id="goldQuest_gold_label">3(+0)</span>
+              <span class="drop-value" id="goldQuest_gold">45</span>
+            </div>
+            <div class="drop-line">
+              <span class="mini-icon" id="goldQuest_bronze_icon"></span>
+              <span class="drop-material" id="goldQuest_bronze_label"
+                >3(+0)</span
+              >
+              <span class="drop-value" id="goldQuest_bronze">6.75</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button class="calculate-btn" onclick="calculate()">
+        Calculate Quest Runs
+      </button>
+
+      <div class="results" id="results">
+        <div class="card" style="margin-top: 20px">
+          <div class="card-title">Items Needed</div>
+          <div class="deficit-grid">
+            <div class="deficit-item bronze">
+              <div class="deficit-label">Bronze</div>
+              <div class="deficit-value" id="bronzeDeficit">0</div>
+            </div>
+            <div class="deficit-item silver">
+              <div class="deficit-label">Silver</div>
+              <div class="deficit-value" id="silverDeficit">0</div>
+            </div>
+            <div class="deficit-item gold">
+              <div class="deficit-label">Gold</div>
+              <div class="deficit-value" id="goldDeficit">0</div>
+            </div>
+          </div>
+
+          <div class="quest-results">
+            <div class="quest-title">Recommended Quest Runs</div>
+            <div class="quest-grid">
+              <div class="quest-item bronze">
+                <div class="quest-name">Bronze Quest</div>
+                <div class="quest-count" id="bronzePlay">0</div>
+                <div class="quest-label">runs</div>
+              </div>
+              <div class="quest-item silver">
+                <div class="quest-name">Silver Quest</div>
+                <div class="quest-count" id="silverPlay">0</div>
+                <div class="quest-label">runs</div>
+              </div>
+              <div class="quest-item gold">
+                <div class="quest-name">Gold Quest</div>
+                <div class="quest-count" id="goldPlay">0</div>
+                <div class="quest-label">runs</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="footer">Fate/Grand Order Event Shop Calculator</footer>
+    </div>
+
+    <script>
+      // Background URLs
+      const backgroundUrls = {
+        bronze:
+          "https://apps.atlasacademy.io/db/assets/listframes1_bg-CB5tQlCX.png",
+        silver:
+          "https://apps.atlasacademy.io/db/assets/listframes2_bg-BcVjjli0.png",
+        gold: "https://apps.atlasacademy.io/db/assets/listframes3_bg-CFbSxrKK.png",
+      };
+
+      // Foreground URLs
+      const foregroundUrls = {
+        bronze: "https://static.atlasacademy.io/JP/Items/94153901.png",
+        silver: "https://static.atlasacademy.io/JP/Items/94153902.png",
+        gold: "https://static.atlasacademy.io/JP/Items/94153903.png",
+      };
+
+      // Load all icons using CSS layering
+      function loadIcons() {
+        // Load main icons in Shop Requirements
+        ["bronze", "silver", "gold"].forEach((type) => {
+          const iconEl = document.getElementById(type + "Icon");
+          iconEl.innerHTML = `
+            <img class="bg-layer" src="${backgroundUrls[type]}" alt="${type} bg">
+            <img class="fg-layer" src="${foregroundUrls[type]}" alt="${type} fg">
+          `;
+        });
+
+        // Load mini icons in Drop Rates card
+        const questMaterials = {
+          bronzeQuest_bronze: "bronze",
+          bronzeQuest_silver: "silver",
+          silverQuest_silver: "silver",
+          silverQuest_gold: "gold",
+          goldQuest_gold: "gold",
+          goldQuest_bronze: "bronze",
+        };
+
+        Object.entries(questMaterials).forEach(([id, type]) => {
+          const iconEl = document.getElementById(id + "_icon");
+          if (iconEl) {
+            iconEl.innerHTML = `
+              <img class="bg-layer" src="${backgroundUrls[type]}" alt="${type} bg">
+              <img class="fg-layer" src="${foregroundUrls[type]}" alt="${type} fg">
+            `;
+          }
+        });
+      }
+
+      // Save data to localStorage
+      function saveData() {
+        const data = {
+          bronzeNeed: document.getElementById("bronzeNeed").value,
+          bronzeHave: document.getElementById("bronzeHave").value,
+          bronzeBonus: document.getElementById("bronzeBonus").value,
+          silverNeed: document.getElementById("silverNeed").value,
+          silverHave: document.getElementById("silverHave").value,
+          silverBonus: document.getElementById("silverBonus").value,
+          goldNeed: document.getElementById("goldNeed").value,
+          goldHave: document.getElementById("goldHave").value,
+          goldBonus: document.getElementById("goldBonus").value,
+          baseDrop: document.getElementById("baseDrop").value,
+          primaryMultiplier: document.getElementById("primaryMultiplier").value,
+          secondaryMultiplier: document.getElementById("secondaryMultiplier")
+            .value,
+        };
+        localStorage.setItem("fgo_calculator_data", JSON.stringify(data));
+      }
+
+      // Load data from localStorage
+      function loadData() {
+        const saved = localStorage.getItem("fgo_calculator_data");
+        const data = saved ? JSON.parse(saved) : {};
+
+        document.getElementById("bronzeNeed").value = data.bronzeNeed || 400;
+        document.getElementById("bronzeHave").value = data.bronzeHave || 155;
+        document.getElementById("bronzeBonus").value = data.bronzeBonus || 0;
+        document.getElementById("silverNeed").value = data.silverNeed || 800;
+        document.getElementById("silverHave").value = data.silverHave || 115;
+        document.getElementById("silverBonus").value = data.silverBonus || 0;
+        document.getElementById("goldNeed").value = data.goldNeed || 400;
+        document.getElementById("goldHave").value = data.goldHave || 94;
+        document.getElementById("goldBonus").value = data.goldBonus || 0;
+        document.getElementById("baseDrop").value = data.baseDrop || 3;
+        document.getElementById("primaryMultiplier").value =
+          data.primaryMultiplier || 1500;
+        document.getElementById("secondaryMultiplier").value =
+          data.secondaryMultiplier || 225;
+
+        // Update calculated values display
+        updateDropDisplay();
+
+        // Load icons from URLs
+        loadIcons();
+      }
+
+      // Update drop rate display
+      function updateDropDisplay() {
+        const base = parseFloat(document.getElementById("baseDrop").value) || 0;
+        const bronzeBonus =
+          parseFloat(document.getElementById("bronzeBonus").value) || 0;
+        const silverBonus =
+          parseFloat(document.getElementById("silverBonus").value) || 0;
+        const goldBonus =
+          parseFloat(document.getElementById("goldBonus").value) || 0;
+        const primaryMult =
+          (parseFloat(document.getElementById("primaryMultiplier").value) ||
+            1500) / 100;
+        const secondaryMult =
+          (parseFloat(document.getElementById("secondaryMultiplier").value) ||
+            225) / 100;
+
+        // Bronze Quest drops: Bronze (main) + Silver (secondary)
+        // Each material uses its own bonus
+        const bronzeQuestBronze = (base + bronzeBonus) * primaryMult;
+        const bronzeQuestSilver = (base + silverBonus) * secondaryMult;
+
+        // Silver Quest drops: Silver (main) + Gold (secondary)
+        const silverQuestSilver = (base + silverBonus) * primaryMult;
+        const silverQuestGold = (base + goldBonus) * secondaryMult;
+
+        // Gold Quest drops: Gold (main) + Bronze (secondary)
+        const goldQuestGold = (base + goldBonus) * primaryMult;
+        const goldQuestBronze = (base + bronzeBonus) * secondaryMult;
+
+        // Update labels with actual Base+Bonus values (icon shows material type)
+        document.getElementById("bronzeQuest_bronze_label").textContent =
+          `${base}(+${bronzeBonus})`;
+        document.getElementById("bronzeQuest_silver_label").textContent =
+          `${base}(+${silverBonus})`;
+        document.getElementById("silverQuest_silver_label").textContent =
+          `${base}(+${silverBonus})`;
+        document.getElementById("silverQuest_gold_label").textContent =
+          `${base}(+${goldBonus})`;
+        document.getElementById("goldQuest_gold_label").textContent =
+          `${base}(+${goldBonus})`;
+        document.getElementById("goldQuest_bronze_label").textContent =
+          `${base}(+${bronzeBonus})`;
+
+        // Update drop values
+        document.getElementById("bronzeQuest_bronze").textContent =
+          bronzeQuestBronze;
+        document.getElementById("bronzeQuest_silver").textContent =
+          bronzeQuestSilver;
+        document.getElementById("silverQuest_silver").textContent =
+          silverQuestSilver;
+        document.getElementById("silverQuest_gold").textContent =
+          silverQuestGold;
+        document.getElementById("goldQuest_gold").textContent = goldQuestGold;
+        document.getElementById("goldQuest_bronze").textContent =
+          goldQuestBronze;
+      }
+
+      // Load saved data when page opens
+      document.addEventListener("DOMContentLoaded", function () {
+        loadData();
+        // Update display when base, bonus, or multiplier values change
+        document
+          .getElementById("baseDrop")
+          .addEventListener("input", updateDropDisplay);
+        document
+          .getElementById("bronzeBonus")
+          .addEventListener("input", updateDropDisplay);
+        document
+          .getElementById("silverBonus")
+          .addEventListener("input", updateDropDisplay);
+        document
+          .getElementById("goldBonus")
+          .addEventListener("input", updateDropDisplay);
+        document
+          .getElementById("primaryMultiplier")
+          .addEventListener("input", updateDropDisplay);
+        document
+          .getElementById("secondaryMultiplier")
+          .addEventListener("input", updateDropDisplay);
+      });
+
+      function calculate() {
+        // Save data whenever calculate is clicked
+        saveData();
+
+        const bronzeNeed =
+          parseInt(document.getElementById("bronzeNeed").value) || 0;
+        const silverNeed =
+          parseInt(document.getElementById("silverNeed").value) || 0;
+        const goldNeed =
+          parseInt(document.getElementById("goldNeed").value) || 0;
+
+        const bronzeHave =
+          parseInt(document.getElementById("bronzeHave").value) || 0;
+        const silverHave =
+          parseInt(document.getElementById("silverHave").value) || 0;
+        const goldHave =
+          parseInt(document.getElementById("goldHave").value) || 0;
+
+        const bronzeBonus =
+          parseFloat(document.getElementById("bronzeBonus").value) || 0;
+        const silverBonus =
+          parseFloat(document.getElementById("silverBonus").value) || 0;
+        const goldBonus =
+          parseFloat(document.getElementById("goldBonus").value) || 0;
+
+        const base = parseFloat(document.getElementById("baseDrop").value) || 0;
+        const primaryMult =
+          (parseFloat(document.getElementById("primaryMultiplier").value) ||
+            1500) / 100;
+        const secondaryMult =
+          (parseFloat(document.getElementById("secondaryMultiplier").value) ||
+            225) / 100;
+
+        // Calculate effective drop rates for each quest type
+        // Each material uses its own bonus
+        const bronzeMore = (base + bronzeBonus) * primaryMult; // Bronze Quest main (Bronze)
+        const bronzeLess = (base + silverBonus) * secondaryMult; // Bronze Quest secondary (Silver)
+        const silverMore = (base + silverBonus) * primaryMult; // Silver Quest main (Silver)
+        const silverLess = (base + goldBonus) * secondaryMult; // Silver Quest secondary (Gold)
+        const goldMore = (base + goldBonus) * primaryMult; // Gold Quest main (Gold)
+        const goldLess = (base + bronzeBonus) * secondaryMult; // Gold Quest secondary (Bronze)
+
+        let bronzeWant = bronzeNeed - bronzeHave;
+        let silverWant = silverNeed - silverHave;
+        let goldWant = goldNeed - goldHave;
+
+        const originalBronzeDeficit = bronzeWant;
+        const originalSilverDeficit = silverWant;
+        const originalGoldDeficit = goldWant;
+
+        let bronzePlay = 0;
+        let silverPlay = 0;
+        let goldPlay = 0;
+
+        while (bronzeWant > 0 || silverWant > 0 || goldWant > 0) {
+          if (bronzeWant >= silverWant && bronzeWant >= goldWant) {
+            bronzeWant -= bronzeMore;
+            silverWant -= bronzeLess;
+            bronzePlay++;
+          } else if (silverWant >= goldWant) {
+            silverWant -= silverMore;
+            goldWant -= silverLess;
+            silverPlay++;
+          } else {
+            goldWant -= goldMore;
+            bronzeWant -= goldLess;
+            goldPlay++;
+          }
+        }
+
+        const resultsSection = document.getElementById("results");
+        resultsSection.classList.add("visible");
+
+        document.getElementById("bronzeDeficit").textContent = Math.max(
+          0,
+          originalBronzeDeficit,
+        );
+        document.getElementById("silverDeficit").textContent = Math.max(
+          0,
+          originalSilverDeficit,
+        );
+        document.getElementById("goldDeficit").textContent = Math.max(
+          0,
+          originalGoldDeficit,
+        );
+
+        animateCount("bronzePlay", bronzePlay);
+        animateCount("silverPlay", silverPlay);
+        animateCount("goldPlay", goldPlay);
+
+        setTimeout(() => {
+          resultsSection.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+        }, 100);
+      }
+
+      function animateCount(elementId, targetValue) {
+        const element = document.getElementById(elementId);
+        const duration = 600;
+        const startTime = performance.now();
+
+        function update(currentTime) {
+          const elapsed = currentTime - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          const easeOut = 1 - Math.pow(1 - progress, 3);
+          const currentValue = Math.round(targetValue * easeOut);
+          element.textContent = currentValue;
+
+          if (progress < 1) {
+            requestAnimationFrame(update);
+          }
+        }
+
+        requestAnimationFrame(update);
+      }
+    </script>
+  </body>
+</html>
