@@ -17,16 +17,36 @@
         --border: #e5e7eb;
         --bronze: #cd7f32;
         --bronze-bg: #fef3e7;
+        --bronze-text: #92400e;
         --silver: #71717a;
         --silver-bg: #f4f4f5;
+        --silver-text: #3f3f46;
         --gold: #eab308;
         --gold-bg: #fefce8;
+        --gold-text: #854d0e;
         --accent: #6366f1;
         --accent-light: #eef2ff;
         --shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
         --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
         --radius: 16px;
         --radius-sm: 10px;
+      }
+
+      /* Tier-based theming via data attributes */
+      [data-tier="bronze"] {
+        --tier-color: var(--bronze);
+        --tier-bg: var(--bronze-bg);
+        --tier-text: var(--bronze-text);
+      }
+      [data-tier="silver"] {
+        --tier-color: var(--silver);
+        --tier-bg: var(--silver-bg);
+        --tier-text: var(--silver-text);
+      }
+      [data-tier="gold"] {
+        --tier-color: var(--gold);
+        --tier-bg: var(--gold-bg);
+        --tier-text: var(--gold-text);
       }
 
       * {
@@ -122,14 +142,8 @@
         box-shadow: var(--shadow-sm);
       }
 
-      .material-card.bronze {
-        background: var(--bronze-bg);
-      }
-      .material-card.silver {
-        background: var(--silver-bg);
-      }
-      .material-card.gold {
-        background: var(--gold-bg);
+      .material-card[data-tier] {
+        background: var(--tier-bg);
       }
 
       .material-icon-wrapper {
@@ -173,14 +187,8 @@
         margin-bottom: 16px;
       }
 
-      .material-card.bronze .material-name {
-        color: #92400e;
-      }
-      .material-card.silver .material-name {
-        color: #3f3f46;
-      }
-      .material-card.gold .material-name {
-        color: #854d0e;
+      .material-card[data-tier] .material-name {
+        color: var(--tier-text);
       }
 
       /* Inputs */
@@ -338,16 +346,8 @@
         border: 2px solid transparent;
       }
 
-      .quest-drops-item.bronze {
-        border-color: var(--bronze);
-      }
-
-      .quest-drops-item.silver {
-        border-color: var(--silver);
-      }
-
-      .quest-drops-item.gold {
-        border-color: var(--gold);
+      .quest-drops-item[data-tier] {
+        border-color: var(--tier-color);
       }
 
       .quest-drops-title {
@@ -357,16 +357,8 @@
         margin-bottom: 12px;
       }
 
-      .quest-drops-item.bronze .quest-drops-title {
-        color: var(--bronze);
-      }
-
-      .quest-drops-item.silver .quest-drops-title {
-        color: var(--silver);
-      }
-
-      .quest-drops-item.gold .quest-drops-title {
-        color: #ca8a04;
+      .quest-drops-item[data-tier] .quest-drops-title {
+        color: var(--tier-color);
       }
 
       .drop-line {
@@ -483,14 +475,8 @@
         border-radius: var(--radius-sm);
       }
 
-      .deficit-item.bronze {
-        background: var(--bronze-bg);
-      }
-      .deficit-item.silver {
-        background: var(--silver-bg);
-      }
-      .deficit-item.gold {
-        background: var(--gold-bg);
+      .deficit-item[data-tier] {
+        background: var(--tier-bg);
       }
 
       .deficit-label {
@@ -505,14 +491,8 @@
         font-weight: 700;
       }
 
-      .deficit-item.bronze .deficit-value {
-        color: var(--bronze);
-      }
-      .deficit-item.silver .deficit-value {
-        color: var(--silver);
-      }
-      .deficit-item.gold .deficit-value {
-        color: #ca8a04;
+      .deficit-item[data-tier] .deficit-value {
+        color: var(--tier-color);
       }
 
       /* Quest Results */
@@ -547,14 +527,8 @@
         transition: all 0.2s ease;
       }
 
-      .quest-item.bronze {
-        border-color: var(--bronze);
-      }
-      .quest-item.silver {
-        border-color: var(--silver);
-      }
-      .quest-item.gold {
-        border-color: var(--gold);
+      .quest-item[data-tier] {
+        border-color: var(--tier-color);
       }
 
       .quest-item:hover {
@@ -567,14 +541,8 @@
         margin-bottom: 8px;
       }
 
-      .quest-item.bronze .quest-name {
-        color: var(--bronze);
-      }
-      .quest-item.silver .quest-name {
-        color: var(--silver);
-      }
-      .quest-item.gold .quest-name {
-        color: #ca8a04;
+      .quest-item[data-tier] .quest-name {
+        color: var(--tier-color);
       }
 
       .quest-count {
@@ -638,7 +606,7 @@
       <div class="card">
         <div class="card-title">Shop Requirements</div>
         <div class="materials-grid">
-          <div class="material-card bronze">
+          <div class="material-card" data-tier="bronze">
             <div class="material-icon-wrapper">
               <div class="material-icon" id="bronzeIcon"></div>
             </div>
@@ -648,7 +616,7 @@
                 type="number"
                 class="input-field"
                 id="bronzeNeed"
-                value="3450"
+                value="0"
               />
             </div>
             <div class="input-row">
@@ -657,7 +625,7 @@
                 type="number"
                 class="input-field"
                 id="bronzeHave"
-                value="1557"
+                value="0"
               />
             </div>
             <div class="input-row">
@@ -666,12 +634,12 @@
                 type="number"
                 class="input-field"
                 id="bronzeBonus"
-                value="1"
+                value="0"
               />
             </div>
           </div>
 
-          <div class="material-card silver">
+          <div class="material-card" data-tier="silver">
             <div class="material-icon-wrapper">
               <div class="material-icon" id="silverIcon"></div>
             </div>
@@ -681,7 +649,7 @@
                 type="number"
                 class="input-field"
                 id="silverNeed"
-                value="2250"
+                value="0"
               />
             </div>
             <div class="input-row">
@@ -690,7 +658,7 @@
                 type="number"
                 class="input-field"
                 id="silverHave"
-                value="383"
+                value="0"
               />
             </div>
             <div class="input-row">
@@ -699,12 +667,12 @@
                 type="number"
                 class="input-field"
                 id="silverBonus"
-                value="1"
+                value="0"
               />
             </div>
           </div>
 
-          <div class="material-card gold">
+          <div class="material-card" data-tier="gold">
             <div class="material-icon-wrapper">
               <div class="material-icon" id="goldIcon"></div>
             </div>
@@ -714,7 +682,7 @@
                 type="number"
                 class="input-field"
                 id="goldNeed"
-                value="3000"
+                value="0"
               />
             </div>
             <div class="input-row">
@@ -723,7 +691,7 @@
                 type="number"
                 class="input-field"
                 id="goldHave"
-                value="1105"
+                value="0"
               />
             </div>
             <div class="input-row">
@@ -732,7 +700,7 @@
                 type="number"
                 class="input-field"
                 id="goldBonus"
-                value="1"
+                value="0"
               />
             </div>
           </div>
@@ -771,7 +739,7 @@
           </div>
         </div>
         <div class="quest-drops-grid">
-          <div class="quest-drops-item bronze">
+          <div class="quest-drops-item" data-tier="bronze">
             <div class="quest-drops-title">Bronze Quest</div>
             <div class="drop-line">
               <span class="mini-icon" id="bronzeQuest_bronze_icon"></span>
@@ -788,7 +756,7 @@
               <span class="drop-value" id="bronzeQuest_silver">6.75</span>
             </div>
           </div>
-          <div class="quest-drops-item silver">
+          <div class="quest-drops-item" data-tier="silver">
             <div class="quest-drops-title">Silver Quest</div>
             <div class="drop-line">
               <span class="mini-icon" id="silverQuest_silver_icon"></span>
@@ -805,7 +773,7 @@
               <span class="drop-value" id="silverQuest_gold">6.75</span>
             </div>
           </div>
-          <div class="quest-drops-item gold">
+          <div class="quest-drops-item" data-tier="gold">
             <div class="quest-drops-title">Gold Quest</div>
             <div class="drop-line">
               <span class="mini-icon" id="goldQuest_gold_icon"></span>
@@ -831,15 +799,15 @@
         <div class="card" style="margin-top: 20px">
           <div class="card-title">Items Needed</div>
           <div class="deficit-grid">
-            <div class="deficit-item bronze">
+            <div class="deficit-item" data-tier="bronze">
               <div class="deficit-label">Bronze</div>
               <div class="deficit-value" id="bronzeDeficit">0</div>
             </div>
-            <div class="deficit-item silver">
+            <div class="deficit-item" data-tier="silver">
               <div class="deficit-label">Silver</div>
               <div class="deficit-value" id="silverDeficit">0</div>
             </div>
-            <div class="deficit-item gold">
+            <div class="deficit-item" data-tier="gold">
               <div class="deficit-label">Gold</div>
               <div class="deficit-value" id="goldDeficit">0</div>
             </div>
@@ -848,17 +816,17 @@
           <div class="quest-results">
             <div class="quest-title">Recommended Quest Runs</div>
             <div class="quest-grid">
-              <div class="quest-item bronze">
+              <div class="quest-item" data-tier="bronze">
                 <div class="quest-name">Bronze Quest</div>
                 <div class="quest-count" id="bronzePlay">0</div>
                 <div class="quest-label">runs</div>
               </div>
-              <div class="quest-item silver">
+              <div class="quest-item" data-tier="silver">
                 <div class="quest-name">Silver Quest</div>
                 <div class="quest-count" id="silverPlay">0</div>
                 <div class="quest-label">runs</div>
               </div>
-              <div class="quest-item gold">
+              <div class="quest-item" data-tier="gold">
                 <div class="quest-name">Gold Quest</div>
                 <div class="quest-count" id="goldPlay">0</div>
                 <div class="quest-label">runs</div>
@@ -872,72 +840,95 @@
     </div>
 
     <script>
-      // Background URLs
-      const backgroundUrls = {
-        bronze:
-          "https://apps.atlasacademy.io/db/assets/listframes1_bg-CB5tQlCX.png",
-        silver:
-          "https://apps.atlasacademy.io/db/assets/listframes2_bg-BcVjjli0.png",
-        gold: "https://apps.atlasacademy.io/db/assets/listframes3_bg-CFbSxrKK.png",
+      // Material tiers
+      const TIERS = ["bronze", "silver", "gold"];
+
+      // Input fields per tier
+      const TIER_FIELDS = ["Need", "Have", "Bonus"];
+
+      // Default values
+      const DEFAULTS = {
+        bronze: { Need: 0, Have: 0, Bonus: 0 },
+        silver: { Need: 0, Have: 0, Bonus: 0 },
+        gold: { Need: 0, Have: 0, Bonus: 0 },
+        baseDrop: 3,
+        primaryMultiplier: 1500,
+        secondaryMultiplier: 225,
       };
 
-      // Foreground URLs
-      const foregroundUrls = {
-        bronze: "https://static.atlasacademy.io/JP/Items/94153901.png",
-        silver: "https://static.atlasacademy.io/JP/Items/94153902.png",
-        gold: "https://static.atlasacademy.io/JP/Items/94153903.png",
+      // Icon URLs
+      const ICON_URLS = {
+        bronze: {
+          bg: "https://apps.atlasacademy.io/db/assets/listframes1_bg-CB5tQlCX.png",
+          fg: "https://static.atlasacademy.io/JP/Items/94153901.png",
+        },
+        silver: {
+          bg: "https://apps.atlasacademy.io/db/assets/listframes2_bg-BcVjjli0.png",
+          fg: "https://static.atlasacademy.io/JP/Items/94153902.png",
+        },
+        gold: {
+          bg: "https://apps.atlasacademy.io/db/assets/listframes3_bg-CFbSxrKK.png",
+          fg: "https://static.atlasacademy.io/JP/Items/94153903.png",
+        },
       };
 
-      // Load all icons using CSS layering
+      // Quest drop configuration: which material drops as primary/secondary
+      const QUEST_DROPS = {
+        bronze: { primary: "bronze", secondary: "silver" },
+        silver: { primary: "silver", secondary: "gold" },
+        gold: { primary: "gold", secondary: "bronze" },
+      };
+
+      // Helper: create icon HTML
+      function createIconHtml(tier) {
+        return `<img class="bg-layer" src="${ICON_URLS[tier].bg}" alt="${tier} bg">
+                <img class="fg-layer" src="${ICON_URLS[tier].fg}" alt="${tier} fg">`;
+      }
+
+      // Load all icons
       function loadIcons() {
-        // Load main icons in Shop Requirements
-        ["bronze", "silver", "gold"].forEach((type) => {
-          const iconEl = document.getElementById(type + "Icon");
-          iconEl.innerHTML = `
-            <img class="bg-layer" src="${backgroundUrls[type]}" alt="${type} bg">
-            <img class="fg-layer" src="${foregroundUrls[type]}" alt="${type} fg">
-          `;
+        // Main icons
+        TIERS.forEach((tier) => {
+          document.getElementById(`${tier}Icon`).innerHTML =
+            createIconHtml(tier);
         });
 
-        // Load mini icons in Drop Rates card
-        const questMaterials = {
-          bronzeQuest_bronze: "bronze",
-          bronzeQuest_silver: "silver",
-          silverQuest_silver: "silver",
-          silverQuest_gold: "gold",
-          goldQuest_gold: "gold",
-          goldQuest_bronze: "bronze",
-        };
-
-        Object.entries(questMaterials).forEach(([id, type]) => {
-          const iconEl = document.getElementById(id + "_icon");
-          if (iconEl) {
-            iconEl.innerHTML = `
-              <img class="bg-layer" src="${backgroundUrls[type]}" alt="${type} bg">
-              <img class="fg-layer" src="${foregroundUrls[type]}" alt="${type} fg">
-            `;
-          }
+        // Quest mini icons
+        Object.entries(QUEST_DROPS).forEach(([quest, drops]) => {
+          [drops.primary, drops.secondary].forEach((material) => {
+            const iconEl = document.getElementById(
+              `${quest}Quest_${material}_icon`,
+            );
+            if (iconEl) iconEl.innerHTML = createIconHtml(material);
+          });
         });
+      }
+
+      // Get all form values as object
+      function getFormData() {
+        const data = {};
+        TIERS.forEach((tier) => {
+          TIER_FIELDS.forEach((field) => {
+            data[`${tier}${field}`] = document.getElementById(
+              `${tier}${field}`,
+            ).value;
+          });
+        });
+        data.baseDrop = document.getElementById("baseDrop").value;
+        data.primaryMultiplier =
+          document.getElementById("primaryMultiplier").value;
+        data.secondaryMultiplier = document.getElementById(
+          "secondaryMultiplier",
+        ).value;
+        return data;
       }
 
       // Save data to localStorage
       function saveData() {
-        const data = {
-          bronzeNeed: document.getElementById("bronzeNeed").value,
-          bronzeHave: document.getElementById("bronzeHave").value,
-          bronzeBonus: document.getElementById("bronzeBonus").value,
-          silverNeed: document.getElementById("silverNeed").value,
-          silverHave: document.getElementById("silverHave").value,
-          silverBonus: document.getElementById("silverBonus").value,
-          goldNeed: document.getElementById("goldNeed").value,
-          goldHave: document.getElementById("goldHave").value,
-          goldBonus: document.getElementById("goldBonus").value,
-          baseDrop: document.getElementById("baseDrop").value,
-          primaryMultiplier: document.getElementById("primaryMultiplier").value,
-          secondaryMultiplier: document.getElementById("secondaryMultiplier")
-            .value,
-        };
-        localStorage.setItem("fgo_calculator_data", JSON.stringify(data));
+        localStorage.setItem(
+          "fgo_calculator_data",
+          JSON.stringify(getFormData()),
+        );
       }
 
       // Load data from localStorage
@@ -945,198 +936,200 @@
         const saved = localStorage.getItem("fgo_calculator_data");
         const data = saved ? JSON.parse(saved) : {};
 
-        document.getElementById("bronzeNeed").value = data.bronzeNeed || 400;
-        document.getElementById("bronzeHave").value = data.bronzeHave || 155;
-        document.getElementById("bronzeBonus").value = data.bronzeBonus || 0;
-        document.getElementById("silverNeed").value = data.silverNeed || 800;
-        document.getElementById("silverHave").value = data.silverHave || 115;
-        document.getElementById("silverBonus").value = data.silverBonus || 0;
-        document.getElementById("goldNeed").value = data.goldNeed || 400;
-        document.getElementById("goldHave").value = data.goldHave || 94;
-        document.getElementById("goldBonus").value = data.goldBonus || 0;
-        document.getElementById("baseDrop").value = data.baseDrop || 3;
+        // Load tier fields
+        TIERS.forEach((tier) => {
+          TIER_FIELDS.forEach((field) => {
+            const key = `${tier}${field}`;
+            document.getElementById(key).value =
+              data[key] ?? DEFAULTS[tier][field];
+          });
+        });
+
+        // Load other fields
+        document.getElementById("baseDrop").value =
+          data.baseDrop ?? DEFAULTS.baseDrop;
         document.getElementById("primaryMultiplier").value =
-          data.primaryMultiplier || 1500;
+          data.primaryMultiplier ?? DEFAULTS.primaryMultiplier;
         document.getElementById("secondaryMultiplier").value =
-          data.secondaryMultiplier || 225;
+          data.secondaryMultiplier ?? DEFAULTS.secondaryMultiplier;
 
-        // Update calculated values display
         updateDropDisplay();
-
-        // Load icons from URLs
         loadIcons();
+      }
+
+      // Get parsed input values with validation
+      function getInputValues() {
+        const clamp = (val, min = 0) => Math.max(min, parseFloat(val) || 0);
+        const values = {
+          base: clamp(document.getElementById("baseDrop").value),
+        };
+        values.primaryMult =
+          clamp(document.getElementById("primaryMultiplier").value, 1) / 100;
+        values.secondaryMult =
+          clamp(document.getElementById("secondaryMultiplier").value, 1) / 100;
+
+        TIERS.forEach((tier) => {
+          values[`${tier}Bonus`] = clamp(
+            document.getElementById(`${tier}Bonus`).value,
+          );
+        });
+
+        return values;
       }
 
       // Update drop rate display
       function updateDropDisplay() {
-        const base = parseFloat(document.getElementById("baseDrop").value) || 0;
-        const bronzeBonus =
-          parseFloat(document.getElementById("bronzeBonus").value) || 0;
-        const silverBonus =
-          parseFloat(document.getElementById("silverBonus").value) || 0;
-        const goldBonus =
-          parseFloat(document.getElementById("goldBonus").value) || 0;
-        const primaryMult =
-          (parseFloat(document.getElementById("primaryMultiplier").value) ||
-            1500) / 100;
-        const secondaryMult =
-          (parseFloat(document.getElementById("secondaryMultiplier").value) ||
-            225) / 100;
+        const {
+          base,
+          primaryMult,
+          secondaryMult,
+          bronzeBonus,
+          silverBonus,
+          goldBonus,
+        } = getInputValues();
+        const bonuses = {
+          bronze: bronzeBonus,
+          silver: silverBonus,
+          gold: goldBonus,
+        };
 
-        // Bronze Quest drops: Bronze (main) + Silver (secondary)
-        // Each material uses its own bonus
-        const bronzeQuestBronze = (base + bronzeBonus) * primaryMult;
-        const bronzeQuestSilver = (base + silverBonus) * secondaryMult;
+        // Calculate and display drops for each quest type
+        TIERS.forEach((questTier) => {
+          const drops = QUEST_DROPS[questTier];
+          const primaryDrop =
+            Math.round((base + bonuses[drops.primary]) * primaryMult * 100) /
+            100;
+          const secondaryDrop =
+            Math.round(
+              (base + bonuses[drops.secondary]) * secondaryMult * 100,
+            ) / 100;
 
-        // Silver Quest drops: Silver (main) + Gold (secondary)
-        const silverQuestSilver = (base + silverBonus) * primaryMult;
-        const silverQuestGold = (base + goldBonus) * secondaryMult;
-
-        // Gold Quest drops: Gold (main) + Bronze (secondary)
-        const goldQuestGold = (base + goldBonus) * primaryMult;
-        const goldQuestBronze = (base + bronzeBonus) * secondaryMult;
-
-        // Update labels with actual Base+Bonus values (icon shows material type)
-        document.getElementById("bronzeQuest_bronze_label").textContent =
-          `${base}(+${bronzeBonus})`;
-        document.getElementById("bronzeQuest_silver_label").textContent =
-          `${base}(+${silverBonus})`;
-        document.getElementById("silverQuest_silver_label").textContent =
-          `${base}(+${silverBonus})`;
-        document.getElementById("silverQuest_gold_label").textContent =
-          `${base}(+${goldBonus})`;
-        document.getElementById("goldQuest_gold_label").textContent =
-          `${base}(+${goldBonus})`;
-        document.getElementById("goldQuest_bronze_label").textContent =
-          `${base}(+${bronzeBonus})`;
-
-        // Update drop values
-        document.getElementById("bronzeQuest_bronze").textContent =
-          bronzeQuestBronze;
-        document.getElementById("bronzeQuest_silver").textContent =
-          bronzeQuestSilver;
-        document.getElementById("silverQuest_silver").textContent =
-          silverQuestSilver;
-        document.getElementById("silverQuest_gold").textContent =
-          silverQuestGold;
-        document.getElementById("goldQuest_gold").textContent = goldQuestGold;
-        document.getElementById("goldQuest_bronze").textContent =
-          goldQuestBronze;
+          document.getElementById(
+            `${questTier}Quest_${drops.primary}_label`,
+          ).textContent = `${base}(+${bonuses[drops.primary]})`;
+          document.getElementById(
+            `${questTier}Quest_${drops.secondary}_label`,
+          ).textContent = `${base}(+${bonuses[drops.secondary]})`;
+          document.getElementById(
+            `${questTier}Quest_${drops.primary}`,
+          ).textContent = primaryDrop;
+          document.getElementById(
+            `${questTier}Quest_${drops.secondary}`,
+          ).textContent = secondaryDrop;
+        });
       }
 
-      // Load saved data when page opens
+      // Initialize event listeners
       document.addEventListener("DOMContentLoaded", function () {
         loadData();
-        // Update display when base, bonus, or multiplier values change
-        document
-          .getElementById("baseDrop")
-          .addEventListener("input", updateDropDisplay);
-        document
-          .getElementById("bronzeBonus")
-          .addEventListener("input", updateDropDisplay);
-        document
-          .getElementById("silverBonus")
-          .addEventListener("input", updateDropDisplay);
-        document
-          .getElementById("goldBonus")
-          .addEventListener("input", updateDropDisplay);
-        document
-          .getElementById("primaryMultiplier")
-          .addEventListener("input", updateDropDisplay);
-        document
-          .getElementById("secondaryMultiplier")
-          .addEventListener("input", updateDropDisplay);
+
+        const inputIds = [
+          "baseDrop",
+          "primaryMultiplier",
+          "secondaryMultiplier",
+          ...TIERS.map((t) => `${t}Bonus`),
+        ];
+        inputIds.forEach((id) => {
+          document
+            .getElementById(id)
+            .addEventListener("input", updateDropDisplay);
+        });
       });
 
       function calculate() {
-        // Save data whenever calculate is clicked
         saveData();
 
-        const bronzeNeed =
-          parseInt(document.getElementById("bronzeNeed").value) || 0;
-        const silverNeed =
-          parseInt(document.getElementById("silverNeed").value) || 0;
-        const goldNeed =
-          parseInt(document.getElementById("goldNeed").value) || 0;
+        const {
+          base,
+          primaryMult,
+          secondaryMult,
+          bronzeBonus,
+          silverBonus,
+          goldBonus,
+        } = getInputValues();
+        const bonuses = {
+          bronze: bronzeBonus,
+          silver: silverBonus,
+          gold: goldBonus,
+        };
 
-        const bronzeHave =
-          parseInt(document.getElementById("bronzeHave").value) || 0;
-        const silverHave =
-          parseInt(document.getElementById("silverHave").value) || 0;
-        const goldHave =
-          parseInt(document.getElementById("goldHave").value) || 0;
+        // Get needs and haves
+        const needs = {},
+          haves = {};
+        TIERS.forEach((tier) => {
+          needs[tier] = Math.max(
+            0,
+            parseInt(document.getElementById(`${tier}Need`).value) || 0,
+          );
+          haves[tier] = Math.max(
+            0,
+            parseInt(document.getElementById(`${tier}Have`).value) || 0,
+          );
+        });
 
-        const bronzeBonus =
-          parseFloat(document.getElementById("bronzeBonus").value) || 0;
-        const silverBonus =
-          parseFloat(document.getElementById("silverBonus").value) || 0;
-        const goldBonus =
-          parseFloat(document.getElementById("goldBonus").value) || 0;
+        // Calculate deficits
+        const deficits = {};
+        TIERS.forEach((tier) => {
+          deficits[tier] = needs[tier] - haves[tier];
+        });
+        const originalDeficits = { ...deficits };
 
-        const base = parseFloat(document.getElementById("baseDrop").value) || 0;
-        const primaryMult =
-          (parseFloat(document.getElementById("primaryMultiplier").value) ||
-            1500) / 100;
-        const secondaryMult =
-          (parseFloat(document.getElementById("secondaryMultiplier").value) ||
-            225) / 100;
+        // Calculate drop rates per quest (rounded to avoid floating-point issues)
+        const dropRates = {};
+        TIERS.forEach((questTier) => {
+          const drops = QUEST_DROPS[questTier];
+          dropRates[questTier] = {
+            primary: {
+              tier: drops.primary,
+              rate:
+                Math.round(
+                  (base + bonuses[drops.primary]) * primaryMult * 100,
+                ) / 100,
+            },
+            secondary: {
+              tier: drops.secondary,
+              rate:
+                Math.round(
+                  (base + bonuses[drops.secondary]) * secondaryMult * 100,
+                ) / 100,
+            },
+          };
+        });
 
-        // Calculate effective drop rates for each quest type
-        // Each material uses its own bonus
-        const bronzeMore = (base + bronzeBonus) * primaryMult; // Bronze Quest main (Bronze)
-        const bronzeLess = (base + silverBonus) * secondaryMult; // Bronze Quest secondary (Silver)
-        const silverMore = (base + silverBonus) * primaryMult; // Silver Quest main (Silver)
-        const silverLess = (base + goldBonus) * secondaryMult; // Silver Quest secondary (Gold)
-        const goldMore = (base + goldBonus) * primaryMult; // Gold Quest main (Gold)
-        const goldLess = (base + bronzeBonus) * secondaryMult; // Gold Quest secondary (Bronze)
+        // Calculate runs needed with safety limit
+        const runs = { bronze: 0, silver: 0, gold: 0 };
+        const MAX_ITERATIONS = 10000;
+        let iterations = 0;
 
-        let bronzeWant = bronzeNeed - bronzeHave;
-        let silverWant = silverNeed - silverHave;
-        let goldWant = goldNeed - goldHave;
+        while (
+          TIERS.some((t) => deficits[t] > 0) &&
+          iterations < MAX_ITERATIONS
+        ) {
+          iterations++;
+          // Find highest deficit
+          const maxTier = TIERS.reduce((a, b) =>
+            deficits[a] >= deficits[b] ? a : b,
+          );
 
-        const originalBronzeDeficit = bronzeWant;
-        const originalSilverDeficit = silverWant;
-        const originalGoldDeficit = goldWant;
-
-        let bronzePlay = 0;
-        let silverPlay = 0;
-        let goldPlay = 0;
-
-        while (bronzeWant > 0 || silverWant > 0 || goldWant > 0) {
-          if (bronzeWant >= silverWant && bronzeWant >= goldWant) {
-            bronzeWant -= bronzeMore;
-            silverWant -= bronzeLess;
-            bronzePlay++;
-          } else if (silverWant >= goldWant) {
-            silverWant -= silverMore;
-            goldWant -= silverLess;
-            silverPlay++;
-          } else {
-            goldWant -= goldMore;
-            bronzeWant -= goldLess;
-            goldPlay++;
-          }
+          // Run that quest
+          const quest = dropRates[maxTier];
+          deficits[quest.primary.tier] -= quest.primary.rate;
+          deficits[quest.secondary.tier] -= quest.secondary.rate;
+          runs[maxTier]++;
         }
 
+        // Show results
         const resultsSection = document.getElementById("results");
         resultsSection.classList.add("visible");
 
-        document.getElementById("bronzeDeficit").textContent = Math.max(
-          0,
-          originalBronzeDeficit,
-        );
-        document.getElementById("silverDeficit").textContent = Math.max(
-          0,
-          originalSilverDeficit,
-        );
-        document.getElementById("goldDeficit").textContent = Math.max(
-          0,
-          originalGoldDeficit,
-        );
-
-        animateCount("bronzePlay", bronzePlay);
-        animateCount("silverPlay", silverPlay);
-        animateCount("goldPlay", goldPlay);
+        // Update deficit display
+        TIERS.forEach((tier) => {
+          document.getElementById(`${tier}Deficit`).textContent = Math.max(
+            0,
+            originalDeficits[tier],
+          );
+          animateCount(`${tier}Play`, runs[tier]);
+        });
 
         setTimeout(() => {
           resultsSection.scrollIntoView({
@@ -1155,12 +1148,9 @@
           const elapsed = currentTime - startTime;
           const progress = Math.min(elapsed / duration, 1);
           const easeOut = 1 - Math.pow(1 - progress, 3);
-          const currentValue = Math.round(targetValue * easeOut);
-          element.textContent = currentValue;
+          element.textContent = Math.round(targetValue * easeOut);
 
-          if (progress < 1) {
-            requestAnimationFrame(update);
-          }
+          if (progress < 1) requestAnimationFrame(update);
         }
 
         requestAnimationFrame(update);
