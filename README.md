@@ -30,9 +30,36 @@ Each quest drops two types of materials:
 
 The calculator prioritizes farming the quest for your highest deficit material.
 
+## File Structure
+
+```
+fgo-event-calculator/
+├── index.html    # Main HTML structure
+├── styles.css    # CSS with custom properties
+└── app.js        # JavaScript with clean architecture
+```
+
+## Architecture
+
+The application follows a clean architecture pattern with three layers:
+
+| Layer | Modules | Purpose |
+|-------|---------|---------|
+| **Domain** | Schema, Validator, Calculator | Pure business logic, no DOM dependencies |
+| **Application** | StateManager, Persistence, App | State management and coordination |
+| **Presentation** | DOMFactory, UIBuilder, ViewManager, EventHandler | DOM manipulation and events |
+
 ## Technical Details
 
-- Single HTML file with embedded CSS and JavaScript
-- No external dependencies (except Google Fonts)
-- Uses CSS custom properties for theming
+- Vanilla JavaScript with no external dependencies (except Google Fonts)
+- Content Security Policy (CSP) for XSS protection
+- Schema-based input validation with localStorage sanitization
+- CSS custom properties for theming
 - Data-driven architecture with configurable tier system
+
+## Security
+
+- CSP header restricts scripts and styles to same-origin
+- All inputs validated against schema constraints
+- localStorage data sanitized on load
+- DOM elements created safely with `createElement()` (no innerHTML)
