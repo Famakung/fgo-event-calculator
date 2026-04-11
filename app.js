@@ -796,7 +796,7 @@ const ServantData = {
           id,
           name: name || `Servant ${id}`,
           traits,
-          image: `servants/${id}_1.webp`
+          image: `servants/${id}.webp`
         };
       }).sort((a, b) => a.id.localeCompare(b.id));
   },
