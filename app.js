@@ -1256,6 +1256,7 @@ const CESelector = {
       item.addEventListener("click", () => {
         if (ce.isGroup) {
           const idx = this.activeSlotIndex;
+          this.pendingSlot = false;
           this.close();
           CESubSelector.open(ce, idx);
           return;
@@ -1852,13 +1853,11 @@ const BondApp = {
       const servantId = slot.servantId;
       const servant = ServantData.getServant(servantId);
 
-      // Frontline bonus: first 3 slots get +20%
+      // Frontline bonus: first 3 slots get +20% (applied separately)
       const isFrontline = i < 3;
-      const frontlineBonus = isFrontline ? 20 : 0;
 
-      // Max bond bonus: +25% per max bond servant
-      // Frontline support bonus: +4% per frontline support servant
-      let ceBonusPercent = frontlineBonus + maxBondBonus + supportBonus;
+      // Sum percentage bonuses (CEs + max bond + support, NOT frontline)
+      let ceBonusPercent = maxBondBonus + supportBonus;
       const appliedCEs = [];
       if (isFrontline) {
         appliedCEs.push({ id: "frontline", name: "Frontline", bonus: 20, image: "icons/bond_icon.webp" });
@@ -1936,7 +1935,16 @@ const BondApp = {
         }
       });
 
-      const effectiveBond = Math.floor(bondPerRun * (1 + ceBonusPercent / 100)) + flatBonus;
+      // Step 1: bonus = base * bonus% rounded down (just the bonus part)
+      let totalBonus = Math.floor(bondPerRun * ceBonusPercent / 100);
+      // Step 2: if frontline, multiply bonus by 1.2 and add base*0.2
+      if (isFrontline) {
+        totalBonus = Math.floor(totalBonus * 1.2) + Math.floor(bondPerRun * 0.2);
+      }
+      // Step 3: add flat bonus
+      totalBonus += flatBonus;
+      // Step 4: effectiveBond = base + totalBonus
+      const effectiveBond = bondPerRun + totalBonus;
       slotResults.push({
         index: i,
         servantId,
@@ -1944,6 +1952,7 @@ const BondApp = {
         image: servant ? ServantData.getImageForAscension(servantId, ascension) : null,
         bondNeeded,
         effectiveBond,
+        totalBonus,
         runs: Math.ceil(bondNeeded / effectiveBond),
         ceBonus: ceBonusPercent,
         appliedCEs,
@@ -2064,13 +2073,11 @@ const BondApp = {
         card.appendChild(ceImgGrid);
       }
 
-      // Bond breakdown
-      const baseBond = bondPerRun;
-      const bonusBond = sr.effectiveBond - baseBond;
+      // Bond breakdown: base(+total bonus)
       const bondInfo = DOMFactory.el("div", "bond-result-bond-info");
-      bondInfo.textContent = bonusBond > 0
-        ? `${baseBond.toLocaleString()}(+${bonusBond.toLocaleString()})`
-        : `${baseBond.toLocaleString()}`;
+      bondInfo.textContent = sr.totalBonus > 0
+        ? `${bondPerRun.toLocaleString()}(+${sr.totalBonus.toLocaleString()})`
+        : `${bondPerRun.toLocaleString()}`;
       card.appendChild(bondInfo);
 
       // Runs count
