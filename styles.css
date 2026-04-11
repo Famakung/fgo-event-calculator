@@ -508,11 +508,6 @@ body {
   display: flex;
   flex-direction: column;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-  overflow: hidden;
-  max-height: 80vh;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
 .servant-modal-header {
@@ -573,7 +568,6 @@ body {
   cursor: pointer;
   transition: background 0.15s;
   min-width: 0;
-  overflow: hidden;
 }
 
 .servant-picker-item:hover {

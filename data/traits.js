@@ -1,6 +1,7 @@
 var TRAIT_DATA = {
   "0001": "Gender Male",
   "0002": "Gender Female",
+  "0003": "Gender Unknown",
   "0100": "Class Saber",
   "0101": "Class Lancer",
   "0102": "Class Archer",
