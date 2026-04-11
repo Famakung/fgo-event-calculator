@@ -23,16 +23,16 @@ const STORAGE_KEY = "fgo_calculator_data";
 
 const ICON_URLS = {
   bronze: {
-    bg: "https://apps.atlasacademy.io/db/assets/listframes1_bg-CB5tQlCX.png",
-    fg: "https://static.atlasacademy.io/JP/Items/94153901.png"
+    bg: "icons/materials/bronze_bg.webp",
+    fg: "icons/materials/bronze_fg.webp"
   },
   silver: {
-    bg: "https://apps.atlasacademy.io/db/assets/listframes2_bg-BcVjjli0.png",
-    fg: "https://static.atlasacademy.io/JP/Items/94153902.png"
+    bg: "icons/materials/silver_bg.webp",
+    fg: "icons/materials/silver_fg.webp"
   },
   gold: {
-    bg: "https://apps.atlasacademy.io/db/assets/listframes3_bg-CFbSxrKK.png",
-    fg: "https://static.atlasacademy.io/JP/Items/94153903.png"
+    bg: "icons/materials/gold_bg.webp",
+    fg: "icons/materials/gold_fg.webp"
   }
 };
 
@@ -777,7 +777,7 @@ const CEList = (() => {
     matchAll: !!data.matchAll,
     traitGroups: Array.isArray(data.traitGroups) ? data.traitGroups : [],
     image: `craft_essences/${id}.webp`
-  }));
+  })).sort((a, b) => a.id.localeCompare(b.id));
 })();
 
 /* ============================================
@@ -798,7 +798,7 @@ const ServantData = {
           traits,
           image: `servants/${id}_1.webp`
         };
-      });
+      }).sort((a, b) => a.id.localeCompare(b.id));
   },
 
   getServant(id) {
