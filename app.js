@@ -19,7 +19,19 @@ const TIER_FIELDS = ["Need", "Have", "Bonus"];
 const MAX_ITERATIONS = 10000;
 const EPSILON = 0.01;
 const DEBOUNCE_MS = 100;
+const SERVANT_MAX_SLOTS = 6;
 const STORAGE_KEY = "fgo_calculator_data";
+const BOND_STORAGE_KEY = "fgo_bond_calculator_data";
+const BOND_CONSTANTS = {
+  MAX_BOND_NEEDED: 9999999,
+  MAX_CUSTOM_BOND: 99999,
+  FRONTLINE_SIZE: 3,
+  MAX_BOND_BONUS_PCT: 25,
+  SUPPORT_BONUS_PCT: 4,
+  FRONTLINE_BONUS_PCT: 20,
+  FRONTLINE_MULTIPLIER: 1.2,
+  FRONTLINE_BONUS_FRACTION: 0.2
+};
 
 const ICON_URLS = {
   bronze: {
@@ -71,30 +83,6 @@ const Validator = {
 
   validate(value, schema) {
     return this.clamp(value, schema.min, schema.max);
-  },
-
-  validateTierData(data) {
-    const result = {};
-    TIERS.forEach(tier => {
-      result[tier] = {};
-      TIER_FIELDS.forEach(field => {
-        const key = `${tier}${field}`;
-        const val = data[key];
-        result[tier][field.toLowerCase()] = this.validate(
-          val,
-          Schema.tier[field]
-        );
-      });
-    });
-    return result;
-  },
-
-  validateSettings(data) {
-    return {
-      baseDrop: this.validate(data.baseDrop, Schema.baseDrop),
-      primaryMultiplier: this.validate(data.primaryMultiplier, Schema.primaryMultiplier),
-      secondaryMultiplier: this.validate(data.secondaryMultiplier, Schema.secondaryMultiplier)
-    };
   },
 
   validateStorageData(data) {
@@ -204,10 +192,6 @@ const StateManager = {
 
   updateSetting(state, key, value) {
     return { ...state, [key]: value };
-  },
-
-  setResults(state, results) {
-    return { ...state, results };
   }
 };
 
@@ -354,6 +338,27 @@ const DOMFactory = {
 
   capitalize(str) {
     return str.charAt(0).toUpperCase() + str.slice(1);
+  },
+
+  addSimpleFallback(img, cssClass, text) {
+    img.onerror = () => {
+      const fb = this.el("div", cssClass);
+      fb.textContent = text;
+      img.replaceWith(fb);
+    };
+  },
+
+  addAscensionFallback(img, flatSrc, fallbackText) {
+    img.onerror = () => {
+      if (flatSrc && !img.dataset.retriedFlat) {
+        img.dataset.retriedFlat = "1";
+        img.src = flatSrc;
+      } else {
+        const fb = this.el("div", "servant-slot-portrait-fallback");
+        fb.textContent = fallbackText;
+        img.replaceWith(fb);
+      }
+    };
   }
 };
 
@@ -761,7 +766,6 @@ const BOND_QUESTS = [
   { key: "fq84", name: "FreeQuest Lv.84", bond: 855 },
   { key: "gd100", name: "GrandDuel Lv.100\u2605\u2605\u2605", bond: 4748 }
 ];
-const BOND_STORAGE_KEY = "fgo_bond_calculator_data";
 
 /* Trait names from traits/traits.js */
 const TraitNames = (typeof TRAIT_DATA !== "undefined") ? TRAIT_DATA : {};
@@ -891,6 +895,12 @@ const ServantData = {
       });
     }
     return names;
+  },
+
+  getDefaultAscension(servantId, slotAscension) {
+    if (slotAscension) return slotAscension;
+    const servant = this.getServant(servantId);
+    return (servant && servant.hasAscensions) ? "000" : null;
   }
 };
 
@@ -961,16 +971,7 @@ const ServantSelector = {
         src: imgSrc,
         alt: servant.name
       });
-      img.onerror = () => {
-        if (servant.hasAscensions && !img.dataset.retriedFlat) {
-          img.dataset.retriedFlat = "1";
-          img.src = servant.image;
-        } else {
-          const fallback = DOMFactory.el("div", "servant-slot-portrait-fallback");
-          fallback.textContent = servant.id;
-          img.replaceWith(fallback);
-        }
-      };
+      DOMFactory.addAscensionFallback(img, servant.hasAscensions ? servant.image : null, servant.id);
 
       const name = DOMFactory.el("div", "servant-picker-name");
       name.textContent = servant.name;
@@ -1072,11 +1073,7 @@ const AscensionSelector = {
         src: imgSrc,
         alt: ServantData.getAscensionLabel(this.servant.id, asc)
       });
-      img.onerror = () => {
-        const fallback = DOMFactory.el("div", "servant-slot-portrait-fallback");
-        fallback.textContent = this.servant.id;
-        img.replaceWith(fallback);
-      };
+      DOMFactory.addSimpleFallback(img, "servant-slot-portrait-fallback", this.servant.id);
 
       const label = DOMFactory.el("div", "servant-picker-name");
       label.textContent = ServantData.getAscensionLabel(this.servant.id, asc);
@@ -1242,11 +1239,7 @@ const CESelector = {
       const item = DOMFactory.el("div", "servant-picker-item");
 
       const img = DOMFactory.el("img", null, { src: ce.image, alt: ce.name });
-      img.onerror = () => {
-        const fb = DOMFactory.el("div", "servant-slot-portrait-fallback");
-        fb.textContent = ce.id;
-        img.replaceWith(fb);
-      };
+      DOMFactory.addSimpleFallback(img, "servant-slot-portrait-fallback", ce.id);
 
       const name = DOMFactory.el("div", "servant-picker-name");
       name.textContent = ce.name;
@@ -1344,11 +1337,7 @@ const CESubSelector = {
       const item = DOMFactory.el("div", "servant-picker-item");
 
       const img = DOMFactory.el("img", null, { src: opt.image, alt: opt.name });
-      img.onerror = () => {
-        const fb = DOMFactory.el("div", "servant-slot-portrait-fallback");
-        fb.textContent = opt.id;
-        img.replaceWith(fb);
-      };
+      DOMFactory.addSimpleFallback(img, "servant-slot-portrait-fallback", opt.id);
 
       const label = DOMFactory.el("div", "servant-picker-name");
       label.textContent = opt.name;
@@ -1499,11 +1488,7 @@ const BondApp = {
       const portraitArea = DOMFactory.el("div");
       if (ceImage) {
         const img = DOMFactory.el("img", "ce-portrait", { src: ceImage, alt: ceName });
-        img.onerror = () => {
-          const fb = DOMFactory.el("div", "ce-portrait-fallback");
-          fb.textContent = typeof ceEntry === "object" ? ceEntry.groupId : ceEntry;
-          img.replaceWith(fb);
-        };
+        DOMFactory.addSimpleFallback(img, "ce-portrait-fallback", typeof ceEntry === "object" ? ceEntry.groupId : ceEntry);
         portraitArea.appendChild(img);
       } else {
         const fb = DOMFactory.el("div", "ce-portrait-fallback");
@@ -1600,7 +1585,7 @@ const BondApp = {
     this.state.slots.forEach((slot, i) => {
       const input = this.elements[`slotBond_${i}`];
       if (input && (slot.type || "normal") === "normal") {
-        slot.bondNeeded = Validator.clamp(input.value, 0, 9999999);
+        slot.bondNeeded = Validator.clamp(input.value, 0, BOND_CONSTANTS.MAX_BOND_NEEDED);
       }
     });
   },
@@ -1628,23 +1613,14 @@ const BondApp = {
         const servant = ServantData.getServant(slotData.servantId);
         if (servant) {
           servantHasAscensions = servant.hasAscensions;
-          const ascension = slotData.ascension || (servant.hasAscensions ? "000" : null);
+          const ascension = ServantData.getDefaultAscension(slotData.servantId, slotData.ascension);
           const imgSrc = ServantData.getImageForAscension(servant.id, ascension);
           const img = DOMFactory.el("img", "servant-slot-portrait", {
             src: imgSrc,
             alt: servant.name,
             draggable: "false"
           });
-          img.onerror = () => {
-            if (ascension && !img.dataset.retriedFlat) {
-              img.dataset.retriedFlat = "1";
-              img.src = servant.image;
-            } else {
-              const fb = DOMFactory.el("div", "servant-slot-portrait-fallback");
-              fb.textContent = servant.id;
-              img.replaceWith(fb);
-            }
-          };
+          DOMFactory.addAscensionFallback(img, ascension ? servant.image : null, servant.id);
           portraitArea.appendChild(img);
           if (servant.hasAscensions) {
             portraitArea.style.cursor = "pointer";
@@ -1720,7 +1696,7 @@ const BondApp = {
           type: "number",
           id: `slotBond_${i}`,
           min: "0",
-          max: "9999999",
+          max: String(BOND_CONSTANTS.MAX_BOND_NEEDED),
           value: String(slotData.bondNeeded || 0)
         });
         inputRow.appendChild(inputLabel);
@@ -1790,7 +1766,7 @@ const BondApp = {
       }
     } else if (questKey === "custom") {
       bondPerRun = Validator.clamp(
-        document.getElementById("customBondPerRun").value, 0, 99999
+        document.getElementById("customBondPerRun").value, 0, BOND_CONSTANTS.MAX_CUSTOM_BOND
       );
       questName = "Custom Quest";
     }
@@ -1805,7 +1781,7 @@ const BondApp = {
     for (let i = 0; i < count; i++) {
       const input = this.elements[`slotBond_${i}`];
       if (input) {
-        this.state.slots[i].bondNeeded = Validator.clamp(input.value, 0, 9999999);
+        this.state.slots[i].bondNeeded = Validator.clamp(input.value, 0, BOND_CONSTANTS.MAX_BOND_NEEDED);
       }
     }
 
@@ -1815,7 +1791,7 @@ const BondApp = {
       const slot = this.state.slots[i];
       if (slot.servantId && (slot.type || "normal") === "maxbond") {
         const servant = ServantData.getServant(slot.servantId);
-        const mbAsc = slot.ascension || (servant && servant.hasAscensions ? "000" : null);
+        const mbAsc = ServantData.getDefaultAscension(slot.servantId, slot.ascension);
         maxBondServants.push({
           servantId: slot.servantId,
           name: servant ? ServantData.getAscensionName(slot.servantId, mbAsc) : slot.servantId,
@@ -1823,15 +1799,15 @@ const BondApp = {
         });
       }
     }
-    const maxBondBonus = maxBondServants.length * 25;
+    const maxBondBonus = maxBondServants.length * BOND_CONSTANTS.MAX_BOND_BONUS_PCT;
 
     // Collect frontline support servants for +4% bonus
     const frontlineSupports = [];
-    for (let i = 0; i < Math.min(count, 3); i++) {
+    for (let i = 0; i < Math.min(count, BOND_CONSTANTS.FRONTLINE_SIZE); i++) {
       const slot = this.state.slots[i];
       if (slot.servantId && (slot.type || "normal") === "support") {
         const servant = ServantData.getServant(slot.servantId);
-        const supAsc = slot.ascension || (servant && servant.hasAscensions ? "000" : null);
+        const supAsc = ServantData.getDefaultAscension(slot.servantId, slot.ascension);
         frontlineSupports.push({
           servantId: slot.servantId,
           name: servant ? ServantData.getAscensionName(slot.servantId, supAsc) : slot.servantId,
@@ -1839,7 +1815,7 @@ const BondApp = {
         });
       }
     }
-    const supportBonus = frontlineSupports.length * 4;
+    const supportBonus = frontlineSupports.length * BOND_CONSTANTS.SUPPORT_BONUS_PCT;
 
     // Check for normal servants with missing bond value
     for (let i = 0; i < count; i++) {
@@ -1850,7 +1826,7 @@ const BondApp = {
       const bondNeeded = slot.bondNeeded || 0;
       if (bondNeeded <= 0) {
         const servant = ServantData.getServant(slot.servantId);
-        const asc = slot.ascension || (servant && servant.hasAscensions ? "000" : null);
+        const asc = ServantData.getDefaultAscension(slot.servantId, slot.ascension);
         const name = servant ? ServantData.getAscensionName(slot.servantId, asc) : "";
         alert(`Please enter required bond points for ${name || "servant in slot " + (i + 1)}.`);
         return;
@@ -1872,13 +1848,13 @@ const BondApp = {
       const servant = ServantData.getServant(servantId);
 
       // Frontline bonus: first 3 slots get +20% (applied separately)
-      const isFrontline = i < 3;
+      const isFrontline = i < BOND_CONSTANTS.FRONTLINE_SIZE;
 
       // Sum percentage bonuses (CEs + max bond + support, NOT frontline)
       let ceBonusPercent = maxBondBonus + supportBonus;
       const appliedCEs = [];
       if (isFrontline) {
-        appliedCEs.push({ id: "frontline", name: "Frontline", bonus: 20, image: "icons/bond_icon.webp" });
+        appliedCEs.push({ id: "frontline", name: "Frontline", bonus: BOND_CONSTANTS.FRONTLINE_BONUS_PCT, image: "icons/bond_icon.webp" });
       }
       frontlineSupports.forEach(fs => {
         appliedCEs.push({ id: "support_" + fs.servantId, name: fs.name, bonus: 4, image: fs.image, isSupport: true });
@@ -1888,7 +1864,7 @@ const BondApp = {
       });
 
       // CE trait matching + flat bonus
-      const ascension = slot.ascension || (servant && servant.hasAscensions ? "000" : null);
+      const ascension = ServantData.getDefaultAscension(slot.servantId, slot.ascension);
       const servantTraits = servant ? ServantData.getTraitsForAscension(servantId, ascension) : [];
       let flatBonus = 0;
       this.state.ces.forEach(ceEntry => {
@@ -1957,7 +1933,7 @@ const BondApp = {
       let totalBonus = Math.floor(bondPerRun * ceBonusPercent / 100);
       // Step 2: if frontline, multiply bonus by 1.2 and add base*0.2
       if (isFrontline) {
-        totalBonus = Math.floor(totalBonus * 1.2) + Math.floor(bondPerRun * 0.2);
+        totalBonus = Math.floor(totalBonus * BOND_CONSTANTS.FRONTLINE_MULTIPLIER) + Math.floor(bondPerRun * BOND_CONSTANTS.FRONTLINE_BONUS_FRACTION);
       }
       // Step 3: add flat bonus
       totalBonus += flatBonus;
@@ -2026,11 +2002,7 @@ const BondApp = {
               alt: ce.name,
               title: `${ce.name} +${ce.bonus}%`
             });
-            servantImg.onerror = () => {
-              const fb = DOMFactory.el("div", "bond-result-ce-fallback");
-              fb.textContent = `+${ce.bonus}`;
-              servantImg.replaceWith(fb);
-            };
+            DOMFactory.addSimpleFallback(servantImg, "bond-result-ce-fallback", `+${ce.bonus}`);
             wrap.appendChild(servantImg);
             const icon = DOMFactory.el("img", "bond-result-ce-maxbond-icon", {
               src: "icons/bond_icon.webp",
@@ -2048,11 +2020,7 @@ const BondApp = {
               alt: ce.name,
               title: `${ce.name} +${ce.bonus}%`
             });
-            servantImg.onerror = () => {
-              const fb = DOMFactory.el("div", "bond-result-ce-fallback");
-              fb.textContent = `+${ce.bonus}`;
-              servantImg.replaceWith(fb);
-            };
+            DOMFactory.addSimpleFallback(servantImg, "bond-result-ce-fallback", `+${ce.bonus}`);
             wrap.appendChild(servantImg);
             const icon = DOMFactory.el("img", "bond-result-ce-maxbond-icon", {
               src: "icons/fp_icon.webp",
@@ -2068,11 +2036,7 @@ const BondApp = {
               alt: ce.name,
               title: `${ce.name} +${ce.flatBonus} pts`
             });
-            ceImg.onerror = () => {
-              const fb = DOMFactory.el("div", "bond-result-ce-fallback");
-              fb.textContent = `+${ce.flatBonus}`;
-              ceImg.replaceWith(fb);
-            };
+            DOMFactory.addSimpleFallback(ceImg, "bond-result-ce-fallback", `+${ce.flatBonus}`);
             ceImgGrid.appendChild(ceImg);
           } else {
             const ceImg = DOMFactory.el("img", "bond-result-ce-img", {
@@ -2080,11 +2044,7 @@ const BondApp = {
               alt: ce.name,
               title: `${ce.name} +${ce.bonus}%`
             });
-            ceImg.onerror = () => {
-              const fb = DOMFactory.el("div", "bond-result-ce-fallback");
-              fb.textContent = `+${ce.bonus}`;
-              ceImg.replaceWith(fb);
-            };
+            DOMFactory.addSimpleFallback(ceImg, "bond-result-ce-fallback", `+${ce.bonus}`);
             ceImgGrid.appendChild(ceImg);
           }
         });
@@ -2136,26 +2096,26 @@ const BondApp = {
           .filter(s => s.servantId)
           .map(s => ({
             servantId: s.servantId || null,
-            bondNeeded: Validator.clamp(s.bondNeeded || 0, 0, 9999999),
+            bondNeeded: Validator.clamp(s.bondNeeded || 0, 0, BOND_CONSTANTS.MAX_BOND_NEEDED),
             type: ["normal", "support", "maxbond"].includes(s.type) ? s.type : "normal",
             ascension: (typeof s.ascension === "string" && s.ascension) ? s.ascension : null
           }));
       } else {
         slots = [];
         if (data.bondNeeded) {
-          slots.push({ servantId: null, bondNeeded: Validator.clamp(data.bondNeeded, 0, 9999999) });
+          slots.push({ servantId: null, bondNeeded: Validator.clamp(data.bondNeeded, 0, BOND_CONSTANTS.MAX_BOND_NEEDED) });
         }
       }
 
       return {
         slots: slots.map(s => ({
           servantId: s.servantId || null,
-          bondNeeded: Validator.clamp(s.bondNeeded || 0, 0, 9999999),
+          bondNeeded: Validator.clamp(s.bondNeeded || 0, 0, BOND_CONSTANTS.MAX_BOND_NEEDED),
           type: s.type || "normal",
           ascension: (typeof s.ascension === "string" && s.ascension) ? s.ascension : null
         })),
         selectedQuest: typeof data.selectedQuest === "string" ? data.selectedQuest : "",
-        customBond: Validator.clamp(data.customBond || 0, 0, 99999),
+        customBond: Validator.clamp(data.customBond || 0, 0, BOND_CONSTANTS.MAX_CUSTOM_BOND),
         ces: Array.isArray(data.ces) ? data.ces.filter(entry => {
           if (typeof entry === "string" && entry) return true;
           if (entry && typeof entry === "object" && entry.groupId && entry.optionId) return true;

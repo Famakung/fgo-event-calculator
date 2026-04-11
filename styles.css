@@ -324,6 +324,7 @@ body {
 }
 
 .servant-slot {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -360,6 +361,13 @@ body {
   font-weight: 700;
   color: var(--text-secondary);
   flex-shrink: 0;
+}
+
+.servant-slot-select-btn {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .servant-slot-info {
@@ -404,10 +412,6 @@ body {
 .servant-remove-btn:hover {
   background: rgba(220, 38, 38, 0.2);
   color: var(--error);
-}
-
-.servant-slot {
-  position: relative;
 }
 
 .servant-add-slot:hover {
@@ -489,10 +493,6 @@ body {
 .ce-add-slot:hover {
   background: var(--accent-light);
   border: 1px dashed var(--accent);
-}
-
-.ce-add-area {
-  display: none;
 }
 
 /* Servant Modal */
@@ -636,18 +636,6 @@ body {
 .header {
   text-align: center;
   margin-bottom: 40px;
-}
-
-.badge {
-  display: inline-block;
-  background: var(--accent-light);
-  color: var(--accent);
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 6px 14px;
-  border-radius: 100px;
-  margin-bottom: 16px;
-  letter-spacing: 0.02em;
 }
 
 .title {
@@ -1113,7 +1101,6 @@ body {
     gap: 10px;
   }
 
-  .drop-rates-3col,
   .quest-drops-grid {
     grid-template-columns: 1fr;
   }
