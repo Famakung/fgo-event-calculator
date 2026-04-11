@@ -2,7 +2,7 @@
 
 A web-based calculator for Fate/Grand Order with two tools: **Event Shop Calculator** for optimizing event item farming and **Bond Calculator** for planning bond point farming.
 
-**Live at:** https://famakung.github.io/fgo-event-calculator/
+**Live at:** https://famakung.github.io/fgo-calculator/
 
 ## Features
 
