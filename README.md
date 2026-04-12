@@ -15,6 +15,7 @@ A web-based calculator for Fate/Grand Order with three tools: **Event Shop Calcu
 
 ### Bond Calculator
 - Dynamic servant slots (up to 6) with portraits and drag-to-reorder
+- Class icon filter in servant picker modal (multi-select, 15 classes)
 - Three servant types: Normal, Support (no calculation), Max Bond (+25% to all)
 - Multi-ascension support for servants with per-ascension trait differences
 - Craft Essence bonus system with trait-based matching
@@ -29,7 +30,7 @@ A web-based calculator for Fate/Grand Order with three tools: **Event Shop Calcu
 - Searchable results by servant ID or name
 - Shows matching CE badges and trait tags per servant
 - Clickable CE badges to add to selection
-- "No CE Bonus" section shows servants that don't match any trait-based CE
+- "No Matching CE" section shows servants that don't match any trait-based CE
 
 ## Usage
 

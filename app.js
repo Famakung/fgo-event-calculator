@@ -937,6 +937,7 @@ const ServantData = {
 const ServantSelector = {
   activeSlotIndex: null,
   pendingSlot: false,
+  classFilters: [],
 
   init() {
     const modal = document.getElementById("servantModal");
@@ -963,9 +964,11 @@ const ServantSelector = {
   open(slotIndex, pending = false) {
     this.activeSlotIndex = slotIndex;
     this.pendingSlot = pending;
+    this.classFilters = [];
     const modal = document.getElementById("servantModal");
     const searchInput = document.getElementById("servantSearch");
 
+    this.buildClassFilter();
     this.renderGrid(ServantData.servants);
     if (searchInput) searchInput.value = "";
     if (modal) modal.classList.add("open");
@@ -1020,15 +1023,81 @@ const ServantSelector = {
   },
 
   filter(query) {
-    const q = query.toLowerCase().trim();
-    if (!q) {
-      this.renderGrid(ServantData.servants);
-      return;
+    const searchInput = document.getElementById("servantSearch");
+    const q = (query != null ? query : (searchInput ? searchInput.value : "")).toLowerCase().trim();
+    this.renderGrid(this.getFilteredServants(q));
+  },
+
+  getFilteredServants(query) {
+    let result = ServantData.servants;
+    if (query) {
+      result = result.filter(s =>
+        s.id.toLowerCase().includes(query) || ServantData.getAllNames(s.id).some(n => n.toLowerCase().includes(query))
+      );
     }
-    const filtered = ServantData.servants.filter(s =>
-      s.id.toLowerCase().includes(q) || ServantData.getAllNames(s.id).some(n => n.toLowerCase().includes(q))
-    );
-    this.renderGrid(filtered);
+    if (this.classFilters.length > 0) {
+      const classSet = new Set(this.classFilters);
+      result = result.filter(s => s.traits.some(t => classSet.has(t)));
+    }
+    return result;
+  },
+
+  buildClassFilter() {
+    const container = document.getElementById("servantClassFilter");
+    if (!container) return;
+
+    const standard = [
+      { id: "0100", icon: "saber", label: "Saber" },
+      { id: "0102", icon: "archer", label: "Archer" },
+      { id: "0101", icon: "lancer", label: "Lancer" },
+      { id: "0103", icon: "rider", label: "Rider" },
+      { id: "0104", icon: "caster", label: "Caster" },
+      { id: "0105", icon: "assassin", label: "Assassin" },
+      { id: "0106", icon: "berserker", label: "Berserker" }
+    ];
+
+    const extra = [
+      { id: "0107", icon: "shielder", label: "Shielder" },
+      { id: "0108", icon: "ruler", label: "Ruler" },
+      { id: "0110", icon: "avenger", label: "Avenger" },
+      { id: "0115", icon: "mooncancer", label: "Moon Cancer" },
+      { id: "0109", icon: "alterego", label: "Alter Ego" },
+      { id: "0117", icon: "foreigner", label: "Foreigner" },
+      { id: "0120", icon: "pretender", label: "Pretender" },
+      { id: "0124", icon: "beast", label: "Beast" }
+    ];
+
+    container.replaceChildren();
+    const selected = new Set(this.classFilters);
+
+    const buildRow = (classes) => {
+      const row = DOMFactory.el("div", "servant-class-row");
+      classes.forEach(cls => {
+        const btn = DOMFactory.el("div", "servant-class-btn" +
+          (selected.has(cls.id) ? " active" : ""));
+        const img = DOMFactory.el("img", "", {
+          src: `icons/classes/${cls.icon}.webp`,
+          alt: cls.label,
+          title: cls.label
+        });
+        btn.appendChild(img);
+        btn.addEventListener("click", () => {
+          if (selected.has(cls.id)) {
+            selected.delete(cls.id);
+          } else {
+            selected.add(cls.id);
+          }
+          this.classFilters = [...selected];
+          this.buildClassFilter();
+          this.filter();
+        });
+        row.appendChild(btn);
+      });
+      container.appendChild(row);
+    };
+
+    buildRow(standard);
+    buildRow(extra);
   }
 };
 
@@ -1690,7 +1759,7 @@ const CEFilterApp = {
     container.replaceChildren();
 
     const label = DOMFactory.el("span", "cefilter-match-count-label");
-    label.textContent = "CE Matches:";
+    label.textContent = "Matching CEs:";
     container.appendChild(label);
 
     const selected = new Set(this.state.matchCounts);
@@ -1876,12 +1945,12 @@ const CEFilterApp = {
       grid.appendChild(card);
     });
 
-    // --- No CE Bonus section ---
-    const noBonusGrid = document.getElementById("cefilterNoBonus");
-    const noBonusCountEl = document.getElementById("cefilterNoBonusCount");
-    const noBonusHeader = document.getElementById("cefilterNoBonusHeader");
-    if (!noBonusGrid) return;
-    noBonusGrid.replaceChildren();
+    // --- No Matching CE section ---
+    const noMatchGrid = document.getElementById("cefilterNoMatch");
+    const noMatchCountEl = document.getElementById("cefilterNoMatchCount");
+    const noMatchHeader = document.getElementById("cefilterNoMatchHeader");
+    if (!noMatchGrid) return;
+    noMatchGrid.replaceChildren();
 
     const matchedIds = new Set(allMatches.map(r => r.servant.id));
     let noMatchServants = ServantData.servants.filter(s => !matchedIds.has(s.id));
@@ -1897,18 +1966,18 @@ const CEFilterApp = {
 
     const hasCESelected = selectedCEObjs.length > 0;
     const hasMatchCountFilter = this.state.matchCounts.length > 0;
-    const showNoBonus = !hasCESelected && !hasMatchCountFilter && noMatchServants.length > 0;
-    if (noBonusHeader) {
-      noBonusHeader.style.display = showNoBonus ? "" : "none";
+    const showNoMatch = !hasCESelected && !hasMatchCountFilter && noMatchServants.length > 0;
+    if (noMatchHeader) {
+      noMatchHeader.style.display = showNoMatch ? "" : "none";
     }
-    if (noBonusGrid) {
-      noBonusGrid.style.display = showNoBonus ? "" : "none";
+    if (noMatchGrid) {
+      noMatchGrid.style.display = showNoMatch ? "" : "none";
     }
-    if (noBonusCountEl) {
-      noBonusCountEl.textContent = `${noMatchServants.length} servant${noMatchServants.length !== 1 ? "s" : ""}`;
+    if (noMatchCountEl) {
+      noMatchCountEl.textContent = `${noMatchServants.length} servant${noMatchServants.length !== 1 ? "s" : ""}`;
     }
 
-    if (showNoBonus) {
+    if (showNoMatch) {
       noMatchServants.forEach(servant => {
         const card = DOMFactory.el("div", "cefilter-servant-card");
 
@@ -1923,7 +1992,7 @@ const CEFilterApp = {
         nameEl.textContent = servant.name;
         card.appendChild(nameEl);
 
-        noBonusGrid.appendChild(card);
+        noMatchGrid.appendChild(card);
       });
     }
   },

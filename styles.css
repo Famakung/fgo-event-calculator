@@ -712,7 +712,7 @@ body {
   justify-content: space-between;
 }
 
-.cefilter-no-bonus-header {
+.cefilter-no-match-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1000,6 +1000,46 @@ body {
   background: var(--border);
 }
 
+.servant-class-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.servant-class-row {
+  display: contents;
+}
+
+.servant-class-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 2px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: border-color 0.15s, background-color 0.15s;
+  background: var(--card);
+}
+
+.servant-class-btn:hover {
+  border-color: var(--accent);
+}
+
+.servant-class-btn.active {
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+
+.servant-class-btn img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
 .ascension-modal-title {
   flex: 1;
   font-weight: 600;
@@ -1032,8 +1072,8 @@ body {
 }
 
 .servant-picker-item img {
-  width: 48px;
-  height: 48px;
+  width: 72px;
+  height: 72px;
   border-radius: 8px;
   object-fit: cover;
   margin-bottom: 4px;
@@ -1041,6 +1081,7 @@ body {
 
 .servant-picker-name {
   font-size: 0.65rem;
+  font-weight: 600;
   color: var(--text-secondary);
   text-align: center;
   max-width: 100%;
@@ -1518,12 +1559,6 @@ body {
     gap: 8px;
   }
 
-  .cefilter-class-btn {
-    width: auto;
-    height: auto;
-    padding: 2px;
-  }
-
   .materials-grid,
   .deficit-grid,
   .quest-grid {
@@ -1537,18 +1572,6 @@ body {
 
   .card {
     padding: 16px;
-  }
-
-  .servant-slot-portrait,
-  .servant-slot-portrait-fallback {
-    width: 56px;
-    height: 56px;
-  }
-
-  .ce-portrait,
-  .ce-portrait-fallback {
-    width: 56px;
-    height: 56px;
   }
 
   .base-row {
