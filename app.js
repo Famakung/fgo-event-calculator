@@ -388,7 +388,7 @@ const DOMFactory = {
     };
   },
 
-  addAscensionFallback(img, _flatSrc, fallbackText) {
+  addAscensionFallback(img, fallbackText) {
     img.onerror = () => {
       const fb = this.el("div", "servant-slot-portrait-fallback");
       fb.textContent = fallbackText;
@@ -405,7 +405,7 @@ const UIBuilder = {
   elements: {},
 
   buildMaterialsGrid(container, state) {
-    container.innerHTML = "";
+    container.replaceChildren();
 
     TIERS.forEach(tier => {
       const card = DOMFactory.el("div", "material-card", {
@@ -443,7 +443,7 @@ const UIBuilder = {
   },
 
   buildQuestDropsGrid(container) {
-    container.innerHTML = "";
+    container.replaceChildren();
 
     Object.entries(QUEST_DROPS).forEach(([questTier, drops]) => {
       const item = DOMFactory.el("div", "quest-drops-item", {
@@ -479,7 +479,7 @@ const UIBuilder = {
   },
 
   buildDeficitGrid(container) {
-    container.innerHTML = "";
+    container.replaceChildren();
 
     TIERS.forEach(tier => {
       const item = DOMFactory.el("div", "deficit-item", {
@@ -500,7 +500,7 @@ const UIBuilder = {
   },
 
   buildQuestGrid(container) {
-    container.innerHTML = "";
+    container.replaceChildren();
 
     TIERS.forEach(tier => {
       const item = DOMFactory.el("div", "quest-item", {
@@ -991,7 +991,7 @@ const ServantSelector = {
   renderGrid(servants) {
     const grid = document.getElementById("servantPickerGrid");
     if (!grid) return;
-    grid.innerHTML = "";
+    grid.replaceChildren();
 
     servants.forEach(servant => {
       const item = DOMFactory.el("div", "servant-picker-item");
@@ -1000,7 +1000,7 @@ const ServantSelector = {
         src: servant.image,
         alt: servant.name
       });
-      DOMFactory.addAscensionFallback(img, null, servant.id);
+      DOMFactory.addAscensionFallback(img, servant.id);
 
       const name = DOMFactory.el("div", "servant-picker-name");
       name.textContent = servant.name;
@@ -1091,7 +1091,7 @@ const AscensionSelector = {
   renderGrid() {
     const grid = document.getElementById("ascensionPickerGrid");
     if (!grid || !this.servant) return;
-    grid.innerHTML = "";
+    grid.replaceChildren();
 
     const options = ServantData.getAscensionOptions(this.servant.id);
     options.forEach(asc => {
@@ -1262,7 +1262,7 @@ const CESelector = {
   renderGrid(ces) {
     const grid = document.getElementById("cePickerGrid");
     if (!grid) return;
-    grid.innerHTML = "";
+    grid.replaceChildren();
 
     ces.forEach(ce => {
       const item = DOMFactory.el("div", "servant-picker-item");
@@ -1359,7 +1359,7 @@ const CESubSelector = {
   renderGrid() {
     const grid = document.getElementById("ceSubPickerGrid");
     if (!grid || !this.groupCE) return;
-    grid.innerHTML = "";
+    grid.replaceChildren();
 
     const options = this.groupCE.options || [];
     options.forEach(opt => {
@@ -1441,7 +1441,7 @@ const CEFilterPicker = {
   renderGrid(ces) {
     const grid = document.getElementById("ceFilterPickerGrid");
     if (!grid) return;
-    grid.innerHTML = "";
+    grid.replaceChildren();
 
     ces.forEach(ce => {
       const isSelected = this.tempSelected.has(ce.id);
@@ -1521,9 +1521,12 @@ const CEFilterApp = {
 
     if (searchInput) {
       searchInput.value = this.state.searchQuery;
-      searchInput.addEventListener("input", (e) => {
-        this.state.searchQuery = e.target.value;
+      const debouncedSearch = EventHandler.debounce((query) => {
+        this.state.searchQuery = query;
         this.renderResults();
+      }, DEBOUNCE_MS);
+      searchInput.addEventListener("input", (e) => {
+        debouncedSearch(e.target.value);
       });
     }
 
@@ -1539,7 +1542,7 @@ const CEFilterApp = {
   renderChips() {
     const container = document.getElementById("cefilterChips");
     if (!container) return;
-    container.innerHTML = "";
+    container.replaceChildren();
 
     if (this.state.selectedCEs.length === 0) {
       const placeholder = DOMFactory.el("div", "servant-slot-placeholder");
@@ -1581,7 +1584,7 @@ const CEFilterApp = {
     const modeSelect = document.getElementById("cefilterMode");
     const modeRow = document.querySelector(".cefilter-mode-row");
     if (!grid) return;
-    grid.innerHTML = "";
+    grid.replaceChildren();
 
     const selectedCEObjs = this.state.selectedCEs
       .map(id => CEList.find(c => c.id === id))
@@ -1636,7 +1639,7 @@ const CEFilterApp = {
         src: imgSrc,
         alt: servant.name
       });
-      DOMFactory.addAscensionFallback(img, null, servant.id);
+      DOMFactory.addAscensionFallback(img, servant.id);
       card.appendChild(img);
 
       if (matchingCEs.length > 0) {
@@ -1695,84 +1698,6 @@ const CEFilterApp = {
 
       grid.appendChild(card);
     });
-  },
-
-  computeMatches(selectedCEObjs) {
-    const results = [];
-    const relevantTraitIds = new Set();
-    selectedCEObjs.forEach(ce => {
-      ce.traits.forEach(t => relevantTraitIds.add(t));
-      ce.traitGroups.forEach(group => group.forEach(t => relevantTraitIds.add(t)));
-    });
-
-    ServantData.servants.forEach(servant => {
-      const traitSets = TraitMatcher.getAllTraitSets(servant);
-
-      let passes, matchingCEs;
-      if (this.state.mode === "all") {
-        // Match All: at least one trait set must satisfy ALL selected CEs
-        const anySetMatchesAll = traitSets.some(set =>
-          selectedCEObjs.every(ce => TraitMatcher.matches(set.traits, ce))
-        );
-        passes = anySetMatchesAll;
-        matchingCEs = passes ? [...selectedCEObjs] : [];
-      } else {
-        matchingCEs = selectedCEObjs.filter(ce =>
-          TraitMatcher.servantMatchesAnyAscension(servant, ce)
-        );
-        passes = matchingCEs.length > 0;
-      }
-
-      if (!passes) return;
-
-      // Check if base traits alone match all selected CEs
-      const baseTraits = servant.hasAscensions
-        ? (servant.rawTraits.base || [])
-        : servant.traits;
-      const baseMatchesAll = selectedCEObjs.every(ce =>
-        TraitMatcher.matches(baseTraits, ce)
-      );
-
-      // Collect ascensions that satisfy all CEs (match-all) or any CE (match-any)
-      const ascensionOnly = [];
-      if (servant.hasAscensions && !baseMatchesAll) {
-        const allKeys = Object.keys(servant.rawTraits).filter(k => k !== "base");
-        allKeys.forEach(k => {
-          const traits = [...(servant.rawTraits.base || []), ...(servant.rawTraits[k] || [])];
-          if (this.state.mode === "all") {
-            if (selectedCEObjs.every(ce => TraitMatcher.matches(traits, ce))) {
-              ascensionOnly.push(k);
-            }
-          } else {
-            const matchesSome = selectedCEObjs.some(ce =>
-              !TraitMatcher.matches(baseTraits, ce) && TraitMatcher.matches(traits, ce)
-            );
-            if (matchesSome) ascensionOnly.push(k);
-          }
-        });
-      }
-      // Sort: standard ascensions (000, 001, 002) first, then custom keys
-      const stdOrder = ["000", "001", "002"];
-      ascensionOnly.sort((a, b) => {
-        const ai = stdOrder.indexOf(a);
-        const bi = stdOrder.indexOf(b);
-        if (ai !== -1 && bi !== -1) return ai - bi;
-        if (ai !== -1) return -1;
-        if (bi !== -1) return 1;
-        return a.localeCompare(b);
-      });
-      const matchedAscensions = ascensionOnly;
-
-      const allTraitSets = TraitMatcher.getAllTraitSets(servant);
-      const mergedTraits = [...new Set(allTraitSets.map(s => s.traits).flat())];
-      const relevantTraits = mergedTraits
-        .filter(t => relevantTraitIds.has(t))
-        .map(t => TraitNames[t] || t);
-
-      results.push({ servant, matchingCEs, allTraitNames: relevantTraits, matchedAscensions, baseMatchesAll });
-    });
-
-    return results;
   },
 
   computeAllCEMatches() {
@@ -1979,7 +1904,7 @@ const BondApp = {
   buildCESlots() {
     const grid = document.getElementById("ceGrid");
     if (!grid) return;
-    grid.innerHTML = "";
+    grid.replaceChildren();
 
     const count = this.state.ces.length;
 
@@ -2114,7 +2039,7 @@ const BondApp = {
   buildServantSlots() {
     const grid = document.getElementById("servantGrid");
     if (!grid) return;
-    grid.innerHTML = "";
+    grid.replaceChildren();
     this.elements = {};
 
     const count = this.state.slots.length;
@@ -2141,7 +2066,7 @@ const BondApp = {
             alt: servant.name,
             draggable: "false"
           });
-          DOMFactory.addAscensionFallback(img, null, servant.id);
+          DOMFactory.addAscensionFallback(img, servant.id);
           portraitArea.appendChild(img);
           if (servant.hasAscensions) {
             portraitArea.style.cursor = "pointer";
@@ -2243,24 +2168,24 @@ const BondApp = {
 
     // Add button
     const addSlot = DOMFactory.el("div", ["servant-slot", "servant-add-slot"]);
-      const addPortrait = DOMFactory.el("div", "servant-slot-portrait-fallback");
-      addPortrait.textContent = "+";
-      addSlot.appendChild(addPortrait);
-      const addInfo = DOMFactory.el("div", "servant-slot-info");
-      const addLabel = DOMFactory.el("div", "servant-slot-placeholder");
-      addLabel.textContent = "Add servant";
-      addInfo.appendChild(addLabel);
-      addSlot.appendChild(addInfo);
-      addSlot.addEventListener("click", () => {
-        // Add slot and open modal; if closed without picking, remove it
-        this.flushInputsToState();
-        this.state.slots.push({ servantId: null, bondNeeded: 0, type: "normal", ascension: null });
-        this.buildServantSlots();
-        const newIndex = this.state.slots.length - 1;
-        ServantSelector.open(newIndex, true); // pending = true
-      });
-      addSlot.style.cursor = "pointer";
-      grid.appendChild(addSlot);
+    const addPortrait = DOMFactory.el("div", "servant-slot-portrait-fallback");
+    addPortrait.textContent = "+";
+    addSlot.appendChild(addPortrait);
+    const addInfo = DOMFactory.el("div", "servant-slot-info");
+    const addLabel = DOMFactory.el("div", "servant-slot-placeholder");
+    addLabel.textContent = "Add servant";
+    addInfo.appendChild(addLabel);
+    addSlot.appendChild(addInfo);
+    addSlot.addEventListener("click", () => {
+      // Add slot and open modal; if closed without picking, remove it
+      this.flushInputsToState();
+      this.state.slots.push({ servantId: null, bondNeeded: 0, type: "normal", ascension: null });
+      this.buildServantSlots();
+      const newIndex = this.state.slots.length - 1;
+      ServantSelector.open(newIndex, true); // pending = true
+    });
+    addSlot.style.cursor = "pointer";
+    grid.appendChild(addSlot);
   },
 
   setServant(slotIndex, servantId, ascension) {
@@ -2472,7 +2397,7 @@ const BondApp = {
 
     // Show results
     const container = document.getElementById("bondResultContent");
-    container.innerHTML = "";
+    container.replaceChildren();
 
     // Per-servant results grid
     const resultGrid = DOMFactory.el("div", "bond-result-servant-grid");
