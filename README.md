@@ -25,7 +25,7 @@ A web-based calculator for Fate/Grand Order with three tools: **Event Shop Calcu
 
 ### Bond Gain CE Filter
 - Reverse lookup: select CEs to find matching servants
-- AND/OR match mode across multiple CEs
+- Match modes: All (AND), Any (OR), and Custom Match (filter by exact CE match count)
 - Searchable results by servant ID or name
 - Shows matching CE badges and trait tags per servant
 - Clickable CE badges to add to selection
@@ -48,7 +48,7 @@ A web-based calculator for Fate/Grand Order with three tools: **Event Shop Calcu
 
 ### CE Filter
 1. Click "Add Craft Essence" to select CEs
-2. Choose match mode (Match All AND / Match Any OR)
+2. Choose match mode (Match All / Match Any OR / Custom Match)
 3. Browse matching servants in the results grid
 4. Search by servant ID or name to narrow results
 

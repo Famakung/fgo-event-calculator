@@ -3,12 +3,21 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="FGO Calculator — Event Shop optimizer, Bond Point calculator, and Bond Gain CE filter for Fate/Grand Order farming." />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self'; style-src 'self' https://fonts.googleapis.com; script-src 'self'; font-src https://fonts.googleapis.com https://fonts.gstatic.com;" />
+    <meta
+      name="description"
+      content="FGO Calculator — Event Shop optimizer, Bond Point calculator, and Bond Gain CE filter for Fate/Grand Order farming."
+    />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self'; style-src 'self' https://fonts.googleapis.com; script-src 'self'; font-src https://fonts.googleapis.com https://fonts.gstatic.com;"
+    />
     <title>FGO Calculator</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -36,15 +45,40 @@
             <div class="base-row">
               <div class="base-item">
                 <label class="base-label" for="baseDrop">Base</label>
-                <input type="number" class="input-field base-input" id="baseDrop" value="3" min="0" max="100" />
+                <input
+                  type="number"
+                  class="input-field base-input"
+                  id="baseDrop"
+                  value="3"
+                  min="0"
+                  max="100"
+                />
               </div>
               <div class="base-item">
-                <label class="base-label" for="primaryMultiplier">Primary %</label>
-                <input type="number" class="input-field base-input" id="primaryMultiplier" value="1500" min="100" max="100000" />
+                <label class="base-label" for="primaryMultiplier"
+                  >Primary %</label
+                >
+                <input
+                  type="number"
+                  class="input-field base-input"
+                  id="primaryMultiplier"
+                  value="1500"
+                  min="100"
+                  max="100000"
+                />
               </div>
               <div class="base-item">
-                <label class="base-label" for="secondaryMultiplier">Secondary %</label>
-                <input type="number" class="input-field base-input" id="secondaryMultiplier" value="225" min="100" max="100000" />
+                <label class="base-label" for="secondaryMultiplier"
+                  >Secondary %</label
+                >
+                <input
+                  type="number"
+                  class="input-field base-input"
+                  id="secondaryMultiplier"
+                  value="225"
+                  min="100"
+                  max="100000"
+                />
               </div>
             </div>
             <div class="quest-drops-grid" id="questDropsGrid"></div>
@@ -88,8 +122,18 @@
             </div>
             <div id="customQuestSection" class="custom-quest-section">
               <div class="input-row">
-                <label class="input-label" for="customBondPerRun">Bond/Run</label>
-                <input type="number" class="input-field" id="customBondPerRun" min="0" max="99999" value="0" disabled />
+                <label class="input-label" for="customBondPerRun"
+                  >Bond/Run</label
+                >
+                <input
+                  type="number"
+                  class="input-field"
+                  id="customBondPerRun"
+                  min="0"
+                  max="99999"
+                  value="0"
+                  disabled
+                />
               </div>
             </div>
           </div>
@@ -110,17 +154,33 @@
           <div class="card">
             <div class="card-title">Bond Gain Craft Essences</div>
             <div class="cefilter-controls">
-              <button class="cefilter-add-btn" id="cefilterAddBtn" type="button">Add Craft Essence</button>
+              <button
+                class="cefilter-add-btn"
+                id="cefilterAddBtn"
+                type="button"
+              >
+                Add Craft Essence
+              </button>
               <div class="cefilter-mode-row">
-                <label class="cefilter-mode-label" for="cefilterMode">Match Mode:</label>
+                <label class="cefilter-mode-label" for="cefilterMode"
+                  >Match Mode:</label
+                >
                 <select class="select-field" id="cefilterMode">
                   <option value="all" selected>Match All (AND)</option>
                   <option value="any">Match Any (OR)</option>
+                  <option value="custom">Custom Match</option>
                 </select>
+                <div
+                  id="cefilterCustomCount"
+                  class="cefilter-custom-count"
+                ></div>
               </div>
             </div>
             <div class="cefilter-chips" id="cefilterChips"></div>
-            <div class="cefilter-match-count-filter" id="cefilterMatchCount"></div>
+            <div
+              class="cefilter-match-count-filter"
+              id="cefilterMatchCount"
+            ></div>
           </div>
 
           <div class="card">
@@ -128,7 +188,12 @@
               <span>Servant CE Matches</span>
               <span class="cefilter-count" id="cefilterCount"></span>
             </div>
-            <input type="text" class="servant-search ce-filter-search" id="cefilterSearch" placeholder="Search by ID or name..." />
+            <input
+              type="text"
+              class="servant-search ce-filter-search"
+              id="cefilterSearch"
+              placeholder="Search by ID or name..."
+            />
             <div class="cefilter-class-filter" id="cefilterClassFilter"></div>
             <div class="cefilter-results-grid" id="cefilterResults"></div>
             <div class="cefilter-no-bonus-header" id="cefilterNoBonusHeader">
@@ -143,8 +208,19 @@
         <div class="servant-modal" id="servantModal">
           <div class="servant-modal-content">
             <div class="servant-modal-header">
-              <input type="text" class="servant-search" id="servantSearch" placeholder="Search by ID or name..." />
-              <button class="servant-modal-close" id="servantModalClose" type="button">&#10005;</button>
+              <input
+                type="text"
+                class="servant-search"
+                id="servantSearch"
+                placeholder="Search by ID or name..."
+              />
+              <button
+                class="servant-modal-close"
+                id="servantModalClose"
+                type="button"
+              >
+                &#10005;
+              </button>
             </div>
             <div class="servant-picker-grid" id="servantPickerGrid"></div>
           </div>
@@ -154,9 +230,24 @@
         <div class="servant-modal" id="ascensionModal">
           <div class="servant-modal-content">
             <div class="servant-modal-header">
-              <button class="ascension-modal-back" id="ascensionModalBack" type="button">&#8592;</button>
-              <span class="ascension-modal-title" id="ascensionModalTitle"></span>
-              <button class="servant-modal-close" id="ascensionModalClose" type="button">&#10005;</button>
+              <button
+                class="ascension-modal-back"
+                id="ascensionModalBack"
+                type="button"
+              >
+                &#8592;
+              </button>
+              <span
+                class="ascension-modal-title"
+                id="ascensionModalTitle"
+              ></span>
+              <button
+                class="servant-modal-close"
+                id="ascensionModalClose"
+                type="button"
+              >
+                &#10005;
+              </button>
             </div>
             <div class="servant-picker-grid" id="ascensionPickerGrid"></div>
           </div>
@@ -166,8 +257,19 @@
         <div class="servant-modal" id="ceModal">
           <div class="servant-modal-content">
             <div class="servant-modal-header">
-              <input type="text" class="servant-search" id="ceSearch" placeholder="Search by ID or name..." />
-              <button class="servant-modal-close" id="ceModalClose" type="button">&#10005;</button>
+              <input
+                type="text"
+                class="servant-search"
+                id="ceSearch"
+                placeholder="Search by ID or name..."
+              />
+              <button
+                class="servant-modal-close"
+                id="ceModalClose"
+                type="button"
+              >
+                &#10005;
+              </button>
             </div>
             <div class="servant-picker-grid" id="cePickerGrid"></div>
           </div>
@@ -177,9 +279,21 @@
         <div class="servant-modal" id="ceSubModal">
           <div class="servant-modal-content">
             <div class="servant-modal-header">
-              <button class="ascension-modal-back" id="ceSubModalBack" type="button">&#8592;</button>
+              <button
+                class="ascension-modal-back"
+                id="ceSubModalBack"
+                type="button"
+              >
+                &#8592;
+              </button>
               <span class="ascension-modal-title" id="ceSubModalTitle"></span>
-              <button class="servant-modal-close" id="ceSubModalClose" type="button">&#10005;</button>
+              <button
+                class="servant-modal-close"
+                id="ceSubModalClose"
+                type="button"
+              >
+                &#10005;
+              </button>
             </div>
             <div class="servant-picker-grid" id="ceSubPickerGrid"></div>
           </div>
@@ -189,12 +303,29 @@
         <div class="servant-modal" id="ceFilterModal">
           <div class="servant-modal-content">
             <div class="servant-modal-header">
-              <input type="text" class="servant-search" id="ceFilterSearch" placeholder="Search by ID or name..." />
-              <button class="servant-modal-close" id="ceFilterModalClose" type="button">&#10005;</button>
+              <input
+                type="text"
+                class="servant-search"
+                id="ceFilterSearch"
+                placeholder="Search by ID or name..."
+              />
+              <button
+                class="servant-modal-close"
+                id="ceFilterModalClose"
+                type="button"
+              >
+                &#10005;
+              </button>
             </div>
             <div class="servant-picker-grid" id="ceFilterPickerGrid"></div>
             <div class="cefilter-modal-footer">
-              <button class="calculate-btn cefilter-confirm-btn" id="cefilterConfirmBtn" type="button">Confirm Selection</button>
+              <button
+                class="calculate-btn cefilter-confirm-btn"
+                id="cefilterConfirmBtn"
+                type="button"
+              >
+                Confirm Selection
+              </button>
             </div>
           </div>
         </div>

@@ -615,6 +615,16 @@ body {
   font-weight: 500;
 }
 
+.cefilter-custom-count {
+  display: none;
+  align-items: center;
+  gap: 4px;
+}
+
+.cefilter-custom-count.visible {
+  display: flex;
+}
+
 .cefilter-chips {
   display: flex;
   flex-wrap: wrap;
