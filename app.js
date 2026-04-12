@@ -20,6 +20,7 @@ const MAX_ITERATIONS = 10000;
 const EPSILON = 0.01;
 const DEBOUNCE_MS = 100;
 const SERVANT_MAX_SLOTS = 6;
+const CE_MAX_SLOTS = 8;
 const STORAGE_KEY = "fgo_calculator_data";
 const BOND_STORAGE_KEY = "fgo_bond_calculator_data";
 const BOND_CONSTANTS = {
@@ -1369,7 +1370,8 @@ const CESubSelector = {
       DOMFactory.addSimpleFallback(img, "servant-slot-portrait-fallback", opt.id);
 
       const label = DOMFactory.el("div", "servant-picker-name");
-      label.textContent = opt.name;
+      const colonIdx = opt.name.indexOf(": ");
+      label.textContent = colonIdx !== -1 ? opt.name.substring(colonIdx + 2) : opt.name;
 
       item.appendChild(img);
       item.appendChild(label);
@@ -2122,22 +2124,25 @@ const BondApp = {
       grid.appendChild(slot);
     }
 
-    // Add button
-    const addSlot = DOMFactory.el("div", ["ce-slot", "ce-add-slot"]);
-    const addPortrait = DOMFactory.el("div", "ce-portrait-fallback");
-    addPortrait.textContent = "+";
-    addSlot.appendChild(addPortrait);
-    const addInfo = DOMFactory.el("div");
-    const addLabel = DOMFactory.el("div", "ce-slot-name");
-    addLabel.textContent = "Add CE";
-    addInfo.appendChild(addLabel);
-    addSlot.appendChild(addInfo);
-    addSlot.addEventListener("click", () => {
-      this.state.ces.push(null);
-      this.buildCESlots();
-      CESelector.open(this.state.ces.length - 1, true);
-    });
-    grid.appendChild(addSlot);
+    // Add button (hidden when at max slots)
+    if (this.state.ces.length < CE_MAX_SLOTS) {
+      const addSlot = DOMFactory.el("div", ["ce-slot", "ce-add-slot"]);
+      const addPortrait = DOMFactory.el("div", "ce-portrait-fallback");
+      addPortrait.textContent = "+";
+      addSlot.appendChild(addPortrait);
+      const addInfo = DOMFactory.el("div");
+      const addLabel = DOMFactory.el("div", "ce-slot-name");
+      addLabel.textContent = "Add CE";
+      addInfo.appendChild(addLabel);
+      addSlot.appendChild(addInfo);
+      addSlot.addEventListener("click", () => {
+        if (this.state.ces.length >= CE_MAX_SLOTS) return;
+        this.state.ces.push(null);
+        this.buildCESlots();
+        CESelector.open(this.state.ces.length - 1, true);
+      });
+      grid.appendChild(addSlot);
+    }
   },
 
   setCE(slotIndex, ceId, optionId) {
@@ -2176,10 +2181,50 @@ const BondApp = {
 
     for (let i = 0; i < count; i++) {
       const slotData = this.state.slots[i];
+
+      // Insert group labels before first slot of each group
+      if (i === 0) {
+        const label = DOMFactory.el("div", "bond-group-label bond-group-label--frontline");
+        label.textContent = "Starting Member";
+        grid.appendChild(label);
+      } else if (i === BOND_CONSTANTS.FRONTLINE_SIZE) {
+        const label = DOMFactory.el("div", "bond-group-label bond-group-label--backline");
+        label.textContent = "Sub Member";
+        grid.appendChild(label);
+      }
+
       if (!slotData.servantId) continue; // skip pending slots
-      const slot = DOMFactory.el("div", "servant-slot");
+      const slotClass = i < BOND_CONSTANTS.FRONTLINE_SIZE
+        ? "servant-slot servant-slot--frontline"
+        : "servant-slot servant-slot--backline";
+      const slot = DOMFactory.el("div", slotClass);
       slot.dataset.slotIndex = i;
       slot.style.cursor = "grab";
+
+      // Frontline bonus badge
+      if (i < BOND_CONSTANTS.FRONTLINE_SIZE) {
+        const slotType = slotData.type || "normal";
+        const badge = DOMFactory.el("div", "servant-slot-frontline-badge");
+        const badgeImg = DOMFactory.el("img", "", {
+          src: "icons/bond_icon.webp",
+          alt: "Frontline",
+          draggable: "false"
+        });
+        if (slotType === "support") {
+          const imgWrap = DOMFactory.el("div", "servant-slot-frontline-img");
+          imgWrap.appendChild(badgeImg);
+          const badgeOverlay = DOMFactory.el("span", "servant-slot-frontline-overlay");
+          badgeOverlay.textContent = "All";
+          imgWrap.appendChild(badgeOverlay);
+          badge.appendChild(imgWrap);
+        } else {
+          badge.appendChild(badgeImg);
+        }
+        const badgeText = DOMFactory.el("span");
+        badgeText.textContent = slotType === "support" ? "+4%" : "+20%";
+        badge.appendChild(badgeText);
+        slot.appendChild(badge);
+      }
 
       // Portrait area (clickable to open selector)
       const portraitArea = DOMFactory.el("div", "servant-slot-select-btn");
@@ -2296,26 +2341,28 @@ const BondApp = {
       grid.appendChild(slot);
     }
 
-    // Add button
-    const addSlot = DOMFactory.el("div", ["servant-slot", "servant-add-slot"]);
-    const addPortrait = DOMFactory.el("div", "servant-slot-portrait-fallback");
-    addPortrait.textContent = "+";
-    addSlot.appendChild(addPortrait);
-    const addInfo = DOMFactory.el("div", "servant-slot-info");
-    const addLabel = DOMFactory.el("div", "servant-slot-placeholder");
-    addLabel.textContent = "Add servant";
-    addInfo.appendChild(addLabel);
-    addSlot.appendChild(addInfo);
-    addSlot.addEventListener("click", () => {
-      // Add slot and open modal; if closed without picking, remove it
-      this.flushInputsToState();
-      this.state.slots.push({ servantId: null, bondNeeded: 0, type: "normal", ascension: null });
-      this.buildServantSlots();
-      const newIndex = this.state.slots.length - 1;
-      ServantSelector.open(newIndex, true); // pending = true
-    });
-    addSlot.style.cursor = "pointer";
-    grid.appendChild(addSlot);
+    // Add button (hidden when at max slots)
+    if (count < SERVANT_MAX_SLOTS) {
+      const addSlot = DOMFactory.el("div", ["servant-slot", "servant-add-slot"]);
+      const addPortrait = DOMFactory.el("div", "servant-slot-portrait-fallback");
+      addPortrait.textContent = "+";
+      addSlot.appendChild(addPortrait);
+      const addInfo = DOMFactory.el("div", "servant-slot-info");
+      const addLabel = DOMFactory.el("div", "servant-slot-placeholder");
+      addLabel.textContent = "Add servant";
+      addInfo.appendChild(addLabel);
+      addSlot.appendChild(addInfo);
+      addSlot.addEventListener("click", () => {
+        if (this.state.slots.length >= SERVANT_MAX_SLOTS) return;
+        this.flushInputsToState();
+        this.state.slots.push({ servantId: null, bondNeeded: 0, type: "normal", ascension: null });
+        this.buildServantSlots();
+        const newIndex = this.state.slots.length - 1;
+        ServantSelector.open(newIndex, true);
+      });
+      addSlot.style.cursor = "pointer";
+      grid.appendChild(addSlot);
+    }
   },
 
   setServant(slotIndex, servantId, ascension) {
