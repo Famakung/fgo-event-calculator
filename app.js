@@ -1648,6 +1648,15 @@ const CEFilterApp = {
             title: ce.name
           });
           DOMFactory.addSimpleFallback(badge, "cefilter-match-badge-fallback", ce.id);
+          badge.style.cursor = "pointer";
+          badge.addEventListener("click", (e) => {
+            e.stopPropagation();
+            if (!this.state.selectedCEs.includes(ce.id)) {
+              this.state.selectedCEs.push(ce.id);
+              this.saveState();
+              this.render();
+            }
+          });
           badges.appendChild(badge);
         });
         card.appendChild(badges);
