@@ -33,6 +33,7 @@ A web-based calculator for Fate/Grand Order with three tools: **Event Shop Calcu
 - Searchable results by servant ID or name
 - Shows matching CE badges and trait tags per servant
 - Clickable CE badges to add to selection
+- Click servant portrait to see other servants sharing the same CEs (overlap modal with multi-select filter)
 - "No Matching CE" section shows servants that don't match any trait-based CE
 
 ## Usage
@@ -95,7 +96,7 @@ The application follows a clean 3-layer architecture within a single IIFE:
 |-------|---------|---------|
 | **Domain** | Schema, Validator, Calculator, TraitMatcher | Pure business logic, no DOM |
 | **Application** | StateManager, Persistence, App, BondApp, CEFilterApp | State management and coordination |
-| **Presentation** | DOMFactory, UIBuilder, ViewManager, EventHandler, TabNavigator, ServantSelector, CESelector, AscensionSelector, CESubSelector, ServantDrag, CEFilterPicker | DOM manipulation, modals, events |
+| **Presentation** | DOMFactory, UIBuilder, ViewManager, EventHandler, TabNavigator, ServantSelector, CESelector, AscensionSelector, CESubSelector, ServantDrag, CEFilterPicker, CEServantOverlap | DOM manipulation, modals, events |
 
 ## Technical Details
 

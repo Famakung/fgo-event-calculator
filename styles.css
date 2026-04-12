@@ -922,6 +922,42 @@ body {
   filter: grayscale(100%);
 }
 
+/* CE Overlap Modal */
+.ceoverlap-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.ceoverlap-groups {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.ceoverlap-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.cefilter-match-badge--nonshared {
+  filter: grayscale(100%);
+  opacity: 0.5;
+}
+
+.ceoverlap-grid .cefilter-match-badge {
+  cursor: default;
+  transition: none;
+}
+
+.ceoverlap-empty {
+  text-align: center;
+  padding: 24px 0;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
 /* Servant Modal */
 .servant-modal {
   display: none;
@@ -1576,6 +1612,12 @@ body {
     opacity: 0.8;
   }
 
+  .ceoverlap-grid .cefilter-match-badge:hover {
+    transform: none;
+    opacity: 1;
+    cursor: default;
+  }
+
   .ascension-modal-back:hover {
     background: var(--border);
   }
@@ -1607,6 +1649,10 @@ body {
   .quest-item:hover {
     transform: scale(1.02);
   }
+
+  .ceoverlap-grid .cefilter-servant-card:hover {
+    background: var(--bg);
+  }
 }
 
 /* 13b. Active feedback (touch-friendly) */
@@ -1637,6 +1683,10 @@ body {
 
 .ascension-modal-back:active,
 .servant-modal-close:active {
+  background: var(--border);
+}
+
+.ceoverlap-grid .cefilter-servant-card:active {
   background: var(--border);
 }
 
@@ -1752,8 +1802,6 @@ body {
     max-height: 90vh;
   }
 }
-
-/* 13e. Extra-small phones (<=360px) — overrides 480px and 600px */
 @media (max-width: 360px) {
   :root {
     --portrait-lg: 56px;
@@ -1782,6 +1830,10 @@ body {
   .bond-result-ce-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 2px;
+  }
+
+  .ceoverlap-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 

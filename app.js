@@ -1652,6 +1652,176 @@ const CEFilterPicker = {
 };
 
 /* ============================================
+   CE SERVANT OVERLAP MODAL
+   ============================================ */
+
+const CEServantOverlap = {
+  _selectedCounts: new Set(),
+  _allEntries: [],
+  _clickedCEIds: new Set(),
+  _totalCEs: 0,
+
+  init() {
+    const modal = document.getElementById("ceOverlapModal");
+    const closeBtn = document.getElementById("ceOverlapClose");
+    if (closeBtn) {
+      closeBtn.addEventListener("click", () => this.close());
+    }
+    if (modal) {
+      modal.addEventListener("click", (e) => {
+        if (e.target === modal) this.close();
+      });
+    }
+    this._modal = modal;
+  },
+
+  open(entry) {
+    if (!this._modal) return;
+    const clickedCEIds = new Set(entry.matchingCEs.map(c => c.id));
+    const totalCEs = clickedCEIds.size;
+    if (totalCEs === 0) return;
+
+    this._clickedCEIds = clickedCEIds;
+    this._totalCEs = totalCEs;
+    this._selectedCounts = new Set();
+
+    const titleEl = document.getElementById("ceOverlapTitle");
+    if (titleEl) {
+      titleEl.textContent = "Servants sharing CEs with " + entry.servant.name;
+    }
+
+    const allMatches = CEFilterApp.computeAllCEMatches();
+    this._allEntries = [];
+    allMatches.forEach(other => {
+      if (other.servant.id === entry.servant.id) return;
+      const overlap = other.matchingCEs.filter(ce => clickedCEIds.has(ce.id)).length;
+      if (overlap > 0) {
+        this._allEntries.push({ entry: other, overlap: overlap });
+      }
+    });
+
+    this.buildCountFilter();
+    this._modal.classList.add("open");
+  },
+
+  close() {
+    if (this._modal) {
+      this._modal.classList.remove("open");
+    }
+  },
+
+  buildCountFilter() {
+    const container = document.getElementById("ceOverlapGroups");
+    if (!container) return;
+    container.replaceChildren();
+
+    if (this._allEntries.length === 0) {
+      const msg = DOMFactory.el("div", "ceoverlap-empty");
+      msg.textContent = "No other servants share these CEs.";
+      container.appendChild(msg);
+      return;
+    }
+
+    const availableCounts = new Set(this._allEntries.map(e => e.overlap));
+    const filterRow = DOMFactory.el("div", "ceoverlap-filter-row");
+
+    for (let n = this._totalCEs; n >= 1; n--) {
+      if (!availableCounts.has(n)) continue;
+      const btn = DOMFactory.el("div", "cefilter-match-count-btn" +
+        (this._selectedCounts.has(n) ? " active" : ""));
+      btn.textContent = n + " CE";
+      btn.addEventListener("click", () => {
+        if (this._selectedCounts.has(n)) {
+          this._selectedCounts.delete(n);
+          btn.classList.remove("active");
+        } else {
+          this._selectedCounts.add(n);
+          btn.classList.add("active");
+        }
+        this.renderGrid();
+      });
+      filterRow.appendChild(btn);
+    }
+
+    container.appendChild(filterRow);
+
+    const grid = DOMFactory.el("div", "ceoverlap-grid");
+    container.appendChild(grid);
+    this.renderGrid();
+  },
+
+  renderGrid() {
+    const container = document.getElementById("ceOverlapGroups");
+    if (!container) return;
+    const grid = container.querySelector(".ceoverlap-grid");
+    if (!grid) return;
+    grid.replaceChildren();
+
+    if (this._allEntries.length === 0) return;
+
+    const filtered = this._selectedCounts.size > 0
+      ? this._allEntries.filter(e => this._selectedCounts.has(e.overlap))
+      : this._allEntries;
+
+    if (filtered.length === 0) {
+      const msg = DOMFactory.el("div", "ceoverlap-empty");
+      msg.textContent = "No servants match selected filter.";
+      grid.appendChild(msg);
+      return;
+    }
+
+    filtered.forEach(({ entry }) => {
+      grid.appendChild(this.createServantMiniCard(entry, this._clickedCEIds));
+    });
+  },
+
+  createServantMiniCard(entry, overlapCEIds) {
+    const card = DOMFactory.el("div", "cefilter-servant-card");
+
+    const imgAsc = (!entry.baseMatchesAll && entry.matchedAscensions && entry.matchedAscensions.length > 0)
+      ? (entry.primaryAscension || entry.matchedAscensions[0])
+      : null;
+    const imgSrc = imgAsc
+      ? ServantData.getImageForAscension(entry.servant.id, imgAsc)
+      : entry.servant.image;
+
+    const img = DOMFactory.el("img", "servant-slot-portrait", { src: imgSrc, alt: entry.servant.name });
+    DOMFactory.addAscensionFallback(img, entry.servant.id);
+    card.appendChild(img);
+
+    if (entry.matchingCEs && entry.matchingCEs.length > 0) {
+      const badges = DOMFactory.el("div", "cefilter-match-badges");
+      entry.matchingCEs.forEach(ce => {
+        const badge = DOMFactory.el("img", "cefilter-match-badge" +
+          (overlapCEIds.has(ce.id) ? "" : " cefilter-match-badge--nonshared"),
+          { src: ce.image, alt: ce.name, title: ce.name }
+        );
+        DOMFactory.addSimpleFallback(badge, "cefilter-match-badge-fallback", ce.id);
+        badges.appendChild(badge);
+      });
+      card.appendChild(badges);
+    }
+
+    const displayName = imgAsc
+      ? ServantData.getAscensionName(entry.servant.id, imgAsc) || entry.servant.name
+      : entry.servant.name;
+    const nameEl = DOMFactory.el("div", "cefilter-servant-name");
+    nameEl.textContent = displayName;
+    card.appendChild(nameEl);
+
+    if (entry.matchedAscensions && entry.matchedAscensions.length > 0) {
+      entry.matchedAscensions.forEach(k => {
+        const ascEl = DOMFactory.el("div", "cefilter-ascension-label");
+        ascEl.textContent = ServantData.getAscensionLabel(entry.servant.id, k);
+        card.appendChild(ascEl);
+      });
+    }
+
+    return card;
+  }
+};
+
+/* ============================================
    CE FILTER APP
    ============================================ */
 const CEFILTER_STORAGE_KEY = "fgo_ce_filter_data";
@@ -1699,6 +1869,7 @@ const CEFilterApp = {
     }
 
     CEFilterPicker.init();
+    CEServantOverlap.init();
     this.buildClassFilter();
     this.buildRarityFilter();
 
@@ -2058,6 +2229,13 @@ const CEFilterApp = {
         alt: servant.name
       });
       DOMFactory.addAscensionFallback(img, servant.id);
+      if (matchingCEs.length > 0) {
+        img.style.cursor = "pointer";
+        img.addEventListener("click", () => {
+          CEServantOverlap.open({ servant, matchingCEs, allTraitNames,
+            matchedAscensions, baseMatchesAll, primaryAscension });
+        });
+      }
       card.appendChild(img);
 
       if (matchingCEs.length > 0) {
