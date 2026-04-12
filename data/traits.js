@@ -16,6 +16,7 @@ var TRAIT_DATA = {
   "0115": "Class Moon Cancer",
   "0117": "Class Foreigner",
   "0120": "Class Pretender",
+  "0124": "Class Beast",
   "0200": "Sky Attribute",
   "0201": "Earth Attribute",
   "0202": "Human Attribute",

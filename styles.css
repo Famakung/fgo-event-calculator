@@ -594,6 +594,46 @@ body {
   margin-bottom: 12px;
 }
 
+.cefilter-class-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.cefilter-class-row {
+  display: contents;
+}
+
+.cefilter-class-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 2px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: border-color 0.15s, background-color 0.15s;
+  background: var(--card);
+}
+
+.cefilter-class-btn:hover {
+  border-color: var(--accent);
+}
+
+.cefilter-class-btn.active {
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+
+.cefilter-class-btn img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
 .cefilter-results-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -1336,6 +1376,12 @@ body {
   .cefilter-results-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 8px;
+  }
+
+  .cefilter-class-btn {
+    width: auto;
+    height: auto;
+    padding: 2px;
   }
 
   .materials-grid,

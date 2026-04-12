@@ -1496,7 +1496,8 @@ const CEFilterApp = {
   state: {
     selectedCEs: [],
     mode: "all",
-    searchQuery: ""
+    searchQuery: "",
+    classFilters: []
   },
 
   init() {
@@ -1531,12 +1532,73 @@ const CEFilterApp = {
     }
 
     CEFilterPicker.init();
+    this.buildClassFilter();
     this.render();
   },
 
   render() {
     this.renderChips();
     this.renderResults();
+  },
+
+  buildClassFilter() {
+    const container = document.getElementById("cefilterClassFilter");
+    if (!container) return;
+
+    const standard = [
+      { id: "0100", icon: "saber", label: "Saber" },
+      { id: "0102", icon: "archer", label: "Archer" },
+      { id: "0101", icon: "lancer", label: "Lancer" },
+      { id: "0103", icon: "rider", label: "Rider" },
+      { id: "0104", icon: "caster", label: "Caster" },
+      { id: "0105", icon: "assassin", label: "Assassin" },
+      { id: "0106", icon: "berserker", label: "Berserker" }
+    ];
+
+    const extra = [
+      { id: "0107", icon: "shielder", label: "Shielder" },
+      { id: "0108", icon: "ruler", label: "Ruler" },
+      { id: "0110", icon: "avenger", label: "Avenger" },
+      { id: "0115", icon: "mooncancer", label: "Moon Cancer" },
+      { id: "0109", icon: "alterego", label: "Alter Ego" },
+      { id: "0117", icon: "foreigner", label: "Foreigner" },
+      { id: "0120", icon: "pretender", label: "Pretender" },
+      { id: "0124", icon: "beast", label: "Beast" }
+    ];
+
+    container.replaceChildren();
+
+    const selected = new Set(this.state.classFilters);
+
+    const buildRow = (classes) => {
+      const row = DOMFactory.el("div", "cefilter-class-row");
+      classes.forEach(cls => {
+        const btn = DOMFactory.el("div", "cefilter-class-btn" +
+          (selected.has(cls.id) ? " active" : ""));
+        const img = DOMFactory.el("img", "", {
+          src: `icons/classes/${cls.icon}.png`,
+          alt: cls.label,
+          title: cls.label
+        });
+        btn.appendChild(img);
+        btn.addEventListener("click", () => {
+          if (selected.has(cls.id)) {
+            selected.delete(cls.id);
+          } else {
+            selected.add(cls.id);
+          }
+          this.state.classFilters = [...selected];
+          this.saveState();
+          this.buildClassFilter();
+          this.renderResults();
+        });
+        row.appendChild(btn);
+      });
+      container.appendChild(row);
+    };
+
+    buildRow(standard);
+    buildRow(extra);
   },
 
   renderChips() {
@@ -1619,6 +1681,14 @@ const CEFilterApp = {
         s.servant.id.toLowerCase().includes(query) ||
         s.servant.name.toLowerCase().includes(query) ||
         ServantData.getAllNames(s.servant.id).some(n => n.toLowerCase().includes(query))
+      );
+    }
+
+    // Apply class filter
+    if (this.state.classFilters.length > 0) {
+      const classSet = new Set(this.state.classFilters);
+      filtered = filtered.filter(s =>
+        s.servant.traits.some(t => classSet.has(t))
       );
     }
 
@@ -1781,7 +1851,8 @@ const CEFilterApp = {
     try {
       localStorage.setItem(CEFILTER_STORAGE_KEY, JSON.stringify({
         selectedCEs: this.state.selectedCEs,
-        mode: this.state.mode
+        mode: this.state.mode,
+        classFilters: this.state.classFilters
       }));
     } catch (e) { /* ignore */ }
   },
@@ -1798,6 +1869,9 @@ const CEFilterApp = {
       }
       if (data.mode === "all" || data.mode === "any") {
         this.state.mode = data.mode;
+      }
+      if (Array.isArray(data.classFilters)) {
+        this.state.classFilters = data.classFilters;
       }
     } catch (e) { /* ignore */ }
   }
