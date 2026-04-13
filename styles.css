@@ -158,7 +158,7 @@ body {
   padding: 4px;
   margin-bottom: 24px;
   box-shadow: var(--shadow-sm);
-  border: 1px solid var(--border);
+  border: 2px solid var(--border);
 }
 
 .tab-btn {
@@ -218,7 +218,7 @@ html[data-tab="cefilter"] #panel-cefilter {
   flex: 1;
   min-width: 0;
   background: white;
-  border: 1.5px solid var(--border);
+  border: 2px solid var(--border);
   border-radius: 6px;
   padding: 6px 8px;
   font-family: "DM Sans", sans-serif;
@@ -237,7 +237,7 @@ html[data-tab="cefilter"] #panel-cefilter {
 .custom-quest-section {
   margin-top: 12px;
   padding-top: 12px;
-  border-top: 1px solid var(--border);
+  border-top: 2px solid var(--border);
 }
 
 /* Bond Results */
@@ -246,7 +246,7 @@ html[data-tab="cefilter"] #panel-cefilter {
   justify-content: space-between;
   align-items: center;
   padding: 12px 0;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 2px solid var(--border);
 }
 
 .bond-result-row:last-child {
@@ -284,6 +284,7 @@ html[data-tab="cefilter"] #panel-cefilter {
   align-items: center;
   padding: 12px 8px;
   background: var(--bg);
+  border: 2px solid var(--border);
   border-radius: var(--radius-sm);
   text-align: center;
 }
@@ -587,6 +588,7 @@ html[data-tab="cefilter"] #panel-cefilter {
   align-items: center;
   padding: 10px 8px;
   background: var(--bg);
+  border: 2px solid var(--border);
   border-radius: var(--radius-sm);
   position: relative;
   overflow: hidden;
@@ -701,7 +703,7 @@ html[data-tab="cefilter"] #panel-cefilter {
   gap: 6px;
   padding: 4px 10px;
   background: var(--accent-light);
-  border: 1px solid var(--accent);
+  border: 2px solid var(--accent);
   border-radius: 20px;
   font-size: 0.75rem;
   font-weight: 500;
@@ -773,7 +775,7 @@ html[data-tab="cefilter"] #panel-cefilter {
   justify-content: space-between;
   margin-top: 20px;
   padding-top: 16px;
-  border-top: 1px solid var(--border);
+  border-top: 2px solid var(--border);
   font-size: 0.85rem;
   font-weight: 600;
 }
@@ -867,6 +869,7 @@ html[data-tab="cefilter"] #panel-cefilter {
   align-items: center;
   padding: 10px 8px;
   background: var(--bg);
+  border: 2px solid var(--border);
   border-radius: var(--radius-sm);
   text-align: center;
   min-width: 0;
@@ -951,7 +954,7 @@ html[data-tab="cefilter"] #panel-cefilter {
 
 .cefilter-modal-footer {
   padding-top: 12px;
-  border-top: 1px solid var(--border);
+  border-top: 2px solid var(--border);
   margin-top: 8px;
 }
 
@@ -999,12 +1002,54 @@ html[data-tab="cefilter"] #panel-cefilter {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
+  justify-content: center;
   margin-bottom: 12px;
+}
+
+.ceoverlap-ce-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.ceoverlap-ce-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 0.15s, background-color 0.15s;
+  background: var(--card);
+}
+
+.ceoverlap-ce-btn.active {
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+
+.ceoverlap-ce-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 4px;
 }
 
 .ceoverlap-groups {
   overflow-y: auto;
   flex: 1;
+}
+
+.ceoverlap-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--card);
 }
 
 .ceoverlap-grid {
@@ -1028,6 +1073,118 @@ html[data-tab="cefilter"] #panel-cefilter {
   padding: 24px 0;
   color: var(--text-secondary);
   font-size: 0.85rem;
+}
+
+.ceoverlap-search {
+  width: 100%;
+  margin-bottom: 6px;
+}
+
+.ceoverlap-collapsible-content > .ceoverlap-class-filter,
+.ceoverlap-collapsible-content > .ceoverlap-rarity-filter,
+.ceoverlap-collapsible-content > .ceoverlap-filter-row {
+  margin-bottom: 6px;
+}
+
+.ceoverlap-collapsible {
+  margin-bottom: 2px;
+}
+
+.ceoverlap-collapsible-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: var(--bg);
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  margin-bottom: 6px;
+  user-select: none;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+
+.ceoverlap-collapsible-arrow {
+  font-size: 0.65rem;
+  transition: transform 0.2s;
+}
+
+.ceoverlap-collapsible.collapsed .ceoverlap-collapsible-arrow {
+  transform: rotate(-90deg);
+}
+
+.ceoverlap-collapsible.collapsed .ceoverlap-collapsible-content {
+  display: none;
+}
+
+.ceoverlap-collapsible-content {
+  padding-bottom: 0;
+}
+
+.ceoverlap-class-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+}
+
+.ceoverlap-class-row {
+  display: contents;
+}
+
+.ceoverlap-class-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 2px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: border-color 0.15s, background-color 0.15s;
+  background: var(--card);
+}
+
+.ceoverlap-class-btn.active {
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+
+.ceoverlap-class-btn img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.ceoverlap-rarity-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+}
+
+.ceoverlap-rarity-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 32px;
+  padding: 0 8px;
+  border: 2px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: border-color 0.15s, background-color 0.15s;
+  background: var(--card);
+}
+
+.ceoverlap-rarity-btn.active {
+  border-color: var(--accent);
+  background: var(--accent-light);
 }
 
 /* Servant Modal */
@@ -1060,13 +1217,13 @@ html[data-tab="cefilter"] #panel-cefilter {
 .servant-modal-header {
   display: flex;
   gap: 8px;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
 }
 
 .servant-search {
   flex: 1;
   padding: 10px 12px;
-  border: 1.5px solid var(--border);
+  border: 2px solid var(--border);
   border-radius: 8px;
   font-family: "DM Sans", sans-serif;
   font-size: 0.85rem;
@@ -1113,7 +1270,7 @@ html[data-tab="cefilter"] #panel-cefilter {
   flex-wrap: wrap;
   gap: 4px;
   justify-content: center;
-  margin-bottom: 12px;
+  margin-bottom: 6px;
 }
 
 .servant-class-row {
@@ -1149,7 +1306,7 @@ html[data-tab="cefilter"] #panel-cefilter {
   flex-wrap: wrap;
   gap: 4px;
   justify-content: center;
-  margin-bottom: 12px;
+  margin-bottom: 6px;
 }
 
 .servant-rarity-btn {
@@ -1248,7 +1405,7 @@ html[data-tab="cefilter"] #panel-cefilter {
   box-shadow: var(--shadow);
   padding: 28px;
   margin-bottom: 20px;
-  border: 1px solid var(--border);
+  border: 2px solid var(--border);
 }
 
 .card-title {
@@ -1375,7 +1532,7 @@ html[data-tab="cefilter"] #panel-cefilter {
   flex: 1;
   min-width: 0;
   background: white;
-  border: 1.5px solid var(--border);
+  border: 2px solid var(--border);
   border-radius: 6px;
   padding: 6px 8px;
   font-family: "Space Mono", monospace;
@@ -1661,12 +1818,12 @@ html[data-tab="cefilter"] #panel-cefilter {
 
   .servant-add-slot:hover {
     background: var(--accent-light);
-    border: 1px dashed var(--accent);
+    border: 2px dashed var(--accent);
   }
 
   .ce-add-slot:hover {
     background: var(--accent-light);
-    border: 1px dashed var(--accent);
+    border: 2px dashed var(--accent);
   }
 
   .cefilter-add-btn:hover {
@@ -1730,7 +1887,17 @@ html[data-tab="cefilter"] #panel-cefilter {
   }
 
   .ceoverlap-grid .cefilter-servant-card:hover {
-    background: var(--bg);
+    background: var(--card);
+  }
+
+  .ceoverlap-ce-btn:hover,
+  .ceoverlap-class-btn:hover,
+  .ceoverlap-rarity-btn:hover {
+    border-color: var(--accent);
+  }
+
+  .ceoverlap-collapsible-header:hover {
+    background: var(--border);
   }
 }
 
@@ -1751,7 +1918,10 @@ html[data-tab="cefilter"] #panel-cefilter {
 .servant-class-btn:active,
 .servant-rarity-btn:active,
 .cefilter-class-btn:active,
-.cefilter-rarity-btn:active {
+.cefilter-rarity-btn:active,
+.ceoverlap-ce-btn:active,
+.ceoverlap-class-btn:active,
+.ceoverlap-rarity-btn:active {
   border-color: var(--accent);
   background: var(--accent-light);
 }

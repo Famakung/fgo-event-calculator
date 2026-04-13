@@ -1,4 +1,4 @@
-const CACHE_NAME = "fgo-calc-v6";
+const CACHE_NAME = "fgo-calc-v7";
 
 // Compute base path from service worker location (works on GitHub Pages subdirs)
 const BASE = new URL(".", self.location.href).pathname;
@@ -20,7 +20,7 @@ const SECURITY_HEADERS = {
   "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
   "Cross-Origin-Opener-Policy": "same-origin",
   "X-Frame-Options": "SAMEORIGIN",
-  "Content-Security-Policy": "frame-ancestors 'self'"
+  "Content-Security-Policy": "default-src 'self'; img-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; font-src 'self'; frame-ancestors 'self'"
 };
 
 // Create new response with modified headers (preserves body stream)

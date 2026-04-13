@@ -33,7 +33,7 @@ A web-based calculator for Fate/Grand Order with three tools: **Event Shop Calcu
 - Searchable results by servant ID or name
 - Shows matching CE badges and trait tags per servant
 - Clickable CE badges to add to selection
-- Click servant portrait to see other servants sharing the same CEs (overlap modal with multi-select filter)
+- Click servant portrait to see other servants sharing the same CEs (overlap modal with CE image filter, search, class/rarity filters, and count filter)
 - "No Matching CE" section shows servants that don't match any trait-based CE
 
 ## Usage
@@ -73,9 +73,10 @@ Craft Essences apply bonuses based on servant traits with four modes:
 ```
 fgo-calculator/
 ├── index.html              # Main HTML with static grid elements, tab panels and modals
-├── styles.css              # CSS source (~1930 lines)
+├── favicon.svg             # SVG favicon
+├── styles.css              # CSS source (~2060 lines)
 ├── styles.min.css          # Minified CSS (served to browser)
-├── app.js                  # All logic in single IIFE (~3250 lines, source)
+├── app.js                  # All logic in single IIFE (~3200 lines, source)
 ├── app.min.js              # Minified JS (served to browser)
 ├── tab-init.js             # (Removed; logic inlined in index.html <head> to eliminate render-blocking request)
 ├── sw.js                   # Service Worker (cache-first for assets, stale-while-revalidate for code)
@@ -103,7 +104,7 @@ The application follows a clean 3-layer architecture within a single IIFE:
 |-------|---------|---------|
 | **Domain** | Schema, Validator, Calculator, TraitMatcher | Pure business logic, no DOM |
 | **Application** | StateManager, Persistence, App, BondApp, CEFilterApp | State management and coordination |
-| **Presentation** | DOMFactory, UIBuilder, ViewManager, EventHandler, TabNavigator, ServantSelector, CESelector, AscensionSelector, CESubSelector, ServantDrag, CEFilterPicker, CEServantOverlap | DOM manipulation, modals, events. UIBuilder hydrates static HTML grids |
+| **Presentation** | DOMFactory, CollapsibleFactory, UIBuilder, ViewManager, EventHandler, TabNavigator, ServantSelector, CESelector, AscensionSelector, CESubSelector, ServantDrag, CEFilterPicker, CEServantOverlap | DOM manipulation, modals, events. UIBuilder hydrates static HTML grids |
 
 ## Technical Details
 
