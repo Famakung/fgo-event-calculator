@@ -75,6 +75,9 @@ fgo-calculator/
 ├── index.html              # Main HTML with tab panels and modals
 ├── styles.css              # CSS with custom properties and grid layouts (~1900 lines)
 ├── app.js                  # All logic in single IIFE (~3300 lines)
+├── sw.js                   # Service Worker (cache-first for assets, network-first for code)
+├── register-sw.js          # SW registration (separate file for CSP compliance)
+├── manifest.json           # PWA manifest
 ├── fonts/                  # Self-hosted web fonts (DM Sans, Space Mono — woff2)
 ├── data/
 │   ├── traits.js           # Trait ID to display name mapping
@@ -110,3 +113,5 @@ The application follows a clean 3-layer architecture within a single IIFE:
 - Schema-based input validation with localStorage sanitization
 - Debounced input handlers (100ms)
 - Multi-ascension servant support with per-ascension traits and spiriton dress images
+- **PWA support** with Service Worker for offline caching and instant repeat visits
+- **Performance optimized**: DocumentFragment batching, lazy image loading, lazy tab initialization, computation caching, debounced filter renders, CSS layout containment

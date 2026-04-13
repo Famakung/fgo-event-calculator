@@ -348,6 +348,13 @@ const DOMFactory = {
     return container;
   },
 
+  createLazyImg(src, className, attrs = {}) {
+    const img = this.el("img", className, { src, ...attrs });
+    img.loading = "lazy";
+    img.decoding = "async";
+    return img;
+  },
+
   createInput(id, label, value, min, max) {
     const row = this.el("div", "input-row");
 
@@ -780,6 +787,8 @@ const TabNavigator = {
       e.target.classList.add("active");
       document.getElementById("panel-" + tab).classList.add("active");
 
+      if (tab === "cefilter") CEFilterApp.init();
+
       try {
         localStorage.setItem("fgo_active_tab", tab);
       } catch (e) { /* ignore */ }
@@ -992,13 +1001,13 @@ const ServantSelector = {
   renderGrid(servants) {
     const grid = document.getElementById("servantPickerGrid");
     if (!grid) return;
-    grid.replaceChildren();
+
+    const frag = document.createDocumentFragment();
 
     servants.forEach(servant => {
       const item = DOMFactory.el("div", "servant-picker-item");
 
-      const img = DOMFactory.el("img", null, {
-        src: servant.image,
+      const img = DOMFactory.createLazyImg(servant.image, null, {
         alt: servant.name
       });
       DOMFactory.addAscensionFallback(img, servant.id);
@@ -1021,8 +1030,10 @@ const ServantSelector = {
         }
       });
 
-      grid.appendChild(item);
+      frag.appendChild(item);
     });
+
+    grid.replaceChildren(frag);
   },
 
   filter(query) {
@@ -1205,8 +1216,7 @@ const AscensionSelector = {
       const item = DOMFactory.el("div", "servant-picker-item");
 
       const imgSrc = ServantData.getImageForAscension(this.servant.id, asc);
-      const img = DOMFactory.el("img", null, {
-        src: imgSrc,
+      const img = DOMFactory.createLazyImg(imgSrc, null, {
         alt: ServantData.getAscensionLabel(this.servant.id, asc)
       });
       DOMFactory.addSimpleFallback(img, "servant-slot-portrait-fallback", this.servant.id);
@@ -1369,12 +1379,13 @@ const CESelector = {
   renderGrid(ces) {
     const grid = document.getElementById("cePickerGrid");
     if (!grid) return;
-    grid.replaceChildren();
+
+    const frag = document.createDocumentFragment();
 
     ces.forEach(ce => {
       const item = DOMFactory.el("div", "servant-picker-item");
 
-      const img = DOMFactory.el("img", null, { src: ce.image, alt: ce.name });
+      const img = DOMFactory.createLazyImg(ce.image, null, { alt: ce.name });
       DOMFactory.addSimpleFallback(img, "servant-slot-portrait-fallback", ce.id);
 
       const name = DOMFactory.el("div", "servant-picker-name");
@@ -1395,8 +1406,10 @@ const CESelector = {
         this.close();
       });
 
-      grid.appendChild(item);
+      frag.appendChild(item);
     });
+
+    grid.replaceChildren(frag);
   },
 
   filter(query) {
@@ -1472,7 +1485,7 @@ const CESubSelector = {
     options.forEach(opt => {
       const item = DOMFactory.el("div", "servant-picker-item");
 
-      const img = DOMFactory.el("img", null, { src: opt.image, alt: opt.name });
+      const img = DOMFactory.createLazyImg(opt.image, null, { alt: opt.name });
       DOMFactory.addSimpleFallback(img, "servant-slot-portrait-fallback", opt.id);
 
       const label = DOMFactory.el("div", "servant-picker-name");
@@ -1549,7 +1562,6 @@ const CEFilterPicker = {
   renderGrid(ces) {
     const grid = document.getElementById("ceFilterPickerGrid");
     if (!grid) return;
-    grid.replaceChildren();
 
     // Build CE → entry index map (each entry = unique servant + ascension group)
     const allMatches = CEFilterApp.computeAllCEMatches();
@@ -1561,6 +1573,8 @@ const CEFilterPicker = {
       });
     });
 
+    const frag = document.createDocumentFragment();
+
     ces.forEach(ce => {
       const isSelected = this.tempSelected.has(ce.id);
       const item = DOMFactory.el("div", "servant-picker-item ce-filter-picker-item" +
@@ -1571,7 +1585,7 @@ const CEFilterPicker = {
       check.textContent = "\u2713";
       item.appendChild(check);
 
-      const img = DOMFactory.el("img", null, { src: ce.image, alt: ce.name });
+      const img = DOMFactory.createLazyImg(ce.image, null, { alt: ce.name });
       DOMFactory.addSimpleFallback(img, "servant-slot-portrait-fallback", ce.id);
       item.appendChild(img);
 
@@ -1590,9 +1604,10 @@ const CEFilterPicker = {
         this.updateNoMatchState();
       });
 
-      grid.appendChild(item);
+      frag.appendChild(item);
     });
 
+    grid.replaceChildren(frag);
     this.updateNoMatchState();
   },
 
@@ -1785,16 +1800,17 @@ const CEServantOverlap = {
       ? ServantData.getImageForAscension(entry.servant.id, imgAsc)
       : entry.servant.image;
 
-    const img = DOMFactory.el("img", "servant-slot-portrait", { src: imgSrc, alt: entry.servant.name });
+    const img = DOMFactory.createLazyImg(imgSrc, "servant-slot-portrait", { alt: entry.servant.name });
     DOMFactory.addAscensionFallback(img, entry.servant.id);
     card.appendChild(img);
 
     if (entry.matchingCEs && entry.matchingCEs.length > 0) {
       const badges = DOMFactory.el("div", "cefilter-match-badges");
       entry.matchingCEs.forEach(ce => {
-        const badge = DOMFactory.el("img", "cefilter-match-badge" +
+        const badge = DOMFactory.createLazyImg(ce.image,
+          "cefilter-match-badge" +
           (overlapCEIds.has(ce.id) ? "" : " cefilter-match-badge--nonshared"),
-          { src: ce.image, alt: ce.name, title: ce.name }
+          { alt: ce.name, title: ce.name }
         );
         DOMFactory.addSimpleFallback(badge, "cefilter-match-badge-fallback", ce.id);
         badges.appendChild(badge);
@@ -1837,8 +1853,15 @@ const CEFilterApp = {
     matchCustomCounts: []
   },
 
+  _allCEMatchesCache: null,
+  _initialized: false,
+  _debouncedRender: null,
+
   init() {
+    if (this._initialized) return;
+    this._initialized = true;
     this.loadState();
+    this._debouncedRender = EventHandler.debounce(() => this.renderResults(), 50);
 
     const addBtn = document.getElementById("cefilterAddBtn");
     const modeSelect = document.getElementById("cefilterMode");
@@ -1934,7 +1957,7 @@ const CEFilterApp = {
           }
           this.state.classFilters = [...selected];
           this.saveState();
-          this.renderResults();
+          this._debouncedRender();
         });
         row.appendChild(btn);
       });
@@ -1976,7 +1999,7 @@ const CEFilterApp = {
         }
         this.state.rarityFilters = [...selected];
         this.saveState();
-        this.renderResults();
+        this._debouncedRender();
       });
       container.appendChild(btn);
     });
@@ -2051,7 +2074,7 @@ const CEFilterApp = {
         this.saveState();
         this.buildCustomCountFilter();
         this.buildMatchCountFilter();
-        this.renderResults();
+        this._debouncedRender();
       });
       container.appendChild(btn);
     }
@@ -2086,7 +2109,7 @@ const CEFilterApp = {
         this.state.matchCounts = [...selected];
         this.saveState();
         this.buildMatchCountFilter();
-        this.renderResults();
+        this._debouncedRender();
       });
       container.appendChild(btn);
     }
@@ -2110,7 +2133,7 @@ const CEFilterApp = {
 
       const chip = DOMFactory.el("div", "cefilter-chip");
 
-      const img = DOMFactory.el("img", null, { src: ce.image, alt: ce.name });
+      const img = DOMFactory.createLazyImg(ce.image, null, { alt: ce.name });
       DOMFactory.addSimpleFallback(img, "cefilter-match-badge-fallback", ce.id);
       chip.appendChild(img);
 
@@ -2137,7 +2160,6 @@ const CEFilterApp = {
     const modeSelect = document.getElementById("cefilterMode");
     const modeRow = document.querySelector(".cefilter-mode-row");
     if (!grid) return;
-    grid.replaceChildren();
 
     const selectedCEObjs = this.state.selectedCEs
       .map(id => CEList.find(c => c.id === id))
@@ -2215,6 +2237,8 @@ const CEFilterApp = {
       countEl.textContent = `${filtered.length} servant${filtered.length !== 1 ? "s" : ""} found`;
     }
 
+    const frag = document.createDocumentFragment();
+
     filtered.forEach(({ servant, matchingCEs, allTraitNames, matchedAscensions, baseMatchesAll, primaryAscension }) => {
       const card = DOMFactory.el("div", "cefilter-servant-card");
 
@@ -2224,8 +2248,7 @@ const CEFilterApp = {
       const imgSrc = imgAsc
         ? ServantData.getImageForAscension(servant.id, imgAsc)
         : servant.image;
-      const img = DOMFactory.el("img", "servant-slot-portrait", {
-        src: imgSrc,
+      const img = DOMFactory.createLazyImg(imgSrc, "servant-slot-portrait", {
         alt: servant.name
       });
       DOMFactory.addAscensionFallback(img, servant.id);
@@ -2241,8 +2264,7 @@ const CEFilterApp = {
       if (matchingCEs.length > 0) {
         const badges = DOMFactory.el("div", "cefilter-match-badges");
         matchingCEs.forEach(ce => {
-          const badge = DOMFactory.el("img", "cefilter-match-badge", {
-            src: ce.image,
+          const badge = DOMFactory.createLazyImg(ce.image, "cefilter-match-badge", {
             alt: ce.name,
             title: ce.name
           });
@@ -2292,15 +2314,18 @@ const CEFilterApp = {
         card.appendChild(tags);
       }
 
-      grid.appendChild(card);
+      frag.appendChild(card);
     });
+
+    grid.replaceChildren(frag);
 
     // --- No Matching CE section ---
     const noMatchGrid = document.getElementById("cefilterNoMatch");
     const noMatchCountEl = document.getElementById("cefilterNoMatchCount");
     const noMatchHeader = document.getElementById("cefilterNoMatchHeader");
     if (!noMatchGrid) return;
-    noMatchGrid.replaceChildren();
+
+    const noMatchFrag = document.createDocumentFragment();
 
     const matchedIds = new Set(allMatches.map(r => r.servant.id));
     let noMatchServants = ServantData.servants.filter(s => !matchedIds.has(s.id));
@@ -2336,8 +2361,7 @@ const CEFilterApp = {
       noMatchServants.forEach(servant => {
         const card = DOMFactory.el("div", "cefilter-servant-card");
 
-        const img = DOMFactory.el("img", "servant-slot-portrait", {
-          src: servant.image,
+        const img = DOMFactory.createLazyImg(servant.image, "servant-slot-portrait", {
           alt: servant.name
         });
         DOMFactory.addAscensionFallback(img, servant.id);
@@ -2347,12 +2371,15 @@ const CEFilterApp = {
         nameEl.textContent = servant.name;
         card.appendChild(nameEl);
 
-        noMatchGrid.appendChild(card);
+        noMatchFrag.appendChild(card);
       });
     }
+
+    noMatchGrid.replaceChildren(noMatchFrag);
   },
 
   computeAllCEMatches() {
+    if (this._allCEMatchesCache) return this._allCEMatchesCache;
     const traitCEs = CEList.filter(ce => ce.traits.length > 0 || ce.traitGroups.length > 0);
     const relevantTraitIds = new Set();
     traitCEs.forEach(ce => {
@@ -2426,6 +2453,7 @@ const CEFilterApp = {
       }
     });
 
+    this._allCEMatchesCache = results;
     return results;
   },
 
@@ -2605,7 +2633,7 @@ const BondApp = {
       // Portrait
       const portraitArea = DOMFactory.el("div");
       if (ceImage) {
-        const img = DOMFactory.el("img", "ce-portrait", { src: ceImage, alt: ceName });
+        const img = DOMFactory.createLazyImg(ceImage, "ce-portrait", { alt: ceName });
         DOMFactory.addSimpleFallback(img, "ce-portrait-fallback", typeof ceEntry === "object" ? ceEntry.groupId : ceEntry);
         portraitArea.appendChild(img);
       } else {
@@ -2714,9 +2742,9 @@ const BondApp = {
   buildServantSlots() {
     const grid = document.getElementById("servantGrid");
     if (!grid) return;
-    grid.replaceChildren();
     this.elements = {};
 
+    const frag = document.createDocumentFragment();
     const count = this.state.slots.length;
 
     for (let i = 0; i < count; i++) {
@@ -2726,11 +2754,11 @@ const BondApp = {
       if (i === 0) {
         const label = DOMFactory.el("div", "bond-group-label bond-group-label--frontline");
         label.textContent = "Starting Member";
-        grid.appendChild(label);
+        frag.appendChild(label);
       } else if (i === BOND_CONSTANTS.FRONTLINE_SIZE) {
         const label = DOMFactory.el("div", "bond-group-label bond-group-label--backline");
         label.textContent = "Sub Member";
-        grid.appendChild(label);
+        frag.appendChild(label);
       }
 
       if (!slotData.servantId) continue; // skip pending slots
@@ -2776,8 +2804,7 @@ const BondApp = {
           servantHasAscensions = servant.hasAscensions;
           const ascension = ServantData.getDefaultAscension(slotData.servantId, slotData.ascension);
           const imgSrc = ServantData.getImageForAscension(servant.id, ascension);
-          const img = DOMFactory.el("img", "servant-slot-portrait", {
-            src: imgSrc,
+          const img = DOMFactory.createLazyImg(imgSrc, "servant-slot-portrait", {
             alt: servant.name,
             draggable: "false"
           });
@@ -2878,7 +2905,7 @@ const BondApp = {
       slot.appendChild(removeBtn);
 
       slot.appendChild(info);
-      grid.appendChild(slot);
+      frag.appendChild(slot);
     }
 
     // Add button (hidden when at max slots)
@@ -2901,8 +2928,10 @@ const BondApp = {
         ServantSelector.open(newIndex, true);
       });
       addSlot.style.cursor = "pointer";
-      grid.appendChild(addSlot);
+      frag.appendChild(addSlot);
     }
+
+    grid.replaceChildren(frag);
   },
 
   setServant(slotIndex, servantId, ascension) {
@@ -3114,7 +3143,6 @@ const BondApp = {
 
     // Show results
     const container = document.getElementById("bondResultContent");
-    container.replaceChildren();
 
     // Per-servant results grid
     const resultGrid = DOMFactory.el("div", "bond-result-servant-grid");
@@ -3123,8 +3151,7 @@ const BondApp = {
 
       // Portrait
       if (sr.image) {
-        const img = DOMFactory.el("img", "servant-slot-portrait", {
-          src: sr.image,
+        const img = DOMFactory.createLazyImg(sr.image, "servant-slot-portrait", {
           alt: sr.name
         });
         card.appendChild(img);
@@ -3146,8 +3173,7 @@ const BondApp = {
           if (ce.isMaxBond) {
             // Max bond: servant portrait with 00205 icon overlay
             const wrap = DOMFactory.el("div", "bond-result-ce-maxbond-wrap");
-            const servantImg = DOMFactory.el("img", "bond-result-ce-img", {
-              src: ce.image,
+            const servantImg = DOMFactory.createLazyImg(ce.image, "bond-result-ce-img", {
               alt: ce.name,
               title: `${ce.name} +${ce.bonus}%`
             });
@@ -3164,8 +3190,7 @@ const BondApp = {
           } else if (ce.isSupport) {
             // Frontline support: servant portrait with FP icon overlay
             const wrap = DOMFactory.el("div", "bond-result-ce-maxbond-wrap");
-            const servantImg = DOMFactory.el("img", "bond-result-ce-img", {
-              src: ce.image,
+            const servantImg = DOMFactory.createLazyImg(ce.image, "bond-result-ce-img", {
               alt: ce.name,
               title: `${ce.name} +${ce.bonus}%`
             });
@@ -3180,16 +3205,14 @@ const BondApp = {
             wrap.appendChild(icon);
             ceImgGrid.appendChild(wrap);
           } else if (ce.isFlatBonus) {
-            const ceImg = DOMFactory.el("img", "bond-result-ce-img", {
-              src: ce.image,
+            const ceImg = DOMFactory.createLazyImg(ce.image, "bond-result-ce-img", {
               alt: ce.name,
               title: `${ce.name} +${ce.flatBonus} pts`
             });
             DOMFactory.addSimpleFallback(ceImg, "bond-result-ce-fallback", `+${ce.flatBonus} pts`);
             ceImgGrid.appendChild(ceImg);
           } else {
-            const ceImg = DOMFactory.el("img", "bond-result-ce-img", {
-              src: ce.image,
+            const ceImg = DOMFactory.createLazyImg(ce.image, "bond-result-ce-img", {
               alt: ce.name,
               title: `${ce.name} +${ce.bonus}%`
             });
@@ -3214,7 +3237,7 @@ const BondApp = {
 
       resultGrid.appendChild(card);
     });
-    container.appendChild(resultGrid);
+    container.replaceChildren(resultGrid);
 
     const results = document.getElementById("bondResults");
     results.classList.add("visible");
@@ -3285,7 +3308,13 @@ document.addEventListener("DOMContentLoaded", () => {
   TabNavigator.init();
   App.init();
   BondApp.init();
-  CEFilterApp.init();
+
+  // Lazy-init CEFilterApp: only if saved tab is cefilter
+  let activeTab = "event";
+  try {
+    activeTab = localStorage.getItem("fgo_active_tab") || "event";
+  } catch (e) { /* ignore */ }
+  if (activeTab === "cefilter") CEFilterApp.init();
 });
 
 })();

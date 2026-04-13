@@ -833,6 +833,7 @@ body {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
+  contain: layout paint style;
 }
 
 .cefilter-servant-card {
