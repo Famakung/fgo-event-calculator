@@ -19,8 +19,8 @@ A web-based calculator for Fate/Grand Order with three tools: **Event Shop Calcu
 - Three servant types: Normal, Support (no calculation), Max Bond (+25% to all)
 - Multi-ascension support for servants with per-ascension trait differences
 - Craft Essence bonus system with trait-based matching
-- Frontline bonus (+20%) for first 3 slots
-- Frontline support bonus (+4%) when support is in frontline
+- Frontline bonus (×1.2 multiplier + flat 20% of base) for first 3 slots
+- Frontline support bonus (+4% as multiplier and flat per support) applies to all calculated servants
 - Quest presets (Free Quest Lv.83/84, Grand Duel Lv.100) or custom bond per run
 - Per-servant results with bond breakdown and run count
 
@@ -110,11 +110,11 @@ The application follows a clean 3-layer architecture within a single IIFE:
 - Vanilla JavaScript with no external dependencies
 - Self-hosted fonts (DM Sans, Space Mono) via `@font-face` with woff2
 - All images in WebP format
-- Content Security Policy (CSP) restricting all resources to `'self'`
+- Content Security Policy (CSP) restricting all resources to `'self'` with Trusted Types enforcement
 - All DOM elements created safely with `createElement()` (no innerHTML)
 - Data files use `var` globals via `<script defer>` tags in `<head>` for `file://` compatibility
 - Schema-based input validation with localStorage sanitization
 - Debounced input handlers (100ms)
 - Multi-ascension servant support with per-ascension traits and spiriton dress images
-- **PWA support** with Service Worker (cache-first for assets with Cache-Control override, stale-while-revalidate for code) for offline access and instant repeat visits
+- **PWA support** with Service Worker (cache-first for assets with Cache-Control override, stale-while-revalidate for code, security header injection for HSTS/COOP/XFO/frame-ancestors) for offline access and instant repeat visits
 - **Performance optimized**: Static HTML grids (zero CLS on load), CSS/JS minification, tab flash prevention via inline `<head>` script, DocumentFragment batching, lazy image loading, lazy tab initialization, computation caching, debounced filter renders, CSS layout containment, right-sized material icons (2x render dimensions), font preloading with `fetchpriority="high"` on LCP-critical font, CSS preload, inline critical CSS for LCP optimization, CLS prevention with `min-width` and `tabular-nums` on dynamic numeric elements

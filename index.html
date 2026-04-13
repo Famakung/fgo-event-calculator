@@ -9,7 +9,7 @@
     />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; img-src 'self'; style-src 'self' 'sha256-ZOR3TUG4uJHsLwpPjEKUB0hg3oQm69cJGAsIV6paoug='; script-src 'self' 'sha256-AUKqUZD5rXhIrUTs0OnKNc3OngYspsKVYAGE81T8KkA='; font-src 'self';"
+      content="default-src 'self'; img-src 'self'; style-src 'self' 'sha256-ZOR3TUG4uJHsLwpPjEKUB0hg3oQm69cJGAsIV6paoug='; script-src 'self' 'sha256-AUKqUZD5rXhIrUTs0OnKNc3OngYspsKVYAGE81T8KkA=' 'sha256-CEDT8fWAZFQfP7UOevHTxafYwDZMEcKYobb7uCOp9bM='; font-src 'self'; require-trusted-types-for 'script';"
     />
     <title>FGO Calculator</title>
     <style id="critical-css">*{margin:0;padding:0;box-sizing:border-box}@font-face{font-family:"DM Sans";font-style:normal;font-weight:400;font-display:swap;src:url("fonts/dm-sans-400.woff2") format("woff2")}@font-face{font-family:"DM Sans";font-style:normal;font-weight:700;font-display:swap;src:url("fonts/dm-sans-700.woff2") format("woff2")}:root{--bg:#f8f9fc;--card:#ffffff;--text:#1a1a2e;--text-secondary:#6b7280;--border:#e5e7eb;--shadow:0 4px 24px rgba(0,0,0,0.06);--radius:16px;--radius-sm:10px;--portrait-lg:72px}body{min-height:100vh;background:var(--bg);font-family:"DM Sans",sans-serif;color:var(--text);line-height:1.5;-webkit-text-size-adjust:100%}.container{max-width:720px;margin:0 auto;padding:40px 20px}.header{text-align:center;margin-bottom:40px}.title{font-size:2rem;font-weight:700;color:var(--text);margin-bottom:8px}.subtitle{font-size:1rem;color:var(--text-secondary)}</style>
@@ -59,6 +59,7 @@
       crossorigin
     />
     <link rel="manifest" href="manifest.json" />
+    <script>if(window.trustedTypes&&trustedTypes.createPolicy){trustedTypes.createPolicy('default',{createHTML:function(s){return s},createScriptURL:function(s){return s},createScript:function(s){return s}})}</script>
     <script defer src="data/traits.js"></script>
     <script defer src="data/servants.js"></script>
     <script defer src="data/craft_essences.js"></script>

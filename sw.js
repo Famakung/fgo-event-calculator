@@ -1,4 +1,4 @@
-const CACHE_NAME = "fgo-calc-v4";
+const CACHE_NAME = "fgo-calc-v5";
 
 // Compute base path from service worker location (works on GitHub Pages subdirs)
 const BASE = new URL(".", self.location.href).pathname;
@@ -14,13 +14,39 @@ const STATIC_ASSETS = [
   BASE + "manifest.json"
 ];
 
+// Security headers injected into every SW-served response
+const SECURITY_HEADERS = {
+  "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
+  "Cross-Origin-Opener-Policy": "same-origin",
+  "X-Frame-Options": "SAMEORIGIN",
+  "Content-Security-Policy": "frame-ancestors 'self'"
+};
+
+// Inject security headers into any response (used for error responses)
+function withSecurityHeaders(response) {
+  if (!response) return response;
+  const headers = new Headers(response.headers);
+  for (const [name, value] of Object.entries(SECURITY_HEADERS)) {
+    headers.set(name, value);
+  }
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: headers
+  });
+}
+
 // Override GitHub Pages' 10-minute Cache-Control with a longer TTL
+// and inject security headers (HSTS, COOP, XFO, frame-ancestors)
 function withCacheControl(response, maxAge, isImmutable) {
   if (!response || !response.ok) return response;
   const headers = new Headers(response.headers);
   let cc = "public, max-age=" + maxAge;
   if (isImmutable) cc += ", immutable";
   headers.set("Cache-Control", cc);
+  for (const [name, value] of Object.entries(SECURITY_HEADERS)) {
+    headers.set(name, value);
+  }
   return new Response(response.body, {
     status: response.status,
     statusText: response.statusText,
@@ -64,7 +90,7 @@ self.addEventListener("fetch", (e) => {
             );
             return withCacheControl(resp, 31536000, true);
           }
-          return resp;
+          return withSecurityHeaders(resp);
         });
       })
     );
@@ -86,7 +112,7 @@ self.addEventListener("fetch", (e) => {
         // Return cached version immediately if available, else wait for network
         if (cached) return withCacheControl(cached, 604800, false);
         return fetchPromise.then((resp) =>
-          resp && resp.ok ? withCacheControl(resp, 604800, false) : resp
+          resp && resp.ok ? withCacheControl(resp, 604800, false) : withSecurityHeaders(resp)
         );
       });
     })

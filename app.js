@@ -30,7 +30,6 @@ const BOND_CONSTANTS = {
   MAX_BOND_BONUS_PCT: 25,
   SUPPORT_BONUS_PCT: 4,
   FRONTLINE_BONUS_PCT: 20,
-  FRONTLINE_MULTIPLIER: 1.2,
   FRONTLINE_BONUS_FRACTION: 0.2
 };
 
@@ -2939,7 +2938,6 @@ const BondApp = {
         });
       }
     }
-    const supportBonus = frontlineSupports.length * BOND_CONSTANTS.SUPPORT_BONUS_PCT;
 
     // Check for normal servants with missing bond value
     for (let i = 0; i < count; i++) {
@@ -2974,8 +2972,8 @@ const BondApp = {
       // Frontline bonus: first 3 slots get +20% (applied separately)
       const isFrontline = i < BOND_CONSTANTS.FRONTLINE_SIZE;
 
-      // Sum percentage bonuses (CEs + max bond + support, NOT frontline)
-      let ceBonusPercent = maxBondBonus + supportBonus;
+      // Sum percentage bonuses (CEs + max bond, NOT frontline or support)
+      let ceBonusPercent = maxBondBonus;
       const appliedCEs = [];
       if (isFrontline) {
         appliedCEs.push({ id: "frontline", name: "Frontline", bonus: BOND_CONSTANTS.FRONTLINE_BONUS_PCT, image: "icons/bond_icon.webp" });
@@ -3041,9 +3039,17 @@ const BondApp = {
 
       // Step 1: bonus = base * bonus% rounded down (just the bonus part)
       let totalBonus = Math.floor(bondPerRun * ceBonusPercent / 100);
-      // Step 2: if frontline, multiply bonus by 1.2 and add base*0.2
+      // Step 2: apply frontline (+0.2) and support (+0.04 each) to multiplier and flat
+      const supportMult = frontlineSupports.length * BOND_CONSTANTS.SUPPORT_BONUS_PCT / 100;
+      const multiplier = 1 + (isFrontline ? BOND_CONSTANTS.FRONTLINE_BONUS_PCT / 100 : 0) + supportMult;
+      if (multiplier > 1) {
+        totalBonus = Math.floor(totalBonus * multiplier);
+      }
       if (isFrontline) {
-        totalBonus = Math.floor(totalBonus * BOND_CONSTANTS.FRONTLINE_MULTIPLIER) + Math.floor(bondPerRun * BOND_CONSTANTS.FRONTLINE_BONUS_FRACTION);
+        totalBonus += Math.floor(bondPerRun * BOND_CONSTANTS.FRONTLINE_BONUS_FRACTION);
+      }
+      if (frontlineSupports.length > 0) {
+        totalBonus += Math.floor(bondPerRun * frontlineSupports.length * BOND_CONSTANTS.SUPPORT_BONUS_PCT / 100);
       }
       // Step 3: add flat bonus
       totalBonus += flatBonus;
