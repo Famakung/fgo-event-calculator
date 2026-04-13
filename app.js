@@ -1393,10 +1393,16 @@ const CESubSelector = {
   },
 
   close() {
+    const idx = this.activeSlotIndex;
     const modal = document.getElementById("ceSubModal");
     if (modal) modal.classList.remove("open");
     this.groupCE = null;
     this.activeSlotIndex = null;
+    // Remove pending null slot if no option was selected
+    if (idx !== null && idx < BondApp.state.ces.length && BondApp.state.ces[idx] === null) {
+      BondApp.state.ces.splice(idx, 1);
+      BondApp.buildCESlots();
+    }
   },
 
   back() {

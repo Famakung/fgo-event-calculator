@@ -57,7 +57,7 @@
   --bg: #f8f9fc;
   --card: #ffffff;
   --text: #1a1a2e;
-  --text-secondary: #6b7280;
+  --text-secondary: #4b5563;
   --border: #e5e7eb;
 
   /* Tier Colors - Bronze */
@@ -76,7 +76,7 @@
   --gold-text: #854d0e;
 
   /* Accent */
-  --accent: #6366f1;
+  --accent: #4338ca;
   --accent-light: #eef2ff;
 
   /* Shadows */
@@ -1281,6 +1281,7 @@ html[data-tab="cefilter"] #panel-cefilter {
 
 .material-card[data-tier] {
   background: var(--tier-bg);
+  border: 2px solid var(--tier-color);
 }
 
 .material-icon-wrapper {
@@ -1444,7 +1445,7 @@ html[data-tab="cefilter"] #panel-cefilter {
 }
 
 .quest-drops-item[data-tier] .quest-drops-title {
-  color: var(--tier-color);
+  color: var(--tier-text);
 }
 
 .drop-line {
@@ -1547,6 +1548,7 @@ html[data-tab="cefilter"] #panel-cefilter {
 
 .deficit-item[data-tier] {
   background: var(--tier-bg);
+  border: 2px solid var(--tier-color);
 }
 
 .deficit-label {
@@ -1645,7 +1647,7 @@ html[data-tab="cefilter"] #panel-cefilter {
 @media (hover: hover) {
   .tab-btn:hover {
     color: var(--text);
-    background: var(--bg);
+    background: var(--border);
   }
 
   .servant-slot:hover {
@@ -1668,7 +1670,7 @@ html[data-tab="cefilter"] #panel-cefilter {
   }
 
   .cefilter-add-btn:hover {
-    background: #4f46e5;
+    background: #3730a3;
   }
 
   .cefilter-chip-remove:hover {
@@ -1718,9 +1720,9 @@ html[data-tab="cefilter"] #panel-cefilter {
   }
 
   .calculate-btn:hover {
-    background: #4f46e5;
+    background: #3730a3;
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 4px 12px rgba(67, 56, 202, 0.3);
   }
 
   .quest-item:hover {

@@ -1,4 +1,4 @@
-const CACHE_NAME = "fgo-calc-v5";
+const CACHE_NAME = "fgo-calc-v6";
 
 // Compute base path from service worker location (works on GitHub Pages subdirs)
 const BASE = new URL(".", self.location.href).pathname;
@@ -6,6 +6,7 @@ const BASE = new URL(".", self.location.href).pathname;
 const STATIC_ASSETS = [
   BASE,
   BASE + "index.html",
+  BASE + "favicon.svg",
   BASE + "styles.min.css",
   BASE + "app.min.js",
   BASE + "data/traits.js",
@@ -22,13 +23,11 @@ const SECURITY_HEADERS = {
   "Content-Security-Policy": "frame-ancestors 'self'"
 };
 
-// Inject security headers into any response (used for error responses)
-function withSecurityHeaders(response) {
+// Create new response with modified headers (preserves body stream)
+function rebuildResponse(response, headerFn) {
   if (!response) return response;
   const headers = new Headers(response.headers);
-  for (const [name, value] of Object.entries(SECURITY_HEADERS)) {
-    headers.set(name, value);
-  }
+  headerFn(headers);
   return new Response(response.body, {
     status: response.status,
     statusText: response.statusText,
@@ -36,21 +35,26 @@ function withSecurityHeaders(response) {
   });
 }
 
+// Inject security headers into any response (used for error responses)
+function withSecurityHeaders(response) {
+  return rebuildResponse(response, (headers) => {
+    for (const [name, value] of Object.entries(SECURITY_HEADERS)) {
+      headers.set(name, value);
+    }
+  });
+}
+
 // Override GitHub Pages' 10-minute Cache-Control with a longer TTL
 // and inject security headers (HSTS, COOP, XFO, frame-ancestors)
 function withCacheControl(response, maxAge, isImmutable) {
   if (!response || !response.ok) return response;
-  const headers = new Headers(response.headers);
-  let cc = "public, max-age=" + maxAge;
-  if (isImmutable) cc += ", immutable";
-  headers.set("Cache-Control", cc);
-  for (const [name, value] of Object.entries(SECURITY_HEADERS)) {
-    headers.set(name, value);
-  }
-  return new Response(response.body, {
-    status: response.status,
-    statusText: response.statusText,
-    headers: headers
+  return rebuildResponse(response, (headers) => {
+    let cc = "public, max-age=" + maxAge;
+    if (isImmutable) cc += ", immutable";
+    headers.set("Cache-Control", cc);
+    for (const [name, value] of Object.entries(SECURITY_HEADERS)) {
+      headers.set(name, value);
+    }
   });
 }
 
@@ -85,8 +89,9 @@ self.addEventListener("fetch", (e) => {
         if (cached) return withCacheControl(cached, 31536000, true);
         return fetch(e.request).then((resp) => {
           if (resp.ok) {
+            const respForCache = resp.clone();
             caches.open(CACHE_NAME).then((cache) =>
-              cache.put(e.request, withCacheControl(resp.clone(), 31536000, true))
+              cache.put(e.request, withCacheControl(respForCache, 31536000, true))
             );
             return withCacheControl(resp, 31536000, true);
           }
@@ -104,7 +109,8 @@ self.addEventListener("fetch", (e) => {
         // Background fetch to update cache for next load
         const fetchPromise = fetch(e.request).then((resp) => {
           if (resp.ok) {
-            cache.put(e.request, withCacheControl(resp.clone(), 604800, false));
+            const forCache = resp.clone();
+            cache.put(e.request, withCacheControl(forCache, 604800, false));
           }
           return resp;
         }).catch(() => null);
