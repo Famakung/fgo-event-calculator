@@ -1486,6 +1486,9 @@ html[data-tab="cefilter"] #panel-cefilter {
   font-size: 0.9rem;
   font-weight: 700;
   color: var(--text);
+  min-width: 4ch;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 
 /* ============================================
@@ -1556,6 +1559,7 @@ html[data-tab="cefilter"] #panel-cefilter {
   font-family: "Space Mono", monospace;
   font-size: 1.5rem;
   font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
 
 .deficit-item[data-tier] .deficit-value {
@@ -1614,6 +1618,7 @@ html[data-tab="cefilter"] #panel-cefilter {
   font-weight: 700;
   line-height: 1;
   color: var(--text);
+  font-variant-numeric: tabular-nums;
 }
 
 .quest-label {

@@ -77,7 +77,7 @@ fgo-calculator/
 ├── styles.min.css          # Minified CSS (served to browser)
 ├── app.js                  # All logic in single IIFE (~3200 lines, source)
 ├── app.min.js              # Minified JS (served to browser)
-├── tab-init.js             # Sync <head> script to prevent tab flash on refresh
+├── tab-init.js             # (Removed; logic inlined in index.html <head> to eliminate render-blocking request)
 ├── sw.js                   # Service Worker (cache-first for assets, stale-while-revalidate for code)
 ├── register-sw.js          # SW registration (separate file for CSP compliance)
 ├── manifest.json           # PWA manifest
@@ -117,4 +117,4 @@ The application follows a clean 3-layer architecture within a single IIFE:
 - Debounced input handlers (100ms)
 - Multi-ascension servant support with per-ascension traits and spiriton dress images
 - **PWA support** with Service Worker (stale-while-revalidate caching) for offline access and instant repeat visits
-- **Performance optimized**: Static HTML grids (zero CLS), CSS/JS minification, tab flash prevention via `tab-init.js`, DocumentFragment batching, lazy image loading, lazy tab initialization, computation caching, debounced filter renders, CSS layout containment, right-sized material icons (2x render dimensions), font preloading, CSS preload
+- **Performance optimized**: Static HTML grids (zero CLS on load), CSS/JS minification, tab flash prevention via inline `<head>` script, DocumentFragment batching, lazy image loading, lazy tab initialization, computation caching, debounced filter renders, CSS layout containment, right-sized material icons (2x render dimensions), font preloading with `fetchpriority="high"` on LCP-critical font, CSS preload, inline critical CSS for LCP optimization, CLS prevention with `min-width` and `tabular-nums` on dynamic numeric elements
