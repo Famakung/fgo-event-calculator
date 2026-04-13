@@ -73,8 +73,9 @@ Craft Essences apply bonuses based on servant traits with four modes:
 ```
 fgo-calculator/
 ├── index.html              # Main HTML with tab panels and modals
-├── styles.css              # CSS with custom properties and grid layouts
-├── app.js                  # All logic in single IIFE (~2800 lines)
+├── styles.css              # CSS with custom properties and grid layouts (~1900 lines)
+├── app.js                  # All logic in single IIFE (~3300 lines)
+├── fonts/                  # Self-hosted web fonts (DM Sans, Space Mono — woff2)
 ├── data/
 │   ├── traits.js           # Trait ID to display name mapping
 │   ├── servants.js         # Servant data with trait arrays
@@ -100,11 +101,12 @@ The application follows a clean 3-layer architecture within a single IIFE:
 
 ## Technical Details
 
-- Vanilla JavaScript with no external dependencies (except Google Fonts)
+- Vanilla JavaScript with no external dependencies
+- Self-hosted fonts (DM Sans, Space Mono) via `@font-face` with woff2
 - All images in WebP format
-- Content Security Policy (CSP) for XSS protection
+- Content Security Policy (CSP) restricting all resources to `'self'`
 - All DOM elements created safely with `createElement()` (no innerHTML)
-- Data files use `var` globals via `<script>` tags for `file://` compatibility
+- Data files use `var` globals via `<script defer>` tags in `<head>` for `file://` compatibility
 - Schema-based input validation with localStorage sanitization
 - Debounced input handlers (100ms)
 - Multi-ascension servant support with per-ascension traits and spiriton dress images
