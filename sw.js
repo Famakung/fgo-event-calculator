@@ -1,4 +1,4 @@
-const CACHE_NAME = "fgo-calc-v2";
+const CACHE_NAME = "fgo-calc-v3";
 
 // Compute base path from service worker location (works on GitHub Pages subdirs)
 const BASE = new URL(".", self.location.href).pathname;
@@ -8,7 +8,6 @@ const STATIC_ASSETS = [
   BASE + "index.html",
   BASE + "styles.min.css",
   BASE + "app.min.js",
-  BASE + "tab-init.js",
   BASE + "data/traits.js",
   BASE + "data/servants.js",
   BASE + "data/craft_essences.js",
