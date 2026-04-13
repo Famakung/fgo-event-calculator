@@ -114,4 +114,4 @@ The application follows a clean 3-layer architecture within a single IIFE:
 - Debounced input handlers (100ms)
 - Multi-ascension servant support with per-ascension traits and spiriton dress images
 - **PWA support** with Service Worker for offline caching and instant repeat visits
-- **Performance optimized**: DocumentFragment batching, lazy image loading, lazy tab initialization, computation caching, debounced filter renders, CSS layout containment, font preloading for all 6 web fonts
+- **Performance optimized**: DocumentFragment batching, lazy image loading, lazy tab initialization, computation caching, debounced filter renders, CSS layout containment, right-sized material icons (2x render dimensions), font preloading for all 6 web fonts, CSS preload for `styles.css`
