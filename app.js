@@ -2684,7 +2684,8 @@ const CEFilterApp = {
         classFilters: this.state.classFilters,
         rarityFilters: this.state.rarityFilters,
         matchCounts: this.state.matchCounts,
-        matchCustomCounts: this.state.matchCustomCounts
+        matchCustomCounts: this.state.matchCustomCounts,
+        currentPage: this.state.currentPage
       }));
     } catch (e) { /* ignore */ }
   },
@@ -2715,6 +2716,9 @@ const CEFilterApp = {
         this.state.matchCustomCounts = data.matchCustomCounts;
       } else if (Array.isArray(data.matchSomeCounts)) {
         this.state.matchCustomCounts = data.matchSomeCounts;
+      }
+      if (typeof data.currentPage === "number" && data.currentPage >= 1) {
+        this.state.currentPage = data.currentPage;
       }
     } catch (e) { /* ignore */ }
   }

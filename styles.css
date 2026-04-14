@@ -949,6 +949,7 @@ html[data-tab="event"] #panel-event {
   justify-content: flex-end;
   gap: 12px;
   padding: 8px 0;
+  min-height: 52px;
 }
 
 .cefilter-page-btn {

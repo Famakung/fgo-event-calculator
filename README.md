@@ -35,6 +35,7 @@ A web-based calculator for Fate/Grand Order with three tools: **Event Shop Calcu
 - Clickable CE badges to add to selection
 - Click servant portrait to see other servants sharing the same CEs (overlap modal with CE image filter, search, class/rarity filters, and count filter)
 - "No Matching CE" section shows servants that don't match any trait-based CE
+- Paginated results (30 servants per page) with prev/next navigation, page state persists on refresh
 
 ## Usage
 
