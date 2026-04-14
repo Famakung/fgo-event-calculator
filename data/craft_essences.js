@@ -1,4 +1,4 @@
-var CE_DATA = {
+export const CE_DATA = {
   "0099": {
     "name": "Heroic Portrait",
     "isGroup": true,

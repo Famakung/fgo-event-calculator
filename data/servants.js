@@ -1,4 +1,4 @@
-var SERVANT_DATA = {
+export const SERVANT_DATA = {
   "001": { "name": "Mash Kyrielight", "traits": {"base": ["0002", "0107", "0201", "0300", "0303", "0403", "0404", "0405", "2654", "2780"]}},
   "002": { "name": "Altria Pendragon", "traits": {"base": ["0002", "0100", "0201", "0300", "0303", "0405", "2780"]}},
   "003": { "name": "Altria Pendragon (Alter)", "traits": {"base": ["0002", "0100", "0202", "0300", "0304", "0404", "2780"]}},

@@ -1,4 +1,4 @@
-var TRAIT_DATA = {
+export const TRAIT_DATA = {
   "0001": "Gender Male",
   "0002": "Gender Female",
   "0003": "Gender Unknown",

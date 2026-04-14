@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "scripts": {
+    "build": "esbuild src/main.js --bundle --outfile=app.min.js --minify",
+    "dev": "esbuild src/main.js --bundle --outfile=app.bundle.js --sourcemap --watch"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0"
+  }
+}
