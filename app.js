@@ -354,6 +354,12 @@ const DOMFactory = {
     return img;
   },
 
+  appendCheckMark(parent) {
+    const check = this.el("div", "ce-filter-check");
+    check.textContent = "\u2713";
+    parent.appendChild(check);
+  },
+
   createInput(id, label, value, min, max) {
     const row = this.el("div", "input-row");
 
@@ -793,14 +799,15 @@ const CEList = (() => {
       alsoMatch: Array.isArray(data.alsoMatch) ? data.alsoMatch : [],
       isGroup,
       flatBonus: isGroup ? (data.flatBonus || 0) : 0,
-      image: `craft_essences/${id}.webp`
+      image: `craft_essences/128/${id}.webp`,
+      thumbImage: `craft_essences/64/${id}.webp`
     };
     if (isGroup && data.options) {
-      const folder = data.folder || id;
       base.options = Object.entries(data.options).map(([optId, opt]) => ({
         id: optId,
         name: opt.name || `CE ${optId}`,
-        image: `craft_essences/${folder}/${optId}.webp`
+        image: `craft_essences/128/${optId}.webp`,
+        thumbImage: `craft_essences/64/${optId}.webp`
       }));
       // Use the specified groupImage option, fallback to option matching group ID, then first
       const groupOpt = data.groupImage
@@ -808,6 +815,7 @@ const CEList = (() => {
         : (base.options.find(o => o.id === id) || base.options[0]);
       if (groupOpt) {
         base.image = groupOpt.image;
+        base.thumbImage = groupOpt.thumbImage;
       }
     }
     return base;
@@ -1544,9 +1552,7 @@ const CEFilterPicker = {
         (isSelected ? " selected" : ""));
       item.dataset.ceId = ce.id;
 
-      const check = DOMFactory.el("div", "ce-filter-check");
-      check.textContent = "\u2713";
-      item.appendChild(check);
+      DOMFactory.appendCheckMark(item);
 
       const img = DOMFactory.createLazyImg(ce.image, null, { alt: ce.name });
       DOMFactory.addSimpleFallback(img, "servant-slot-portrait-fallback", ce.id);
@@ -1753,18 +1759,19 @@ const CEServantOverlap = {
     const selected = this._selectedCEFilter;
 
     this._clickedCEs.forEach(ce => {
-      const btn = DOMFactory.el("div", "ceoverlap-ce-btn" +
-        (selected.has(ce.id) ? " active" : ""));
+      const btn = DOMFactory.el("div", "servant-picker-item ce-filter-picker-item" +
+        (selected.has(ce.id) ? " selected" : ""));
+      DOMFactory.appendCheckMark(btn);
       const img = DOMFactory.createLazyImg(ce.image, "", { alt: ce.name, title: ce.name });
       DOMFactory.addSimpleFallback(img, "cefilter-match-badge-fallback", ce.id);
       btn.appendChild(img);
       btn.addEventListener("click", () => {
         if (selected.has(ce.id)) {
           selected.delete(ce.id);
-          btn.classList.remove("active");
+          btn.classList.remove("selected");
         } else {
           selected.add(ce.id);
-          btn.classList.add("active");
+          btn.classList.add("selected");
         }
         this._debouncedUpdateFilters();
       });
@@ -2044,7 +2051,7 @@ const CEServantOverlap = {
     if (entry.matchingCEs && entry.matchingCEs.length > 0) {
       const badges = DOMFactory.el("div", "cefilter-match-badges");
       entry.matchingCEs.forEach(ce => {
-        const badge = DOMFactory.createLazyImg(ce.image,
+        const badge = DOMFactory.createLazyImg(ce.thumbImage,
           "cefilter-match-badge" +
           (overlapCEIds.has(ce.id) ? "" : " cefilter-match-badge--nonshared"),
           { alt: ce.name, title: ce.name }
@@ -2365,7 +2372,7 @@ const CEFilterApp = {
 
       const chip = DOMFactory.el("div", "cefilter-chip");
 
-      const img = DOMFactory.createLazyImg(ce.image, null, { alt: ce.name });
+      const img = DOMFactory.createLazyImg(ce.thumbImage, null, { alt: ce.name });
       DOMFactory.addSimpleFallback(img, "cefilter-match-badge-fallback", ce.id);
       chip.appendChild(img);
 
@@ -2515,7 +2522,7 @@ const CEFilterApp = {
       if (matchingCEs.length > 0) {
         const badges = DOMFactory.el("div", "cefilter-match-badges");
         matchingCEs.forEach(ce => {
-          const badge = DOMFactory.createLazyImg(ce.image, "cefilter-match-badge", {
+          const badge = DOMFactory.createLazyImg(ce.thumbImage, "cefilter-match-badge", {
             alt: ce.name,
             title: ce.name
           });
@@ -3307,6 +3314,7 @@ const BondApp = {
                 name: option.name,
                 flatBonus: ce.flatBonus,
                 image: option.image,
+                thumbImage: option.thumbImage,
                 isFlatBonus: true
               });
             } else if (ce.bonus > 0) {
@@ -3315,7 +3323,8 @@ const BondApp = {
                 id: option.id,
                 name: option.name,
                 bonus: ce.bonus,
-                image: option.image
+                image: option.image,
+                thumbImage: option.thumbImage
               });
             }
           }
@@ -3436,14 +3445,14 @@ const BondApp = {
             wrap.appendChild(icon);
             ceImgGrid.appendChild(wrap);
           } else if (ce.isFlatBonus) {
-            const ceImg = DOMFactory.createLazyImg(ce.image, "bond-result-ce-img", {
+            const ceImg = DOMFactory.createLazyImg(ce.thumbImage, "bond-result-ce-img", {
               alt: ce.name,
               title: `${ce.name} +${ce.flatBonus} pts`
             });
             DOMFactory.addSimpleFallback(ceImg, "bond-result-ce-fallback", `+${ce.flatBonus} pts`);
             ceImgGrid.appendChild(ceImg);
           } else {
-            const ceImg = DOMFactory.createLazyImg(ce.image, "bond-result-ce-img", {
+            const ceImg = DOMFactory.createLazyImg(ce.thumbImage, "bond-result-ce-img", {
               alt: ce.name,
               title: `${ce.name} +${ce.bonus}%`
             });

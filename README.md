@@ -89,7 +89,7 @@ fgo-calculator/
 │   ├── servants.js         # Servant data with trait arrays
 │   └── craft_essences.js   # CE data with traits/matchAll/traitGroups/alsoMatch
 ├── servants/               # Servant portraits ({ID}.webp, with ascension subdirs)
-├── craft_essences/         # CE images ({ID}.webp)
+├── craft_essences/         # CE images: 128/{ID}.webp (full) + 64/{ID}.webp (thumb)
 └── icons/                  # UI icons
     ├── bond_icon.webp
     ├── fp_icon.webp

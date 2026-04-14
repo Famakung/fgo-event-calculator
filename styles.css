@@ -93,7 +93,7 @@
   --error: #dc2626;
 
   /* Responsive Sizing */
-  --portrait-lg: 72px;
+  --portrait-lg: 64px;
 }
 
 /* Tier-based theming */
@@ -346,13 +346,6 @@ html[data-tab="event"] #panel-event {
   align-items: center;
 }
 
-.bond-result-maxbond-img {
-  width: 28px;
-  height: 28px;
-  border-radius: 4px;
-  object-fit: cover;
-}
-
 .bond-result-ce-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -361,16 +354,16 @@ html[data-tab="event"] #panel-event {
 }
 
 .bond-result-ce-img {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   border-radius: 6px;
   object-fit: cover;
 }
 
 .bond-result-ce-maxbond-wrap {
   position: relative;
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
 }
 
 .bond-result-ce-maxbond-icon {
@@ -384,8 +377,8 @@ html[data-tab="event"] #panel-event {
 }
 
 .bond-result-ce-fallback {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   border-radius: 6px;
   background: var(--accent-light);
   display: flex;
@@ -715,8 +708,8 @@ html[data-tab="event"] #panel-event {
 }
 
 .cefilter-chip img {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   border-radius: 4px;
   object-fit: cover;
 }
@@ -889,8 +882,8 @@ html[data-tab="event"] #panel-event {
 }
 
 .cefilter-match-badge {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   border-radius: 6px;
   object-fit: cover;
   cursor: pointer;
@@ -898,8 +891,8 @@ html[data-tab="event"] #panel-event {
 }
 
 .cefilter-match-badge-fallback {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   border-radius: 6px;
   background: var(--accent-light);
   display: flex;
@@ -1008,7 +1001,7 @@ html[data-tab="event"] #panel-event {
 }
 
 .ce-filter-picker-item.selected {
-  background: var(--accent-light);
+  background: #dbeafe;
   border-radius: 8px;
 }
 
@@ -1028,35 +1021,22 @@ html[data-tab="event"] #panel-event {
 .ceoverlap-ce-filter {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 8px;
   justify-content: center;
   margin-bottom: 12px;
 }
 
-.ceoverlap-ce-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  border: 2px solid var(--border);
-  border-radius: 6px;
-  cursor: pointer;
-  overflow: hidden;
-  transition: border-color 0.15s, background-color 0.15s;
-  background: var(--card);
+.ceoverlap-ce-filter .servant-picker-item {
+  position: relative;
+  padding: 8px 8px;
 }
 
-.ceoverlap-ce-btn.active {
-  border-color: var(--accent);
-  background: var(--accent-light);
+.ceoverlap-ce-filter .servant-picker-item img {
+  margin-bottom: 0;
 }
 
-.ceoverlap-ce-btn img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 4px;
+.ceoverlap-ce-filter .servant-picker-item.selected {
+  background: #dbeafe;
 }
 
 .ceoverlap-scroll {
@@ -1073,6 +1053,7 @@ html[data-tab="event"] #panel-event {
 .cefilter-match-badge--nonshared {
   filter: grayscale(100%);
   opacity: 0.5;
+  cursor: default;
 }
 
 .ceoverlap-grid .cefilter-match-badge {
@@ -1858,10 +1839,19 @@ html[data-tab="event"] #panel-event {
     opacity: 0.8;
   }
 
+  .cefilter-match-badge--nonshared:hover {
+    transform: none;
+    opacity: 0.5;
+  }
+
   .ceoverlap-grid .cefilter-match-badge:hover {
     transform: none;
     opacity: 1;
     cursor: default;
+  }
+
+  .ceoverlap-grid .cefilter-match-badge--nonshared:hover {
+    opacity: 0.5;
   }
 
   .ascension-modal-back:hover {
@@ -1878,7 +1868,7 @@ html[data-tab="event"] #panel-event {
   }
 
   .servant-picker-item:hover {
-    background: var(--bg);
+    background: var(--border);
   }
 
   .material-card:hover {
@@ -1896,11 +1886,6 @@ html[data-tab="event"] #panel-event {
     transform: scale(1.02);
   }
 
-  .ceoverlap-grid .cefilter-servant-card:hover {
-    background: var(--card);
-  }
-
-  .ceoverlap-ce-btn:hover,
   .ceoverlap-class-btn:hover,
   .ceoverlap-rarity-btn:hover {
     border-color: var(--accent);
@@ -1929,7 +1914,6 @@ html[data-tab="event"] #panel-event {
 .servant-rarity-btn:active,
 .cefilter-class-btn:active,
 .cefilter-rarity-btn:active,
-.ceoverlap-ce-btn:active,
 .ceoverlap-class-btn:active,
 .ceoverlap-rarity-btn:active {
   border-color: var(--accent);
@@ -1950,8 +1934,9 @@ html[data-tab="event"] #panel-event {
   background: var(--border);
 }
 
-.ceoverlap-grid .cefilter-servant-card:active {
-  background: var(--border);
+.ceoverlap-grid .cefilter-servant-card {
+  cursor: default;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* 13c. Standard mobile (<=600px) — widest mobile, applied first */
@@ -2038,9 +2023,6 @@ html[data-tab="event"] #panel-event {
 
 /* 13d. Small phones (<=480px) — overrides 600px */
 @media (max-width: 480px) {
-  :root {
-    --portrait-lg: 64px;
-  }
 
   .tab-bar {
     overflow-x: auto;
@@ -2067,9 +2049,6 @@ html[data-tab="event"] #panel-event {
   }
 }
 @media (max-width: 360px) {
-  :root {
-    --portrait-lg: 56px;
-  }
 
   .container {
     padding: 12px 8px;
