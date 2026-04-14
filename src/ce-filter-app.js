@@ -322,9 +322,6 @@ export const CEFilterApp = {
     container.replaceChildren();
 
     if (this.state.selectedCEs.length === 0) {
-      const placeholder = DOMFactory.el("div", "servant-slot-placeholder");
-      placeholder.textContent = "No craft essences selected \u2014 showing all servants. Add Craft Essence to filter.";
-      container.appendChild(placeholder);
       return;
     }
 
