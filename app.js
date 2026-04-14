@@ -814,6 +814,8 @@ const CEList = (() => {
   }).sort((a, b) => a.id.localeCompare(b.id));
 })();
 
+const CEById = new Map(CEList.map(ce => [ce.id, ce]));
+
 /* ============================================
    SERVANT DATA
    ============================================ */
@@ -1519,6 +1521,7 @@ const CEFilterPicker = {
   close() {
     CEFilterApp.state.selectedCEs = [...this.tempSelected];
     CEFilterApp.saveState();
+    CEFilterApp.state.currentPage = 1;
     CEFilterApp.render();
     const modal = document.getElementById("ceFilterModal");
     if (modal) modal.classList.remove("open");
@@ -1529,15 +1532,9 @@ const CEFilterPicker = {
     const grid = document.getElementById("ceFilterPickerGrid");
     if (!grid) return;
 
-    // Build CE → entry index map (each entry = unique servant + ascension group)
-    const allMatches = CEFilterApp.computeAllCEMatches();
-    this._ceMatchEntries = {};
-    allMatches.forEach((entry, idx) => {
-      entry.matchingCEs.forEach(ce => {
-        if (!this._ceMatchEntries[ce.id]) this._ceMatchEntries[ce.id] = new Set();
-        this._ceMatchEntries[ce.id].add(idx);
-      });
-    });
+    // Use cached CE→entry index from computeAllCEMatches()
+    CEFilterApp.computeAllCEMatches();
+    this._ceMatchEntries = CEFilterApp._ceMatchEntriesIndex;
 
     const frag = document.createDocumentFragment();
 
@@ -1741,8 +1738,13 @@ const CEServantOverlap = {
     this._buildClassFilter(content, availableClassIds);
     this._buildRarityFilter(content, availableRarityIds);
 
-    this._buildCountFilter(content);
+    this._buildCountFilter(content, this._getFilteredEntries());
     container.appendChild(CollapsibleFactory.build("Filters", content));
+
+    // Cache button refs for fast visibility updates
+    this._overlapClassBtns = Array.from(container.querySelectorAll(".ceoverlap-class-btn"));
+    this._overlapRarityBtns = Array.from(container.querySelectorAll(".ceoverlap-rarity-btn"));
+
     this.renderGrid();
   },
 
@@ -1810,38 +1812,28 @@ const CEServantOverlap = {
   },
 
   updateFilters() {
-    this._updateClassRarityVisibility();
-    this._rebuildCountFilter();
-    this.renderGrid();
+    const preFiltered = this._getFilteredEntries();
+    this._updateClassRarityVisibility(preFiltered);
+    this._rebuildCountFilter(preFiltered);
+    this.renderGrid(preFiltered);
   },
 
-  _updateClassRarityVisibility() {
-    let ceFiltered = this._allEntries;
-    if (this._selectedCEFilter.size > 0) {
-      ceFiltered = ceFiltered.filter(({ entry }) =>
-        [...this._selectedCEFilter].every(id =>
-          entry.matchingCEs.some(ce => ce.id === id)
-        )
-      );
-    }
-
+  _updateClassRarityVisibility(preFiltered) {
     const availableClassIds = new Set();
     const availableRarityIds = new Set();
-    ceFiltered.forEach(({ entry }) => {
+    preFiltered.forEach(({ entry }) => {
       entry.servant.traits.forEach(t => {
         if (t.startsWith("01")) availableClassIds.add(t);
         if (t.startsWith("04")) availableRarityIds.add(t);
       });
     });
 
-    const container = document.getElementById("ceOverlapFilterArea");
-    if (!container) return;
-    container.querySelectorAll(".ceoverlap-class-btn").forEach(btn => {
+    (this._overlapClassBtns || []).forEach(btn => {
       const avail = availableClassIds.has(btn.dataset.traitId);
       btn.style.display = avail ? "" : "none";
       if (!avail) btn.classList.remove("active");
     });
-    container.querySelectorAll(".ceoverlap-rarity-btn").forEach(btn => {
+    (this._overlapRarityBtns || []).forEach(btn => {
       const avail = availableRarityIds.has(btn.dataset.traitId);
       btn.style.display = avail ? "" : "none";
       if (!avail) btn.classList.remove("active");
@@ -1851,8 +1843,7 @@ const CEServantOverlap = {
     this._rarityFilters = this._rarityFilters.filter(id => availableRarityIds.has(id));
   },
 
-  _buildCountFilter(container) {
-    const preFiltered = this._getFilteredEntries();
+  _buildCountFilter(container, preFiltered) {
     const availableCounts = new Set(preFiltered.map(e => e.entry.matchingCEs.length));
     if (availableCounts.size === 0) return;
 
@@ -1883,7 +1874,7 @@ const CEServantOverlap = {
     container.appendChild(filterRow);
   },
 
-  _rebuildCountFilter() {
+  _rebuildCountFilter(preFiltered) {
     const container = document.getElementById("ceOverlapFilterArea");
     if (!container) return;
 
@@ -1891,7 +1882,7 @@ const CEServantOverlap = {
     const oldRow = (content || container).querySelector(".ceoverlap-filter-row");
     if (oldRow) oldRow.remove();
 
-    this._buildCountFilter(content || container);
+    this._buildCountFilter(content || container, preFiltered);
     const grid = document.getElementById("ceOverlapGrid");
     if (grid) grid.replaceChildren();
   },
@@ -1991,14 +1982,14 @@ const CEServantOverlap = {
     container.appendChild(filterDiv);
   },
 
-  renderGrid() {
+  renderGrid(preFiltered) {
     const grid = document.getElementById("ceOverlapGrid");
     if (!grid) return;
     grid.replaceChildren();
 
     if (this._allEntries.length === 0) return;
 
-    let filtered = this._getFilteredEntries();
+    let filtered = preFiltered || this._getFilteredEntries();
 
     if (this._selectedCounts.size > 0) {
       filtered = filtered.filter(e => this._selectedCounts.has(e.entry.matchingCEs.length));
@@ -2032,6 +2023,21 @@ const CEServantOverlap = {
     DOMFactory.addAscensionFallback(img, entry.servant.id);
     card.appendChild(img);
 
+    const displayName = imgAsc
+      ? ServantData.getAscensionName(entry.servant.id, imgAsc) || entry.servant.name
+      : entry.servant.name;
+    const nameEl = DOMFactory.el("div", "cefilter-servant-name");
+    nameEl.textContent = displayName;
+    card.appendChild(nameEl);
+
+    if (!entry.baseMatchesAll && entry.matchedAscensions && entry.matchedAscensions.length > 0) {
+      const ascLabel = DOMFactory.el("div", "cefilter-ascension-label");
+      ascLabel.textContent = entry.matchedAscensions
+        .map(key => ServantData.getAscensionLabel(entry.servant.id, key))
+        .join("\n");
+      card.appendChild(ascLabel);
+    }
+
     if (entry.matchingCEs && entry.matchingCEs.length > 0) {
       const badges = DOMFactory.el("div", "cefilter-match-badges");
       entry.matchingCEs.forEach(ce => {
@@ -2046,21 +2052,6 @@ const CEServantOverlap = {
       card.appendChild(badges);
     }
 
-    const displayName = imgAsc
-      ? ServantData.getAscensionName(entry.servant.id, imgAsc) || entry.servant.name
-      : entry.servant.name;
-    const nameEl = DOMFactory.el("div", "cefilter-servant-name");
-    nameEl.textContent = displayName;
-    card.appendChild(nameEl);
-
-    if (entry.matchedAscensions && entry.matchedAscensions.length > 0) {
-      entry.matchedAscensions.forEach(k => {
-        const ascEl = DOMFactory.el("div", "cefilter-ascension-label");
-        ascEl.textContent = ServantData.getAscensionLabel(entry.servant.id, k);
-        card.appendChild(ascEl);
-      });
-    }
-
     return card;
   }
 };
@@ -2068,6 +2059,7 @@ const CEServantOverlap = {
 /* ============================================
    CE FILTER APP
    ============================================ */
+const CE_PAGE_SIZE = 30;
 const CEFILTER_STORAGE_KEY = "fgo_ce_filter_data";
 
 const CEFilterApp = {
@@ -2078,10 +2070,12 @@ const CEFilterApp = {
     classFilters: [],
     rarityFilters: [],
     matchCounts: [],
-    matchCustomCounts: []
+    matchCustomCounts: [],
+    currentPage: 1
   },
 
   _allCEMatchesCache: null,
+  _lastCEFiltered: null,
   _initialized: false,
   _debouncedRender: null,
 
@@ -2089,7 +2083,7 @@ const CEFilterApp = {
     if (this._initialized) return;
     this._initialized = true;
     this.loadState();
-    this._debouncedRender = EventHandler.debounce(() => this.renderResults(), 50);
+    this._debouncedRender = EventHandler.debounce(() => this.render(), 50);
 
     const addBtn = document.getElementById("cefilterAddBtn");
     const modeSelect = document.getElementById("cefilterMode");
@@ -2104,6 +2098,7 @@ const CEFilterApp = {
       modeSelect.addEventListener("change", () => {
         this.state.mode = modeSelect.value;
         this.saveState();
+        this.state.currentPage = 1;
         this.render();
       });
     }
@@ -2112,7 +2107,8 @@ const CEFilterApp = {
       searchInput.value = this.state.searchQuery;
       const debouncedSearch = EventHandler.debounce((query) => {
         this.state.searchQuery = query;
-        this.renderResults();
+        this.state.currentPage = 1;
+        this.render();
       }, DEBOUNCE_MS);
       searchInput.addEventListener("input", (e) => {
         debouncedSearch(e.target.value);
@@ -2130,8 +2126,10 @@ const CEFilterApp = {
   render() {
     this.renderChips();
     this.buildCustomCountFilter();
-    this.buildMatchCountFilter();
-    this.renderResults();
+    const ceFiltered = this.filterByCEs(this.computeAllCEMatches());
+    this._lastCEFiltered = ceFiltered;
+    this.buildMatchCountFilter(ceFiltered);
+    this.renderResults(ceFiltered);
   },
 
   buildClassFilter() {
@@ -2185,6 +2183,7 @@ const CEFilterApp = {
           }
           this.state.classFilters = [...selected];
           this.saveState();
+          this.state.currentPage = 1;
           this._debouncedRender();
         });
         row.appendChild(btn);
@@ -2194,6 +2193,7 @@ const CEFilterApp = {
 
     buildRow(standard);
     buildRow(extra);
+    this._classBtns = Array.from(container.querySelectorAll(".cefilter-class-btn"));
   },
 
   buildRarityFilter() {
@@ -2227,15 +2227,17 @@ const CEFilterApp = {
         }
         this.state.rarityFilters = [...selected];
         this.saveState();
+        this.state.currentPage = 1;
         this._debouncedRender();
       });
       container.appendChild(btn);
     });
+    this._rarityBtns = Array.from(container.querySelectorAll(".cefilter-rarity-btn"));
   },
 
   filterByCEs(results) {
     const selectedCEObjs = this.state.selectedCEs
-      .map(id => CEList.find(c => c.id === id))
+      .map(id => CEById.get(id))
       .filter(ce => ce != null);
 
     if (selectedCEObjs.length === 0) return results;
@@ -2300,19 +2302,17 @@ const CEFilterApp = {
         }
         this.state.matchCustomCounts = [...selected];
         this.saveState();
-        this.buildCustomCountFilter();
-        this.buildMatchCountFilter();
+        this.state.currentPage = 1;
         this._debouncedRender();
       });
       container.appendChild(btn);
     }
   },
 
-  buildMatchCountFilter() {
+  buildMatchCountFilter(ceFiltered) {
     const container = document.getElementById("cefilterMatchCount");
     if (!container) return;
 
-    const ceFiltered = this.filterByCEs(this.computeAllCEMatches());
     const availableCounts = new Set(ceFiltered.map(r => r.matchingCEs.length));
     if (availableCounts.size === 0) { container.replaceChildren(); return; }
 
@@ -2322,8 +2322,9 @@ const CEFilterApp = {
     container.replaceChildren();
 
     const selected = new Set(this.state.matchCounts);
+    const maxCount = Math.max(...availableCounts);
 
-    for (let n = 1; n <= Math.max(...availableCounts); n++) {
+    for (let n = 0; n <= maxCount; n++) {
       if (!availableCounts.has(n)) continue;
       const btn = DOMFactory.el("div", "cefilter-match-count-btn" +
         (selected.has(n) ? " active" : ""));
@@ -2336,7 +2337,7 @@ const CEFilterApp = {
         }
         this.state.matchCounts = [...selected];
         this.saveState();
-        this.buildMatchCountFilter();
+        this.state.currentPage = 1;
         this._debouncedRender();
       });
       container.appendChild(btn);
@@ -2356,7 +2357,7 @@ const CEFilterApp = {
     }
 
     this.state.selectedCEs.forEach(ceId => {
-      const ce = CEList.find(c => c.id === ceId);
+      const ce = CEById.get(ceId);
       if (!ce) return;
 
       const chip = DOMFactory.el("div", "cefilter-chip");
@@ -2374,6 +2375,7 @@ const CEFilterApp = {
       removeBtn.addEventListener("click", () => {
         this.state.selectedCEs = this.state.selectedCEs.filter(id => id !== ceId);
         this.saveState();
+        this.state.currentPage = 1;
         this.render();
       });
       chip.appendChild(removeBtn);
@@ -2382,15 +2384,14 @@ const CEFilterApp = {
     });
   },
 
-  renderResults() {
+  renderResults(ceFiltered) {
     const grid = document.getElementById("cefilterResults");
-    const countEl = document.getElementById("cefilterCount");
     const modeSelect = document.getElementById("cefilterMode");
     const modeRow = document.querySelector(".cefilter-mode-row");
     if (!grid) return;
 
     const selectedCEObjs = this.state.selectedCEs
-      .map(id => CEList.find(c => c.id === id))
+      .map(id => CEById.get(id))
       .filter(ce => ce != null);
 
     if (selectedCEObjs.length >= 2) {
@@ -2404,8 +2405,9 @@ const CEFilterApp = {
       }
     }
 
-    const allMatches = this.computeAllCEMatches();
-    let filtered = this.filterByCEs(allMatches);
+    let filtered = ceFiltered || this._lastCEFiltered || [];
+
+    filtered.sort((a, b) => parseInt(a.servant.id, 10) - parseInt(b.servant.id, 10));
 
     // Hide class/rarity buttons not present in CE-filtered results
     const availableClassIds = new Set();
@@ -2416,12 +2418,12 @@ const CEFilterApp = {
         if (t.startsWith("04")) availableRarityIds.add(t);
       });
     });
-    document.querySelectorAll(".cefilter-class-btn").forEach(btn => {
+    (this._classBtns || []).forEach(btn => {
       const avail = availableClassIds.has(btn.dataset.traitId);
       btn.style.display = avail ? "" : "none";
       if (!avail) btn.classList.remove("active");
     });
-    document.querySelectorAll(".cefilter-rarity-btn").forEach(btn => {
+    (this._rarityBtns || []).forEach(btn => {
       const avail = availableRarityIds.has(btn.dataset.traitId);
       btn.style.display = avail ? "" : "none";
       if (!avail) btn.classList.remove("active");
@@ -2461,13 +2463,16 @@ const CEFilterApp = {
       filtered = filtered.filter(s => countSet.has(s.matchingCEs.length));
     }
 
-    if (countEl) {
-      countEl.textContent = `${filtered.length} servant${filtered.length !== 1 ? "s" : ""} found`;
+    const totalPages = Math.max(1, Math.ceil(filtered.length / CE_PAGE_SIZE));
+    if (this.state.currentPage > totalPages) {
+      this.state.currentPage = totalPages;
     }
+    const pageStart = (this.state.currentPage - 1) * CE_PAGE_SIZE;
+    const pageSlice = filtered.slice(pageStart, pageStart + CE_PAGE_SIZE);
 
     const frag = document.createDocumentFragment();
 
-    filtered.forEach(({ servant, matchingCEs, allTraitNames, matchedAscensions, baseMatchesAll, primaryAscension }) => {
+    pageSlice.forEach(({ servant, matchingCEs, allTraitNames, matchedAscensions, baseMatchesAll, primaryAscension }) => {
       const card = DOMFactory.el("div", "cefilter-servant-card");
 
       const imgAsc = (!baseMatchesAll && matchedAscensions.length > 0)
@@ -2489,6 +2494,21 @@ const CEFilterApp = {
       }
       card.appendChild(img);
 
+      const displayName = imgAsc
+        ? ServantData.getAscensionName(servant.id, imgAsc) || servant.name
+        : servant.name;
+      const nameEl = DOMFactory.el("div", "cefilter-servant-name");
+      nameEl.textContent = displayName;
+      card.appendChild(nameEl);
+
+      if (!baseMatchesAll && matchedAscensions.length > 0) {
+        const ascLabel = DOMFactory.el("div", "cefilter-ascension-label");
+        ascLabel.textContent = matchedAscensions
+          .map(key => ServantData.getAscensionLabel(servant.id, key))
+          .join("\n");
+        card.appendChild(ascLabel);
+      }
+
       if (matchingCEs.length > 0) {
         const badges = DOMFactory.el("div", "cefilter-match-badges");
         matchingCEs.forEach(ce => {
@@ -2503,6 +2523,7 @@ const CEFilterApp = {
             if (!this.state.selectedCEs.includes(ce.id)) {
               this.state.selectedCEs.push(ce.id);
               this.saveState();
+              this.state.currentPage = 1;
               this.render();
             }
           });
@@ -2511,99 +2532,54 @@ const CEFilterApp = {
         card.appendChild(badges);
       }
 
-      const displayName = imgAsc
-        ? ServantData.getAscensionName(servant.id, imgAsc) || servant.name
-        : servant.name;
-      const nameEl = DOMFactory.el("div", "cefilter-servant-name");
-      nameEl.textContent = displayName;
-      card.appendChild(nameEl);
-
-      if (matchedAscensions && matchedAscensions.length > 0) {
-        matchedAscensions.forEach(k => {
-          const ascEl = DOMFactory.el("div", "cefilter-ascension-label");
-          ascEl.textContent = ServantData.getAscensionLabel(servant.id, k);
-          card.appendChild(ascEl);
-        });
-      }
-
-      if (allTraitNames.length > 0) {
-        const tags = DOMFactory.el("div", "cefilter-trait-tags");
-        const show = allTraitNames.slice(0, 4);
-        show.forEach(t => {
-          const tag = DOMFactory.el("span", "cefilter-trait-tag");
-          tag.textContent = t;
-          tags.appendChild(tag);
-        });
-        if (allTraitNames.length > 4) {
-          const more = DOMFactory.el("span", "cefilter-trait-tag");
-          more.textContent = `+${allTraitNames.length - 4} more`;
-          tags.appendChild(more);
-        }
-        card.appendChild(tags);
-      }
-
       frag.appendChild(card);
     });
 
     grid.replaceChildren(frag);
+    this._renderPagination(totalPages);
+  },
 
-    // --- No Matching CE section ---
-    const noMatchGrid = document.getElementById("cefilterNoMatch");
-    const noMatchCountEl = document.getElementById("cefilterNoMatchCount");
-    const noMatchHeader = document.getElementById("cefilterNoMatchHeader");
-    if (!noMatchGrid) return;
+  _renderPagination(totalPages) {
+    ["cefilterPaginationTop", "cefilterPaginationBottom"].forEach(id => {
+      const container = document.getElementById(id);
+      if (!container) return;
+      container.replaceChildren();
 
-    const noMatchFrag = document.createDocumentFragment();
+      const currentPage = this.state.currentPage;
+      const frag = document.createDocumentFragment();
 
-    const matchedIds = new Set(allMatches.map(r => r.servant.id));
-    let noMatchServants = ServantData.servants.filter(s => !matchedIds.has(s.id));
-
-    if (query) {
-      noMatchServants = noMatchServants.filter(s => matchesSearch(s));
-    }
-    if (this.state.classFilters.length > 0) {
-      noMatchServants = noMatchServants.filter(s =>
-        s.traits.some(t => classSet.has(t))
-      );
-    }
-    if (this.state.rarityFilters.length > 0) {
-      noMatchServants = noMatchServants.filter(s =>
-        s.traits.some(t => raritySet.has(t))
-      );
-    }
-
-    const hasCESelected = selectedCEObjs.length > 0;
-    const hasMatchCountFilter = this.state.matchCounts.length > 0;
-    const showNoMatch = !hasCESelected && !hasMatchCountFilter && noMatchServants.length > 0;
-    if (noMatchHeader) {
-      noMatchHeader.style.display = showNoMatch ? "" : "none";
-    }
-    if (noMatchGrid) {
-      noMatchGrid.style.display = showNoMatch ? "" : "none";
-    }
-    if (noMatchCountEl) {
-      noMatchCountEl.textContent = `${noMatchServants.length} servant${noMatchServants.length !== 1 ? "s" : ""}`;
-    }
-
-    if (showNoMatch) {
-      noMatchServants.forEach(servant => {
-        const card = DOMFactory.el("div", "cefilter-servant-card");
-
-        const img = DOMFactory.createLazyImg(servant.image, "servant-slot-portrait", {
-          alt: servant.name
+      const prevBtn = DOMFactory.el("button", "cefilter-page-btn", { type: "button" });
+      prevBtn.textContent = "\u2039";
+      prevBtn.setAttribute("aria-label", "Previous page");
+      if (currentPage <= 1) {
+        prevBtn.disabled = true;
+      } else {
+        prevBtn.addEventListener("click", () => {
+          this.state.currentPage = currentPage - 1;
+          this.renderResults(this._lastCEFiltered);
         });
-        DOMFactory.addAscensionFallback(img, servant.id);
-        card.appendChild(img);
+      }
+      frag.appendChild(prevBtn);
 
-        const nameEl = DOMFactory.el("div", "cefilter-servant-name");
-        nameEl.textContent = servant.name;
-        card.appendChild(nameEl);
+      const indicator = DOMFactory.el("span", "cefilter-page-indicator");
+      indicator.textContent = `${currentPage} / ${totalPages}`;
+      frag.appendChild(indicator);
 
-        noMatchFrag.appendChild(card);
-      });
-    }
+      const nextBtn = DOMFactory.el("button", "cefilter-page-btn", { type: "button" });
+      nextBtn.textContent = "\u203a";
+      nextBtn.setAttribute("aria-label", "Next page");
+      if (currentPage >= totalPages) {
+        nextBtn.disabled = true;
+      } else {
+        nextBtn.addEventListener("click", () => {
+          this.state.currentPage = currentPage + 1;
+          this.renderResults(this._lastCEFiltered);
+        });
+      }
+      frag.appendChild(nextBtn);
 
-    noMatchGrid.replaceChildren(noMatchFrag);
+      container.replaceChildren(frag);
+    });
   },
 
   computeAllCEMatches() {
@@ -2622,7 +2598,6 @@ const CEFilterApp = {
 
       if (!servant.hasAscensions) {
         const matchingCEs = traitCEs.filter(ce => TraitMatcher.matches(servant.traits, ce));
-        if (matchingCEs.length === 0) return;
 
         const relevantTraits = servant.traits
           .filter(t => relevantTraitIds.has(t))
@@ -2648,7 +2623,13 @@ const CEFilterApp = {
 
         const nonEmptyGroups = [...groups.entries()]
           .filter(([_, entries]) => entries[0].matchingCEs.length > 0);
-        if (nonEmptyGroups.length === 0) return;
+        if (nonEmptyGroups.length === 0) {
+          results.push({
+            servant, matchingCEs: [], allTraitNames: [],
+            matchedAscensions: [], baseMatchesAll: true
+          });
+          return;
+        }
 
         if (nonEmptyGroups.length === 1) {
           const entries = nonEmptyGroups[0][1];
@@ -2682,6 +2663,16 @@ const CEFilterApp = {
     });
 
     this._allCEMatchesCache = results;
+
+    // Build CE→entry index for CEFilterPicker overlap detection
+    this._ceMatchEntriesIndex = {};
+    results.forEach((entry, idx) => {
+      entry.matchingCEs.forEach(ce => {
+        if (!this._ceMatchEntriesIndex[ce.id]) this._ceMatchEntriesIndex[ce.id] = new Set();
+        this._ceMatchEntriesIndex[ce.id].add(idx);
+      });
+    });
+
     return results;
   },
 
@@ -2704,9 +2695,7 @@ const CEFilterApp = {
       if (!raw) return;
       const data = JSON.parse(raw);
       if (data.selectedCEs && Array.isArray(data.selectedCEs)) {
-        this.state.selectedCEs = data.selectedCEs.filter(id =>
-          CEList.some(c => c.id === id)
-        );
+        this.state.selectedCEs = data.selectedCEs.filter(id => CEById.has(id));
       }
       if (data.mode === "all" || data.mode === "any" || data.mode === "custom") {
         this.state.mode = data.mode;
@@ -2843,13 +2832,13 @@ const BondApp = {
       // Resolve CE entry (string or group object)
       let ce, ceName, ceImage, ceBonusText;
       if (typeof ceEntry === "object" && ceEntry.groupId) {
-        ce = CEList.find(c => c.id === ceEntry.groupId);
+        ce = CEById.get(ceEntry.groupId);
         const selectedOption = ce && ce.options ? ce.options.find(o => o.id === ceEntry.optionId) : null;
         ceName = selectedOption ? selectedOption.name : (ce ? ce.name : ceEntry.groupId);
         ceImage = selectedOption ? selectedOption.image : (ce ? ce.image : null);
         ceBonusText = ce ? (ce.flatBonus > 0 ? `+${ce.flatBonus} pts All` : `+${ce.bonus}% All`) : "";
       } else {
-        ce = CEList.find(c => c.id === ceEntry);
+        ce = CEById.get(ceEntry);
         ceName = ce ? ce.name : ceEntry;
         ceImage = ce ? ce.image : null;
         ceBonusText = null;
@@ -3297,7 +3286,7 @@ const BondApp = {
           optionId = null;
         }
 
-        const ce = CEList.find(c => c.id === ceId);
+        const ce = CEById.get(ceId);
         if (!ce) return;
 
         if (ce.isGroup) {

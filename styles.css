@@ -773,17 +773,6 @@ html[data-tab="event"] #panel-event {
   justify-content: space-between;
 }
 
-.cefilter-no-match-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 20px;
-  padding-top: 16px;
-  border-top: 2px solid var(--border);
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-
 .cefilter-count {
   font-size: 0.75rem;
   color: var(--accent);
@@ -934,9 +923,7 @@ html[data-tab="event"] #panel-event {
   color: var(--accent);
   font-weight: 500;
   width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: pre-line;
 }
 
 .cefilter-trait-tags {
@@ -954,6 +941,43 @@ html[data-tab="event"] #panel-event {
   border-radius: 3px;
   color: var(--text-secondary);
   font-weight: 500;
+}
+
+.cefilter-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.cefilter-page-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  background: var(--card);
+  color: var(--text);
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: border-color 0.15s, background-color 0.15s;
+  line-height: 1;
+}
+
+.cefilter-page-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.cefilter-page-indicator {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  min-width: 60px;
+  text-align: center;
 }
 
 .ce-filter-picker-item {
@@ -1816,6 +1840,11 @@ html[data-tab="event"] #panel-event {
     border-color: var(--accent);
   }
 
+  .cefilter-page-btn:not(:disabled):hover {
+    border-color: var(--accent);
+    background: var(--accent-light);
+  }
+
   .cefilter-class-btn:hover,
   .cefilter-rarity-btn:hover {
     border-color: var(--accent);
@@ -1906,6 +1935,11 @@ html[data-tab="event"] #panel-event {
 
 .cefilter-match-count-btn:active {
   border-color: var(--accent);
+}
+
+.cefilter-page-btn:not(:disabled):active {
+  border-color: var(--accent);
+  background: var(--accent-light);
 }
 
 .ascension-modal-back:active,
