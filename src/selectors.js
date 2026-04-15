@@ -349,7 +349,7 @@ export const ServantDrag = {
     const grid = document.getElementById("servantGrid");
     const touch = e.touches ? e.touches[0] : e;
     const target = document.elementFromPoint(touch.clientX, touch.clientY);
-    const slot = target ? target.closest(".servant-slot:not(.servant-add-slot)") : null;
+    const slot = target ? target.closest(".servant-slot") : null;
 
     grid.querySelectorAll(".servant-slot.drag-over").forEach(s => s.classList.remove("drag-over"));
     if (slot && slot.dataset.slotIndex !== undefined) {

@@ -142,7 +142,6 @@ body {
    3. LAYOUT
    ============================================ */
 .container {
-  max-width: 720px;
   margin: 0 auto;
   padding: 40px 20px;
 }
@@ -369,8 +368,9 @@ html[data-tab="event"] #panel-event {
 
 .bond-result-servant-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(120px, 160px));
   gap: 12px;
+  justify-content: center;
   margin-bottom: 16px;
 }
 
@@ -484,15 +484,17 @@ html[data-tab="event"] #panel-event {
 /* Servant Slots */
 .servant-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 160px));
+  justify-content: center;
   gap: 12px;
 }
 
 .bond-group-label {
   grid-column: 1 / -1;
+  text-align: left;
   font-size: 0.75rem;
   font-weight: 700;
-  padding: 4px 0 2px;
+  padding: 4px 0 0;
 }
 
 .bond-group-label--frontline {
@@ -516,6 +518,8 @@ html[data-tab="event"] #panel-event {
   border-radius: var(--radius-sm);
   transition: background 0.15s;
   min-width: 0;
+  width: 160px;
+  height: 180px;
   user-select: none;
   -webkit-user-select: none;
 }
@@ -667,8 +671,9 @@ html[data-tab="event"] #panel-event {
 /* Craft Essences */
 .ce-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(120px, 160px));
   gap: 12px;
+  justify-content: center;
 }
 
 .ce-slot {
@@ -682,6 +687,7 @@ html[data-tab="event"] #panel-event {
   position: relative;
   overflow: hidden;
   min-width: 0;
+  max-width: 160px;
 }
 
 .ce-portrait {
@@ -712,10 +718,8 @@ html[data-tab="event"] #panel-event {
   color: var(--text);
   text-align: center;
   margin-top: 6px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 100%;
+  width: 100%;
+  word-break: break-word;
 }
 
 .ce-slot-bonus {
@@ -940,8 +944,9 @@ html[data-tab="event"] #panel-event {
 
 .cefilter-results-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(120px, 160px));
   gap: 12px;
+  justify-content: center;
   contain: layout paint style;
 }
 
@@ -1140,8 +1145,9 @@ html[data-tab="event"] #panel-event {
 
 .ceoverlap-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(120px, 160px));
   gap: 8px;
+  justify-content: center;
 }
 
 .cefilter-match-badge--nonshared {
@@ -1600,6 +1606,13 @@ html[data-tab="event"] #panel-event {
   color: var(--text);
   text-align: center;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  -moz-appearance: textfield;
+}
+
+.input-field::-webkit-inner-spin-button,
+.input-field::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .input-field:focus {
@@ -2041,26 +2054,6 @@ html[data-tab="event"] #panel-event {
     grid-template-columns: repeat(3, 1fr);
   }
 
-  .servant-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-  }
-
-  .ce-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-  }
-
-  .bond-result-servant-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-  }
-
-  .cefilter-results-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-  }
-
   .bond-result-ce-grid {
     gap: 3px;
   }
@@ -2107,6 +2100,10 @@ html[data-tab="event"] #panel-event {
 /* 13d. Small phones (<=480px) — overrides 600px */
 @media (max-width: 480px) {
 
+  .servant-grid {
+    grid-template-columns: repeat(2, minmax(0, 160px));
+  }
+
   .servant-modal-content {
     width: 95%;
     max-width: none;
@@ -2118,6 +2115,10 @@ html[data-tab="event"] #panel-event {
 
   .container {
     padding: 12px 8px;
+  }
+
+  .servant-grid {
+    grid-template-columns: minmax(0, 160px);
   }
 
   .navbar-title {
@@ -2139,24 +2140,44 @@ html[data-tab="event"] #panel-event {
     grid-template-columns: repeat(2, 1fr);
     gap: 2px;
   }
-
-  .ceoverlap-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
 }
 
 /* 13f. Tablet and up (>=769px) */
 @media (min-width: 769px) {
-  .container {
-    max-width: 840px;
-    padding: 48px 32px;
-  }
-
   .card {
     padding: 32px;
   }
 
   .servant-picker-grid {
     grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+/* 13h. Small desktop (>=960px) */
+@media (min-width: 960px) {
+  .servant-modal-content {
+    max-width: 720px;
+  }
+
+  .servant-picker-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+/* 13i. Desktop (>=1200px) */
+@media (min-width: 1200px) {
+  .servant-modal-content {
+    max-width: 900px;
+  }
+
+  .servant-picker-grid {
+    grid-template-columns: repeat(7, 1fr);
+  }
+}
+
+/* 13j. Large desktop (>=1440px) */
+@media (min-width: 1440px) {
+  .servant-picker-grid {
+    grid-template-columns: repeat(8, 1fr);
   }
 }

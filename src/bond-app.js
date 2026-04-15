@@ -1,7 +1,6 @@
 import {
   BOND_CONSTANTS,
   SERVANT_MAX_SLOTS,
-  CE_MAX_SLOTS,
   BOND_QUESTS,
   BOND_STORAGE_KEY
 } from "./constants.js";
@@ -23,7 +22,7 @@ export const BondApp = {
     return {
       onSelect: (_slotIdx, servantId, ascension) => this.setServant(slotIndex, servantId, ascension),
       onPendingRemove: () => {
-        this.state.slots.splice(slotIndex, 1);
+        this.state.slots[slotIndex] = { servantId: null, bondNeeded: 0, type: "normal", ascension: null };
         this.saveState();
         this.buildServantSlots();
       },
@@ -62,7 +61,7 @@ export const BondApp = {
   init() {
     const saved = this.loadState();
     this.state = saved || {
-      slots: [],
+      slots: Array.from({ length: SERVANT_MAX_SLOTS }, () => ({ servantId: null, bondNeeded: 0, type: "normal", ascension: null })),
       selectedQuest: "",
       customBond: 0,
       ces: []
@@ -144,17 +143,9 @@ export const BondApp = {
     this._refs.CESubSelector.init();
   },
 
-  addSlot() {
-    if (this.state.slots.length >= SERVANT_MAX_SLOTS) return;
-    this.flushInputsToState();
-    this.state.slots.push({ servantId: null, bondNeeded: 0, type: "normal", ascension: null });
-    this.saveState();
-    this.buildServantSlots();
-  },
-
   removeSlot(index) {
     this.flushInputsToState();
-    this.state.slots.splice(index, 1);
+    this.state.slots[index] = { servantId: null, bondNeeded: 0, type: "normal", ascension: null };
     this.saveState();
     this.buildServantSlots();
   },
@@ -258,26 +249,23 @@ export const BondApp = {
       grid.appendChild(slot);
     }
 
-    // Add button (hidden when at max slots)
-    if (this.state.ces.length < CE_MAX_SLOTS) {
-      const addSlot = DOMFactory.el("div", ["ce-slot", "ce-add-slot"]);
-      const addPortrait = DOMFactory.el("div", "ce-portrait-fallback");
-      addPortrait.textContent = "+";
-      addSlot.appendChild(addPortrait);
-      const addInfo = DOMFactory.el("div");
-      const addLabel = DOMFactory.el("div", "ce-slot-name");
-      addLabel.textContent = "Add Craft Essence";
-      addInfo.appendChild(addLabel);
-      addSlot.appendChild(addInfo);
-      addSlot.addEventListener("click", () => {
-        if (this.state.ces.length >= CE_MAX_SLOTS) return;
-        this.state.ces.push(null);
-        this.buildCESlots();
-        const idx = this.state.ces.length - 1;
-        this._refs.CESelector.open(idx, true, this._createCECallbacks(idx));
-      });
-      grid.appendChild(addSlot);
-    }
+    // Add button
+    const addSlot = DOMFactory.el("div", ["ce-slot", "ce-add-slot"]);
+    const addPortrait = DOMFactory.el("div", "ce-portrait-fallback");
+    addPortrait.textContent = "+";
+    addSlot.appendChild(addPortrait);
+    const addInfo = DOMFactory.el("div");
+    const addLabel = DOMFactory.el("div", "ce-slot-name");
+    addLabel.textContent = "Add Craft Essence";
+    addInfo.appendChild(addLabel);
+    addSlot.appendChild(addInfo);
+    addSlot.addEventListener("click", () => {
+      this.state.ces.push(null);
+      this.buildCESlots();
+      const idx = this.state.ces.length - 1;
+      this._refs.CESelector.open(idx, true, this._createCECallbacks(idx));
+    });
+    grid.appendChild(addSlot);
   },
 
   setCE(slotIndex, ceId, optionId) {
@@ -312,10 +300,9 @@ export const BondApp = {
     this.elements = {};
 
     const frag = document.createDocumentFragment();
-    const count = this.state.slots.length;
 
-    for (let i = 0; i < count; i++) {
-      const slotData = this.state.slots[i];
+    for (let i = 0; i < SERVANT_MAX_SLOTS; i++) {
+      const slotData = this.state.slots[i] || { servantId: null, bondNeeded: 0, type: "normal", ascension: null };
 
       // Insert group labels before first slot of each group
       if (i === 0) {
@@ -328,44 +315,46 @@ export const BondApp = {
         frag.appendChild(label);
       }
 
-      if (!slotData.servantId) continue; // skip pending slots
-      const slotClass = i < BOND_CONSTANTS.FRONTLINE_SIZE
+      const isFrontline = i < BOND_CONSTANTS.FRONTLINE_SIZE;
+      const slotClass = isFrontline
         ? "servant-slot servant-slot--frontline"
         : "servant-slot servant-slot--backline";
       const slot = DOMFactory.el("div", slotClass);
       slot.dataset.slotIndex = i;
-      slot.style.cursor = "grab";
-
-      // Frontline bonus badge
-      if (i < BOND_CONSTANTS.FRONTLINE_SIZE) {
-        const slotType = slotData.type || "normal";
-        const badge = DOMFactory.el("div", "servant-slot-frontline-badge");
-        const badgeImg = DOMFactory.el("img", "", {
-          src: "icons/bond_icon.webp",
-          alt: "Frontline",
-          draggable: "false"
-        });
-        if (slotType === "support") {
-          const imgWrap = DOMFactory.el("div", "servant-slot-frontline-img");
-          imgWrap.appendChild(badgeImg);
-          const badgeOverlay = DOMFactory.el("span", "servant-slot-frontline-overlay");
-          badgeOverlay.textContent = "All";
-          imgWrap.appendChild(badgeOverlay);
-          badge.appendChild(imgWrap);
-        } else {
-          badge.appendChild(badgeImg);
-        }
-        const badgeText = DOMFactory.el("span");
-        badgeText.textContent = slotType === "support" ? "+4%" : "+20%";
-        badge.appendChild(badgeText);
-        slot.appendChild(badge);
-      }
-
-      // Portrait area (clickable to open selector)
-      const portraitArea = DOMFactory.el("div", "servant-slot-select-btn");
-      let servantHasAscensions = false;
 
       if (slotData.servantId) {
+        // --- Filled slot ---
+        slot.style.cursor = "grab";
+
+        // Frontline bonus badge
+        if (isFrontline) {
+          const slotType = slotData.type || "normal";
+          const badge = DOMFactory.el("div", "servant-slot-frontline-badge");
+          const badgeImg = DOMFactory.el("img", "", {
+            src: "icons/bond_icon.webp",
+            alt: "Frontline",
+            draggable: "false"
+          });
+          if (slotType === "support") {
+            const imgWrap = DOMFactory.el("div", "servant-slot-frontline-img");
+            imgWrap.appendChild(badgeImg);
+            const badgeOverlay = DOMFactory.el("span", "servant-slot-frontline-overlay");
+            badgeOverlay.textContent = "All";
+            imgWrap.appendChild(badgeOverlay);
+            badge.appendChild(imgWrap);
+          } else {
+            badge.appendChild(badgeImg);
+          }
+          const badgeText = DOMFactory.el("span");
+          badgeText.textContent = slotType === "support" ? "+4%" : "+20%";
+          badge.appendChild(badgeText);
+          slot.appendChild(badge);
+        }
+
+        // Portrait area (clickable to open selector)
+        const portraitArea = DOMFactory.el("div", "servant-slot-select-btn");
+        let servantHasAscensions = false;
+
         const servant = ServantData.getServant(slotData.servantId);
         if (servant) {
           servantHasAscensions = servant.hasAscensions;
@@ -394,117 +383,102 @@ export const BondApp = {
           fb.textContent = slotData.servantId;
           portraitArea.appendChild(fb);
         }
-      } else {
-        const fb = DOMFactory.el("div", "servant-slot-portrait-fallback");
-        fb.textContent = "+";
-        portraitArea.appendChild(fb);
-      }
 
-      // Click portrait to open selector (non-ascension servants or empty slots)
-      if (!servantHasAscensions) {
-        const selectorSlotIndex = i;
-        portraitArea.addEventListener("click", () => {
-          this._refs.ServantSelector.open(selectorSlotIndex, false, this._createServantCallbacks(selectorSlotIndex));
-        });
-        portraitArea.style.cursor = "pointer";
-      }
-      slot.appendChild(portraitArea);
+        if (!servantHasAscensions) {
+          const selectorSlotIndex = i;
+          portraitArea.addEventListener("click", () => {
+            this._refs.ServantSelector.open(selectorSlotIndex, false, this._createServantCallbacks(selectorSlotIndex));
+          });
+          portraitArea.style.cursor = "pointer";
+        }
+        slot.appendChild(portraitArea);
 
-      // Info area: name + type dropdown + bond input
-      const info = DOMFactory.el("div", "servant-slot-info");
+        // Info area: name + type dropdown + bond input
+        const info = DOMFactory.el("div", "servant-slot-info");
 
-      if (slotData.servantId) {
-        const servant = ServantData.getServant(slotData.servantId);
         const nameEl = DOMFactory.el("div", "servant-slot-name");
         nameEl.textContent = servant ? ServantData.getAscensionName(servant.id, slotData.ascension) : slotData.servantId;
         info.appendChild(nameEl);
-      } else {
-        const placeholder = DOMFactory.el("div", "servant-slot-placeholder");
-        placeholder.textContent = "Click to select";
-        info.appendChild(placeholder);
-      }
 
-      // Type dropdown
-      const typeRow = DOMFactory.el("div", "input-row");
-      const typeSelect = DOMFactory.el("select", "select-field", { id: `slotType_${i}` });
-      const typeOpts = [
-        { value: "normal", text: "Normal Servant" },
-        { value: "support", text: "Support Servant" },
-        { value: "maxbond", text: "Max Bond Servant" }
-      ];
-      typeOpts.forEach(opt => {
-        const o = DOMFactory.el("option", null, { value: opt.value });
-        o.textContent = opt.text;
-        if (opt.value === (slotData.type || "normal")) o.selected = true;
-        typeSelect.appendChild(o);
-      });
-      typeRow.appendChild(typeSelect);
-      info.appendChild(typeRow);
-
-      const typeSlotIndex = i;
-      typeSelect.addEventListener("change", () => {
-        this.flushInputsToState();
-        this.state.slots[typeSlotIndex].type = typeSelect.value;
-        this.saveState();
-        this.buildServantSlots();
-      });
-
-      // Bond input row (only for normal)
-      const slotType = slotData.type || "normal";
-      if (slotType === "normal") {
-        const inputRow = DOMFactory.el("div", "input-row");
-        const inputLabel = DOMFactory.el("label", "input-label", { for: `slotBond_${i}` });
-        inputLabel.textContent = "Bond Needed";
-        const input = DOMFactory.el("input", "input-field", {
-          type: "number",
-          id: `slotBond_${i}`,
-          min: "0",
-          max: String(BOND_CONSTANTS.MAX_BOND_NEEDED),
-          value: String(slotData.bondNeeded || 0)
+        // Type dropdown
+        const typeRow = DOMFactory.el("div", "input-row");
+        const typeSelect = DOMFactory.el("select", "select-field", { id: `slotType_${i}` });
+        const typeOpts = [
+          { value: "normal", text: "Normal Servant" },
+          { value: "support", text: "Support Servant" },
+          { value: "maxbond", text: "Max Bond Servant" }
+        ];
+        typeOpts.forEach(opt => {
+          const o = DOMFactory.el("option", null, { value: opt.value });
+          o.textContent = opt.text;
+          if (opt.value === (slotData.type || "normal")) o.selected = true;
+          typeSelect.appendChild(o);
         });
-        inputRow.appendChild(inputLabel);
-        inputRow.appendChild(input);
-        info.appendChild(inputRow);
+        typeRow.appendChild(typeSelect);
+        info.appendChild(typeRow);
 
-        this.elements[`slotBond_${i}`] = input;
+        const typeSlotIndex = i;
+        typeSelect.addEventListener("change", () => {
+          this.flushInputsToState();
+          this.state.slots[typeSlotIndex].type = typeSelect.value;
+          this.saveState();
+          this.buildServantSlots();
+        });
+
+        // Bond input row (only for normal)
+        const slotType = slotData.type || "normal";
+        if (slotType === "normal") {
+          const inputRow = DOMFactory.el("div", "input-row");
+          const inputLabel = DOMFactory.el("label", "input-label", { for: `slotBond_${i}` });
+          inputLabel.textContent = "Bond Needed";
+          const input = DOMFactory.el("input", "input-field", {
+            type: "number",
+            id: `slotBond_${i}`,
+            min: "0",
+            max: String(BOND_CONSTANTS.MAX_BOND_NEEDED),
+            value: String(slotData.bondNeeded || 0)
+          });
+          inputRow.appendChild(inputLabel);
+          inputRow.appendChild(input);
+          info.appendChild(inputRow);
+
+          this.elements[`slotBond_${i}`] = input;
+        }
+
+        // Remove button
+        const removeSlotIndex = i;
+        const removeBtn = DOMFactory.el("button", "servant-remove-btn", { type: "button" });
+        removeBtn.textContent = "\u2715";
+        removeBtn.title = "Remove servant";
+        removeBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          this.removeSlot(removeSlotIndex);
+        });
+        slot.appendChild(removeBtn);
+
+        slot.appendChild(info);
+      } else {
+        // --- Empty slot (Add Servant) ---
+        slot.style.cursor = "pointer";
+        slot.classList.add("servant-add-slot");
+
+        const addPortrait = DOMFactory.el("div", "servant-slot-portrait-fallback");
+        addPortrait.textContent = "+";
+        slot.appendChild(addPortrait);
+
+        const addInfo = DOMFactory.el("div", "servant-slot-info");
+        const addLabel = DOMFactory.el("div", "servant-slot-placeholder");
+        addLabel.textContent = "Add Servant";
+        addInfo.appendChild(addLabel);
+        slot.appendChild(addInfo);
+
+        const selectorSlotIndex = i;
+        slot.addEventListener("click", () => {
+          this._refs.ServantSelector.open(selectorSlotIndex, true, this._createServantCallbacks(selectorSlotIndex));
+        });
       }
 
-      // Remove button
-      const removeSlotIndex = i;
-      const removeBtn = DOMFactory.el("button", "servant-remove-btn", { type: "button" });
-      removeBtn.textContent = "\u2715";
-      removeBtn.title = "Remove servant";
-      removeBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        this.removeSlot(removeSlotIndex);
-      });
-      slot.appendChild(removeBtn);
-
-      slot.appendChild(info);
       frag.appendChild(slot);
-    }
-
-    // Add button (hidden when at max slots)
-    if (count < SERVANT_MAX_SLOTS) {
-      const addSlot = DOMFactory.el("div", ["servant-slot", "servant-add-slot"]);
-      const addPortrait = DOMFactory.el("div", "servant-slot-portrait-fallback");
-      addPortrait.textContent = "+";
-      addSlot.appendChild(addPortrait);
-      const addInfo = DOMFactory.el("div", "servant-slot-info");
-      const addLabel = DOMFactory.el("div", "servant-slot-placeholder");
-      addLabel.textContent = "Add servant";
-      addInfo.appendChild(addLabel);
-      addSlot.appendChild(addInfo);
-      addSlot.addEventListener("click", () => {
-        if (this.state.slots.length >= SERVANT_MAX_SLOTS) return;
-        this.flushInputsToState();
-        this.state.slots.push({ servantId: null, bondNeeded: 0, type: "normal", ascension: null });
-        this.buildServantSlots();
-        const newIndex = this.state.slots.length - 1;
-        this._refs.ServantSelector.open(newIndex, true, this._createServantCallbacks(newIndex));
-      });
-      addSlot.style.cursor = "pointer";
-      frag.appendChild(addSlot);
     }
 
     grid.replaceChildren(frag);
@@ -849,9 +823,7 @@ export const BondApp = {
       // Migrate old format (single bondNeeded) to new slots format
       let slots;
       if (data.slots && Array.isArray(data.slots)) {
-        // Only keep slots that have a servant selected
         slots = data.slots
-          .filter(s => s.servantId)
           .map(s => ({
             servantId: s.servantId || null,
             bondNeeded: Validator.clamp(s.bondNeeded || 0, 0, BOND_CONSTANTS.MAX_BOND_NEEDED),
@@ -861,8 +833,13 @@ export const BondApp = {
       } else {
         slots = [];
         if (data.bondNeeded) {
-          slots.push({ servantId: null, bondNeeded: Validator.clamp(data.bondNeeded, 0, BOND_CONSTANTS.MAX_BOND_NEEDED) });
+          slots.push({ servantId: null, bondNeeded: Validator.clamp(data.bondNeeded, 0, BOND_CONSTANTS.MAX_BOND_NEEDED), type: "normal", ascension: null });
         }
+      }
+
+      // Pad to SERVANT_MAX_SLOTS
+      while (slots.length < SERVANT_MAX_SLOTS) {
+        slots.push({ servantId: null, bondNeeded: 0, type: "normal", ascension: null });
       }
 
       return {

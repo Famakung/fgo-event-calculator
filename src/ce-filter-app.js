@@ -1,4 +1,4 @@
-import { DEBOUNCE_MS, CE_PAGE_SIZE, CEFILTER_STORAGE_KEY } from "./constants.js";
+import { DEBOUNCE_MS, CEFILTER_STORAGE_KEY } from "./constants.js";
 import { TraitMatcher } from "./domain.js";
 import { ServantData, CEList, CEById, TraitCEs, TraitNames } from "./data.js";
 import { DOMFactory, CollapsibleFactory, debounce } from "./presentation.js";
@@ -20,6 +20,17 @@ export const CEFilterApp = {
   _initialized: false,
   _debouncedRender: null,
   _callbacks: null,
+
+  _getPageSize() {
+    const grid = document.getElementById("cefilterResults");
+    if (!grid) return 30;
+    const style = getComputedStyle(grid);
+    const containerWidth = grid.clientWidth - parseFloat(style.paddingLeft || 0) - parseFloat(style.paddingRight || 0);
+    const gap = 12;
+    const colWidth = 160;
+    const cols = Math.max(2, Math.floor((containerWidth + gap) / (colWidth + gap)));
+    return cols * 5;
+  },
 
   init(callbacks) {
     if (this._initialized) return;
@@ -422,12 +433,13 @@ export const CEFilterApp = {
       filtered = filtered.filter(s => countSet.has(s.matchingCEs.length));
     }
 
-    const totalPages = Math.max(1, Math.ceil(filtered.length / CE_PAGE_SIZE));
+    const pageSize = this._getPageSize();
+    const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
     if (this.state.currentPage > totalPages) {
       this.state.currentPage = totalPages;
     }
-    const pageStart = (this.state.currentPage - 1) * CE_PAGE_SIZE;
-    const pageSlice = filtered.slice(pageStart, pageStart + CE_PAGE_SIZE);
+    const pageStart = (this.state.currentPage - 1) * pageSize;
+    const pageSlice = filtered.slice(pageStart, pageStart + pageSize);
 
     const frag = document.createDocumentFragment();
 
@@ -517,6 +529,7 @@ export const CEFilterApp = {
       } else {
         prevBtn.addEventListener("click", () => {
           this.state.currentPage = currentPage - 1;
+          this.saveState();
           this.renderResults(this._lastCEFiltered);
         });
       }
@@ -534,6 +547,7 @@ export const CEFilterApp = {
       } else {
         nextBtn.addEventListener("click", () => {
           this.state.currentPage = currentPage + 1;
+          this.saveState();
           this.renderResults(this._lastCEFiltered);
         });
       }

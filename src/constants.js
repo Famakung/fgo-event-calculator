@@ -4,11 +4,9 @@ export const MAX_ITERATIONS = 10000;
 export const EPSILON = 0.01;
 export const DEBOUNCE_MS = 100;
 export const SERVANT_MAX_SLOTS = 6;
-export const CE_MAX_SLOTS = 8;
 export const STORAGE_KEY = "fgo_calculator_data";
 export const BOND_STORAGE_KEY = "fgo_bond_calculator_data";
 export const CEFILTER_STORAGE_KEY = "fgo_ce_filter_data";
-export const CE_PAGE_SIZE = 30;
 
 export const BOND_CONSTANTS = {
   MAX_BOND_NEEDED: 9999999,
