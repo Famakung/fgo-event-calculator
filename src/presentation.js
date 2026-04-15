@@ -1,4 +1,4 @@
-import { ICON_URLS, TIER_COLORS, DEBOUNCE_MS } from "./constants.js";
+import { DEBOUNCE_MS } from "./constants.js";
 
 export const DOMFactory = {
   el(tag, className, attrs = {}) {
@@ -22,36 +22,6 @@ export const DOMFactory = {
     return element;
   },
 
-  createIcon(tier, size = "normal") {
-    const container = this.el(
-      "div",
-      size === "normal" ? "material-icon" : "mini-icon"
-    );
-    container.id = size === "normal" ? `${tier}Icon` : undefined;
-
-    const bgImg = this.el("img", "bg-layer", {
-      src: ICON_URLS[tier].bg,
-      alt: ""
-    });
-    bgImg.onerror = () => { bgImg.style.display = "none"; };
-
-    const fgImg = this.el("img", "fg-layer", {
-      src: ICON_URLS[tier].fg,
-      alt: `${this.capitalize(tier)} material icon`
-    });
-
-    fgImg.onerror = () => {
-      const fallback = this.el("div", "icon-fallback");
-      fallback.style.background = TIER_COLORS[tier];
-      fallback.textContent = this.capitalize(tier).charAt(0);
-      fgImg.replaceWith(fallback);
-    };
-
-    container.appendChild(bgImg);
-    container.appendChild(fgImg);
-    return container;
-  },
-
   createLazyImg(src, className, attrs = {}) {
     const img = this.el("img", className, { src, ...attrs });
     img.loading = "lazy";
@@ -63,22 +33,6 @@ export const DOMFactory = {
     const check = this.el("div", "ce-filter-check");
     check.textContent = "\u2713";
     parent.appendChild(check);
-  },
-
-  createInput(id, label, value, min, max) {
-    const row = this.el("div", "input-row");
-    const labelEl = this.el("label", "input-label", { for: id });
-    labelEl.textContent = label;
-    const input = this.el("input", "input-field", {
-      type: "number",
-      id,
-      min: String(min),
-      max: String(max),
-      value: String(value)
-    });
-    row.appendChild(labelEl);
-    row.appendChild(input);
-    return { row, input };
   },
 
   capitalize(str) {

@@ -18,21 +18,6 @@ export const BOND_CONSTANTS = {
   FRONTLINE_BONUS_FRACTION: 0.2
 };
 
-export const ICON_URLS = {
-  bronze: {
-    bg: "icons/materials/bronze_bg.webp",
-    fg: "icons/materials/bronze_fg.webp"
-  },
-  silver: {
-    bg: "icons/materials/silver_bg.webp",
-    fg: "icons/materials/silver_fg.webp"
-  },
-  gold: {
-    bg: "icons/materials/gold_bg.webp",
-    fg: "icons/materials/gold_fg.webp"
-  }
-};
-
 export const TIER_COLORS = {
   bronze: "#cd7f32",
   silver: "#71717a",
@@ -44,6 +29,37 @@ export const QUEST_DROPS = {
   silver: { primary: "silver", secondary: "gold" },
   gold: { primary: "gold", secondary: "bronze" }
 };
+
+export const CLASS_FILTERS = {
+  standard: [
+    { id: "0100", icon: "saber", label: "Saber" },
+    { id: "0102", icon: "archer", label: "Archer" },
+    { id: "0101", icon: "lancer", label: "Lancer" },
+    { id: "0103", icon: "rider", label: "Rider" },
+    { id: "0104", icon: "caster", label: "Caster" },
+    { id: "0105", icon: "assassin", label: "Assassin" },
+    { id: "0106", icon: "berserker", label: "Berserker" }
+  ],
+  extra: [
+    { id: "0107", icon: "shielder", label: "Shielder" },
+    { id: "0108", icon: "ruler", label: "Ruler" },
+    { id: "0110", icon: "avenger", label: "Avenger" },
+    { id: "0115", icon: "mooncancer", label: "Moon Cancer" },
+    { id: "0109", icon: "alterego", label: "Alter Ego" },
+    { id: "0117", icon: "foreigner", label: "Foreigner" },
+    { id: "0120", icon: "pretender", label: "Pretender" },
+    { id: "0124", icon: "beast", label: "Beast" }
+  ]
+};
+
+export const RARITY_FILTERS = [
+  { id: "0400", label: "0 \u2605" },
+  { id: "0401", label: "1 \u2605" },
+  { id: "0402", label: "2 \u2605" },
+  { id: "0403", label: "3 \u2605" },
+  { id: "0404", label: "4 \u2605" },
+  { id: "0405", label: "5 \u2605" }
+];
 
 export const BOND_QUESTS = [
   { key: "fq83", name: "Free Quest Lv.83", bond: 835 },

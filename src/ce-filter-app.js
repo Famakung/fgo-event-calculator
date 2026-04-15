@@ -1,4 +1,4 @@
-import { DEBOUNCE_MS, CEFILTER_STORAGE_KEY } from "./constants.js";
+import { DEBOUNCE_MS, CEFILTER_STORAGE_KEY, CLASS_FILTERS, RARITY_FILTERS } from "./constants.js";
 import { TraitMatcher } from "./domain.js";
 import { ServantData, CEList, CEById, TraitCEs, TraitNames } from "./data.js";
 import { DOMFactory, CollapsibleFactory, debounce } from "./presentation.js";
@@ -133,26 +133,7 @@ export const CEFilterApp = {
     const container = document.getElementById("cefilterClassFilter");
     if (!container) return;
 
-    const standard = [
-      { id: "0100", icon: "saber", label: "Saber" },
-      { id: "0102", icon: "archer", label: "Archer" },
-      { id: "0101", icon: "lancer", label: "Lancer" },
-      { id: "0103", icon: "rider", label: "Rider" },
-      { id: "0104", icon: "caster", label: "Caster" },
-      { id: "0105", icon: "assassin", label: "Assassin" },
-      { id: "0106", icon: "berserker", label: "Berserker" }
-    ];
-
-    const extra = [
-      { id: "0107", icon: "shielder", label: "Shielder" },
-      { id: "0108", icon: "ruler", label: "Ruler" },
-      { id: "0110", icon: "avenger", label: "Avenger" },
-      { id: "0115", icon: "mooncancer", label: "Moon Cancer" },
-      { id: "0109", icon: "alterego", label: "Alter Ego" },
-      { id: "0117", icon: "foreigner", label: "Foreigner" },
-      { id: "0120", icon: "pretender", label: "Pretender" },
-      { id: "0124", icon: "beast", label: "Beast" }
-    ];
+    const { standard, extra } = CLASS_FILTERS;
 
     container.replaceChildren();
 
@@ -197,14 +178,7 @@ export const CEFilterApp = {
     const container = document.getElementById("cefilterRarityFilter");
     if (!container) return;
 
-    const rarities = [
-      { id: "0400", label: "0 \u2605" },
-      { id: "0401", label: "1 \u2605" },
-      { id: "0402", label: "2 \u2605" },
-      { id: "0403", label: "3 \u2605" },
-      { id: "0404", label: "4 \u2605" },
-      { id: "0405", label: "5 \u2605" }
-    ];
+    const rarities = RARITY_FILTERS;
 
     container.replaceChildren();
     const selected = new Set(this.state.rarityFilters);

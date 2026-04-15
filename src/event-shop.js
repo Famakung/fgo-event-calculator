@@ -1,4 +1,4 @@
-import { TIERS, TIER_FIELDS, ICON_URLS, QUEST_DROPS, TIER_COLORS, DEBOUNCE_MS } from "./constants.js";
+import { TIERS, TIER_FIELDS, QUEST_DROPS, TIER_COLORS, DEBOUNCE_MS } from "./constants.js";
 import { Schema, Validator, Calculator } from "./domain.js";
 import { StateManager, Persistence } from "./state.js";
 import { DOMFactory, debounce } from "./presentation.js";
@@ -35,18 +35,6 @@ export const UIBuilder = {
         }
       }
     });
-  },
-
-  buildQuestDropsGrid(container) {
-    // Elements already exist in HTML — no-op
-  },
-
-  buildDeficitGrid(container) {
-    // Elements already exist in HTML — no-op
-  },
-
-  buildQuestGrid(container) {
-    // Elements already exist in HTML — no-op
   },
 
   loadQuestIcons() {
@@ -193,10 +181,6 @@ export const App = {
       document.getElementById("materialsGrid"),
       this.state
     );
-    UIBuilder.buildQuestDropsGrid(document.getElementById("questDropsGrid"));
-    UIBuilder.buildDeficitGrid(document.getElementById("deficitGrid"));
-    UIBuilder.buildQuestGrid(document.getElementById("questGrid"));
-
     // Sync inputs
     ViewManager.syncInputsFromState(this.state);
 
