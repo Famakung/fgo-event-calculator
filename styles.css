@@ -834,7 +834,7 @@ html[data-tab="event"] #panel-event {
 }
 
 #cefilterFilterArea {
-  min-height: 34px;
+  min-height: 41px;
   margin-bottom: 2px;
 }
 
@@ -956,6 +956,9 @@ html[data-tab="event"] #panel-event {
   flex-direction: column;
   align-items: center;
   padding: 10px 8px;
+  min-height: 146px;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 146px;
   background: var(--bg);
   border: 2px solid var(--border);
   border-radius: var(--radius-sm);

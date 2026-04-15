@@ -1,4 +1,4 @@
-import { DEBOUNCE_MS, CEFILTER_STORAGE_KEY, CLASS_FILTERS, RARITY_FILTERS } from "./constants.js";
+import { DEBOUNCE_MS, CLASS_FILTERS, RARITY_FILTERS } from "./constants.js";
 import { TraitMatcher } from "./domain.js";
 import { ServantData, CEList, CEById, TraitCEs, TraitNames } from "./data.js";
 import { DOMFactory, CollapsibleFactory, debounce } from "./presentation.js";
@@ -91,7 +91,6 @@ export const CEFilterApp = {
     if (this._initialized) return;
     this._initialized = true;
     this._callbacks = callbacks || {};
-    this.loadState();
     this._debouncedRender = debounce(() => this.render(), 50);
 
     const addBtn = document.getElementById("cefilterAddBtn");
@@ -107,7 +106,6 @@ export const CEFilterApp = {
       modeSelect.value = this.state.mode;
       modeSelect.addEventListener("change", () => {
         this.state.mode = modeSelect.value;
-        this.saveState();
         this.state.currentPage = 1;
         this.render();
       });
@@ -257,7 +255,6 @@ export const CEFilterApp = {
             btn.classList.add("active");
           }
           this.state.classFilters = [...selected];
-          this.saveState();
           this.state.currentPage = 1;
           this._debouncedRender();
         });
@@ -294,7 +291,6 @@ export const CEFilterApp = {
           btn.classList.add("active");
         }
         this.state.rarityFilters = [...selected];
-        this.saveState();
         this.state.currentPage = 1;
         this._debouncedRender();
       });
@@ -370,7 +366,6 @@ export const CEFilterApp = {
           selected.add(n);
         }
         this.state.matchCustomCounts = [...selected];
-        this.saveState();
         this.state.currentPage = 1;
         this._debouncedRender();
       });
@@ -405,7 +400,6 @@ export const CEFilterApp = {
           selected.add(n);
         }
         this.state.matchCounts = [...selected];
-        this.saveState();
         this.state.currentPage = 1;
         this._debouncedRender();
       });
@@ -440,7 +434,6 @@ export const CEFilterApp = {
       removeBtn.textContent = "\u2715";
       removeBtn.addEventListener("click", () => {
         this.state.selectedCEs = this.state.selectedCEs.filter(id => id !== ceId);
-        this.saveState();
         this.state.currentPage = 1;
         this.render();
       });
@@ -467,7 +460,6 @@ export const CEFilterApp = {
       if (this.state.mode !== "all") {
         this.state.mode = "all";
         if (modeSelect) modeSelect.value = "all";
-        this.saveState();
       }
     }
 
@@ -514,24 +506,24 @@ export const CEFilterApp = {
 
     const frag = document.createDocumentFragment();
     const isFirstPage = this.state.currentPage === 1;
-    const eagerAttrs = isFirstPage ? { loading: "eager", fetchpriority: "high" } : {};
-    const firstPageImages = isFirstPage ? [] : null;
+    const eagerAttrs = isFirstPage ? { loading: "eager" } : {};
+    let isFirstCard = isFirstPage;
 
-    pageSlice.forEach(({ servant, matchingCEs, allTraitNames, matchedAscensions, baseMatchesAll, primaryAscension }) => {
-      frag.appendChild(this._buildCard({ servant, matchingCEs, allTraitNames, matchedAscensions, baseMatchesAll, primaryAscension }, eagerAttrs, firstPageImages));
+    // Reuse existing placeholder cards from inline script to avoid LCP render delay
+    const existingCards = isFirstPage ? grid.querySelectorAll(":scope > .cefilter-servant-card") : null;
+
+    pageSlice.forEach(({ servant, matchingCEs, allTraitNames, matchedAscensions, baseMatchesAll, primaryAscension }, idx) => {
+      const cardAttrs = isFirstCard ? { ...eagerAttrs, fetchpriority: "high" } : eagerAttrs;
+      isFirstCard = false;
+      const existing = existingCards && existingCards[idx];
+      frag.appendChild(this._buildCard({ servant, matchingCEs, allTraitNames, matchedAscensions, baseMatchesAll, primaryAscension }, cardAttrs, existing));
     });
-
-    if (firstPageImages && firstPageImages.length > 0) {
-      try {
-        localStorage.setItem("fgo_ce_first_page_imgs", JSON.stringify(firstPageImages));
-      } catch (e) { /* ignore */ }
-    }
 
     grid.replaceChildren(frag);
     this._renderPagination(totalPages);
   },
 
-  _buildCard({ servant, matchingCEs, allTraitNames, matchedAscensions, baseMatchesAll, primaryAscension }, eagerAttrs, firstPageImages) {
+  _buildCard({ servant, matchingCEs, allTraitNames, matchedAscensions, baseMatchesAll, primaryAscension }, eagerAttrs, existingCard) {
     const card = DOMFactory.el("div", "cefilter-servant-card");
 
     const imgAsc = (!baseMatchesAll && matchedAscensions.length > 0)
@@ -540,11 +532,25 @@ export const CEFilterApp = {
     const imgSrc = imgAsc
       ? ServantData.getImageForAscension(servant.id, imgAsc)
       : servant.image;
-    if (firstPageImages) firstPageImages.push(imgSrc);
-    const img = DOMFactory.createLazyImg(imgSrc, "servant-slot-portrait", {
-      alt: servant.name,
-      ...eagerAttrs
-    });
+
+    let img;
+    if (existingCard) {
+      // Reuse placeholder img to avoid LCP render delay from re-decode
+      const placeholderImg = existingCard.querySelector("img.servant-slot-portrait");
+      if (placeholderImg) {
+        img = placeholderImg;
+        img.src = imgSrc;
+        img.alt = servant.name;
+        if (eagerAttrs.fetchpriority) img.fetchPriority = eagerAttrs.fetchpriority;
+        if (eagerAttrs.loading) img.loading = eagerAttrs.loading;
+      }
+    }
+    if (!img) {
+      img = DOMFactory.createLazyImg(imgSrc, "servant-slot-portrait", {
+        alt: servant.name,
+        ...eagerAttrs
+      });
+    }
     DOMFactory.addAscensionFallback(img, servant.id);
     if (matchingCEs.length > 0) {
       img.style.cursor = "pointer";
@@ -575,7 +581,6 @@ export const CEFilterApp = {
     if (matchingCEs.length > 0) {
       const badges = DOMFactory.el("div", "cefilter-match-badges");
       matchingCEs.forEach(ce => {
-        if (firstPageImages) firstPageImages.push(ce.thumbImage);
         const badge = DOMFactory.createLazyImg(ce.thumbImage, "cefilter-match-badge", {
           alt: ce.name,
           title: ce.name,
@@ -587,7 +592,6 @@ export const CEFilterApp = {
           e.stopPropagation();
           if (!this.state.selectedCEs.includes(ce.id)) {
             this.state.selectedCEs.push(ce.id);
-            this.saveState();
             this.state.currentPage = 1;
             this.render();
           }
@@ -617,7 +621,6 @@ export const CEFilterApp = {
       } else {
         prevBtn.addEventListener("click", () => {
           this.state.currentPage = currentPage - 1;
-          this.saveState();
           this.renderResults(this._lastCEFiltered);
         });
       }
@@ -635,7 +638,6 @@ export const CEFilterApp = {
       } else {
         nextBtn.addEventListener("click", () => {
           this.state.currentPage = currentPage + 1;
-          this.saveState();
           this.renderResults(this._lastCEFiltered);
         });
       }
@@ -741,52 +743,5 @@ export const CEFilterApp = {
     });
 
     return results;
-  },
-
-  saveState() {
-    try {
-      localStorage.setItem(CEFILTER_STORAGE_KEY, JSON.stringify({
-        selectedCEs: this.state.selectedCEs,
-        mode: this.state.mode,
-        classFilters: this.state.classFilters,
-        rarityFilters: this.state.rarityFilters,
-        matchCounts: this.state.matchCounts,
-        matchCustomCounts: this.state.matchCustomCounts,
-        currentPage: this.state.currentPage
-      }));
-    } catch (e) { /* ignore */ }
-  },
-
-  loadState() {
-    try {
-      const raw = localStorage.getItem(CEFILTER_STORAGE_KEY);
-      if (!raw) return;
-      const data = JSON.parse(raw);
-      if (data.selectedCEs && Array.isArray(data.selectedCEs)) {
-        this.state.selectedCEs = data.selectedCEs.filter(id => CEById.has(id));
-      }
-      if (data.mode === "all" || data.mode === "any" || data.mode === "custom") {
-        this.state.mode = data.mode;
-      } else if (data.mode === "some") {
-        this.state.mode = "custom";
-      }
-      if (Array.isArray(data.classFilters)) {
-        this.state.classFilters = data.classFilters;
-      }
-      if (Array.isArray(data.rarityFilters)) {
-        this.state.rarityFilters = data.rarityFilters;
-      }
-      if (Array.isArray(data.matchCounts)) {
-        this.state.matchCounts = data.matchCounts;
-      }
-      if (Array.isArray(data.matchCustomCounts)) {
-        this.state.matchCustomCounts = data.matchCustomCounts;
-      } else if (Array.isArray(data.matchSomeCounts)) {
-        this.state.matchCustomCounts = data.matchSomeCounts;
-      }
-      if (typeof data.currentPage === "number" && data.currentPage >= 1) {
-        this.state.currentPage = data.currentPage;
-      }
-    } catch (e) { /* ignore */ }
   }
 };

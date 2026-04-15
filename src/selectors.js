@@ -601,7 +601,6 @@ export const CEFilterPicker = {
   },
 
   close() {
-    this._callbacks?.onApply?.([...this.tempSelected]);
     const modal = document.getElementById("ceFilterModal");
     if (modal) modal.classList.remove("open");
     this.tempSelected = new Set();
@@ -638,6 +637,7 @@ export const CEFilterPicker = {
           item.classList.add("selected");
         }
         this.updateNoMatchState();
+        this._callbacks?.onApply?.([...this.tempSelected]);
       });
 
       frag.appendChild(item);

@@ -9,6 +9,8 @@ import {
 } from "./selectors.js";
 
 document.addEventListener("DOMContentLoaded", () => {
+  // Yield to let browser paint placeholder images from inline scripts first
+  requestAnimationFrame(() => {
   // Load servant/CE data
   ServantData.load();
 
@@ -24,7 +26,6 @@ document.addEventListener("DOMContentLoaded", () => {
       openFilterPicker: () => CEFilterPicker.open({
         onApply: (selectedCEs) => {
           CEFilterApp.state.selectedCEs = selectedCEs;
-          CEFilterApp.saveState();
           CEFilterApp.state.currentPage = 1;
           CEFilterApp.render();
         },
@@ -63,4 +64,5 @@ document.addEventListener("DOMContentLoaded", () => {
     if (activeTab !== "event") App.init();
     if (activeTab !== "bond") initBond();
   });
+  }); // end rAF
 });

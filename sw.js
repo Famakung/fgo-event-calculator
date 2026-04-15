@@ -1,4 +1,4 @@
-const CACHE_NAME = "fgo-calc-v13";
+const CACHE_NAME = "fgo-calc-v14";
 
 // Compute base path from service worker location (works on GitHub Pages subdirs)
 const BASE = new URL(".", self.location.href).pathname;
@@ -58,7 +58,13 @@ function withCacheControl(response, maxAge, isImmutable) {
 
 self.addEventListener("install", (e) => {
   e.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
+    caches.open(CACHE_NAME).then((cache) =>
+      Promise.all(STATIC_ASSETS.map(url =>
+        fetch(url, { cache: "no-cache" }).then(resp => {
+          if (resp.ok) return cache.put(url, resp);
+        })
+      ))
+    )
   );
   self.skipWaiting();
 });
@@ -67,9 +73,8 @@ self.addEventListener("activate", (e) => {
   e.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
-    )
+    ).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
 self.addEventListener("fetch", (e) => {
