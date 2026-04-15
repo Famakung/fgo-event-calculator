@@ -9,8 +9,6 @@ import {
 } from "./selectors.js";
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Yield to let browser paint placeholder images from inline scripts first
-  requestAnimationFrame(() => {
   // Load servant/CE data
   ServantData.load();
 
@@ -64,5 +62,4 @@ document.addEventListener("DOMContentLoaded", () => {
     if (activeTab !== "event") App.init();
     if (activeTab !== "bond") initBond();
   });
-  }); // end rAF
 });

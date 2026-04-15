@@ -77,13 +77,8 @@ export const CEFilterApp = {
   _callbacks: null,
 
   _getPageSize() {
-    const grid = document.getElementById("cefilterResults");
-    if (!grid) return 30;
-    const style = getComputedStyle(grid);
-    const containerWidth = grid.clientWidth - parseFloat(style.paddingLeft || 0) - parseFloat(style.paddingRight || 0);
-    const gap = 12;
-    const colWidth = 160;
-    const cols = Math.max(2, Math.floor((containerWidth + gap) / (colWidth + gap)));
+    const w = window.innerWidth;
+    const cols = w >= 1200 ? 6 : w >= 1000 ? 5 : w >= 800 ? 4 : w >= 600 ? 3 : 2;
     return cols * 5;
   },
 
@@ -146,36 +141,16 @@ export const CEFilterApp = {
 
     initWorker();
 
-    // Double-rAF: ensures browser paints placeholder before heavy work
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        this.render();
-      });
-    });
+    // Render immediately (synchronous computation) for faster first paint
+    this.render();
   },
 
   render() {
     this.renderChips();
     this.buildCustomCountFilter();
 
-    if (this._allCEMatchesCache) {
-      // Cached: render synchronously
-      this._finishRender(this._allCEMatchesCache);
-    } else if (!_worker) {
-      // First render: use worker to avoid blocking main thread
-      computeWorker().then(data => {
-        if (data) {
-          this._processWorkerResults(data);
-          this._finishRender(this._allCEMatchesCache);
-        } else {
-          // Worker failed — fall back to synchronous computation
-          this._finishRender(this.computeAllCEMatches());
-        }
-      });
-    } else {
-      // Subsequent render before cache ready: use sync fallback
-      this._finishRender(this.computeAllCEMatches());
-    }
+    const allMatches = this.computeAllCEMatches();
+    this._finishRender(allMatches);
   },
 
   _processWorkerResults(data) {
@@ -554,12 +529,14 @@ export const CEFilterApp = {
     DOMFactory.addAscensionFallback(img, servant.id);
     if (matchingCEs.length > 0) {
       img.style.cursor = "pointer";
-      img.addEventListener("click", () => {
+      img.onclick = () => {
         if (this._callbacks.openOverlap) {
           this._callbacks.openOverlap({ servant, matchingCEs, allTraitNames,
             matchedAscensions, baseMatchesAll, primaryAscension });
         }
-      });
+      };
+    } else {
+      img.onclick = null;
     }
     card.appendChild(img);
 
