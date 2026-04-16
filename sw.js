@@ -1,7 +1,12 @@
-const CACHE_NAME = "fgo-calc-v17";
+const CACHE_NAME = "fgo-calc-v18";
 
 // Compute base path from service worker location (works on GitHub Pages subdirs)
 const BASE = new URL(".", self.location.href).pathname;
+
+const CLASS_ICON_NAMES = [
+  "saber", "archer", "lancer", "rider", "caster", "assassin", "berserker",
+  "shielder", "ruler", "avenger", "mooncancer", "alterego", "foreigner", "pretender", "beast",
+];
 
 const STATIC_ASSETS = [
   BASE,
@@ -12,6 +17,7 @@ const STATIC_ASSETS = [
   BASE + "ce-match-worker.min.js",
   BASE + "register-sw.js",
   BASE + "manifest.json",
+  ...CLASS_ICON_NAMES.map((c) => BASE + "icons/classes/" + c + ".webp"),
 ];
 
 // Security headers injected into every SW-served response
