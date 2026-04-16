@@ -4,8 +4,13 @@ import { BondApp } from "./bond-app.js";
 import { CEFilterApp } from "./ce-filter-app.js";
 import { TabNavigator } from "./tab-navigator.js";
 import {
-  ServantSelector, AscensionSelector, ServantDrag,
-  CESelector, CESubSelector, CEFilterPicker, CEServantOverlap
+  ServantSelector,
+  AscensionSelector,
+  ServantDrag,
+  CESelector,
+  CESubSelector,
+  CEFilterPicker,
+  CEServantOverlap,
 } from "./selectors.js";
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -16,31 +21,38 @@ document.addEventListener("DOMContentLoaded", () => {
   let activeTab = "cefilter";
   try {
     activeTab = localStorage.getItem("fgo_active_tab") || "cefilter";
-  } catch (e) { /* ignore */ }
+  } catch (_e) {
+    /* ignore */
+  }
 
   // CEFilterApp lazy-init callback for TabNavigator
   const initCEFilter = () => {
     CEFilterApp.init({
-      openFilterPicker: () => CEFilterPicker.open({
-        onApply: (selectedCEs) => {
-          CEFilterApp.state.selectedCEs = selectedCEs;
-          CEFilterApp.state.currentPage = 1;
-          CEFilterApp.render();
-        },
-        getSelectedCEs: () => CEFilterApp.state.selectedCEs,
-        getCEMatches: () => CEFilterApp.computeAllCEMatches(),
-        getCEMatchEntries: () => CEFilterApp._ceMatchEntriesIndex
-      }),
+      openFilterPicker: () =>
+        CEFilterPicker.open({
+          onApply: (selectedCEs) => {
+            CEFilterApp.state.selectedCEs = selectedCEs;
+            CEFilterApp.state.currentPage = 1;
+            CEFilterApp.render();
+          },
+          getSelectedCEs: () => CEFilterApp.state.selectedCEs,
+          getCEMatches: () => CEFilterApp.computeAllCEMatches(),
+          getCEMatchEntries: () => CEFilterApp._ceMatchEntriesIndex,
+        }),
       initFilterPicker: () => CEFilterPicker.init(),
       initOverlap: () => CEServantOverlap.init(() => CEFilterApp.computeAllCEMatches()),
-      openOverlap: (entry) => CEServantOverlap.open(entry)
+      openOverlap: (entry) => CEServantOverlap.open(entry),
     });
   };
 
   // BondApp init (configure + init in one function)
   const initBond = () => {
     BondApp.configure({
-      ServantSelector, AscensionSelector, CESelector, CESubSelector, ServantDrag
+      ServantSelector,
+      AscensionSelector,
+      CESelector,
+      CESubSelector,
+      ServantDrag,
     });
     BondApp.init();
   };
@@ -57,7 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Defer non-active tabs to idle time
-  const rIC = window.requestIdleCallback || (cb => setTimeout(cb, 1));
+  const rIC = window.requestIdleCallback || ((cb) => setTimeout(cb, 1));
   rIC(() => {
     if (activeTab !== "event") App.init();
     if (activeTab !== "bond") initBond();

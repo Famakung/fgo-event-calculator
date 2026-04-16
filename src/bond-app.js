@@ -1,9 +1,4 @@
-import {
-  BOND_CONSTANTS,
-  SERVANT_MAX_SLOTS,
-  BOND_QUESTS,
-  BOND_STORAGE_KEY
-} from "./constants.js";
+import { BOND_CONSTANTS, SERVANT_MAX_SLOTS, BOND_QUESTS, BOND_STORAGE_KEY } from "./constants.js";
 import { Validator, TraitMatcher } from "./domain.js";
 import { ServantData, CEById, TraitNames } from "./data.js";
 import { DOMFactory } from "./presentation.js";
@@ -31,9 +26,9 @@ export const BondApp = {
           onSelect: (_si, servantId, asc) => this.setServant(idx, servantId, asc),
           onBack: (backIdx) => {
             this._refs.ServantSelector.open(backIdx, false, this._createServantCallbacks(backIdx));
-          }
+          },
         });
-      }
+      },
     };
   },
 
@@ -52,19 +47,24 @@ export const BondApp = {
             this.state.ces.splice(idx, 1);
             this.saveState();
             this.buildCESlots();
-          }
+          },
         });
-      }
+      },
     };
   },
 
   init() {
     const saved = this.loadState();
     this.state = saved || {
-      slots: Array.from({ length: SERVANT_MAX_SLOTS }, () => ({ servantId: null, bondNeeded: 0, type: "normal", ascension: null })),
+      slots: Array.from({ length: SERVANT_MAX_SLOTS }, () => ({
+        servantId: null,
+        bondNeeded: 0,
+        type: "normal",
+        ascension: null,
+      })),
       selectedQuest: "",
       customBond: 0,
-      ces: []
+      ces: [],
     };
 
     const select = document.getElementById("bondQuestSelect");
@@ -72,7 +72,7 @@ export const BondApp = {
     const customSection = document.getElementById("customQuestSection");
 
     // Populate presets
-    BOND_QUESTS.forEach(q => {
+    BOND_QUESTS.forEach((q) => {
       const opt = DOMFactory.el("option", null, { value: q.key });
       opt.textContent = `${q.name} (${q.bond} pts)`;
       select.appendChild(opt);
@@ -135,7 +135,7 @@ export const BondApp = {
         this.state.slots[toIndex] = temp;
         this.saveState();
         this.buildServantSlots();
-      }
+      },
     });
 
     // Init CE selector
@@ -165,9 +165,9 @@ export const BondApp = {
       let ce, ceName, ceImage, ceBonusText;
       if (typeof ceEntry === "object" && ceEntry.groupId) {
         ce = CEById.get(ceEntry.groupId);
-        const selectedOption = ce && ce.options ? ce.options.find(o => o.id === ceEntry.optionId) : null;
-        ceName = selectedOption ? selectedOption.name : (ce ? ce.name : ceEntry.groupId);
-        ceImage = selectedOption ? selectedOption.image : (ce ? ce.image : null);
+        const selectedOption = ce && ce.options ? ce.options.find((o) => o.id === ceEntry.optionId) : null;
+        ceName = selectedOption ? selectedOption.name : ce ? ce.name : ceEntry.groupId;
+        ceImage = selectedOption ? selectedOption.image : ce ? ce.image : null;
         ceBonusText = ce ? (ce.flatBonus > 0 ? `+${ce.flatBonus} pts All` : `+${ce.bonus}% All`) : "";
       } else {
         ce = CEById.get(ceEntry);
@@ -183,7 +183,11 @@ export const BondApp = {
       const portraitArea = DOMFactory.el("div");
       if (ceImage) {
         const img = DOMFactory.createLazyImg(ceImage, "ce-portrait", { alt: ceName });
-        DOMFactory.addSimpleFallback(img, "ce-portrait-fallback", typeof ceEntry === "object" ? ceEntry.groupId : ceEntry);
+        DOMFactory.addSimpleFallback(
+          img,
+          "ce-portrait-fallback",
+          typeof ceEntry === "object" ? ceEntry.groupId : ceEntry,
+        );
         portraitArea.appendChild(img);
       } else {
         const fb = DOMFactory.el("div", "ce-portrait-fallback");
@@ -203,14 +207,12 @@ export const BondApp = {
           // Grouped CE (pre-computed bonus text)
           bonusEl.textContent = ceBonusText;
         } else if (ce.traitGroups.length > 0) {
-          const groups = ce.traitGroups.map(group =>
-            group.map(t => TraitNames[t] || t).join(" or ")
-          ).join(" and ");
+          const groups = ce.traitGroups.map((group) => group.map((t) => TraitNames[t] || t).join(" or ")).join(" and ");
           bonusEl.textContent = `+${ce.bonus}% ${groups}`;
         } else if (ce.traits.length === 0) {
           bonusEl.textContent = `+${ce.bonus}% All`;
         } else {
-          const traitNames = ce.traits.map(t => TraitNames[t] || t);
+          const traitNames = ce.traits.map((t) => TraitNames[t] || t);
           const joiner = ce.matchAll ? " and " : " or ";
           bonusEl.textContent = `+${ce.bonus}% ${traitNames.join(joiner)}`;
         }
@@ -229,7 +231,7 @@ export const BondApp = {
               this.state.ces.splice(ceSlotIndex, 1);
               this.saveState();
               this.buildCESlots();
-            }
+            },
           });
         } else {
           this._refs.CESelector.open(ceSlotIndex, false, this._createCECallbacks(ceSlotIndex));
@@ -318,9 +320,7 @@ export const BondApp = {
       }
 
       const isFrontline = i < BOND_CONSTANTS.FRONTLINE_SIZE;
-      const slotClass = isFrontline
-        ? "servant-slot servant-slot--frontline"
-        : "servant-slot servant-slot--backline";
+      const slotClass = isFrontline ? "servant-slot servant-slot--frontline" : "servant-slot servant-slot--backline";
       const slot = DOMFactory.el("div", slotClass);
       slot.dataset.slotIndex = i;
 
@@ -335,7 +335,7 @@ export const BondApp = {
           const badgeImg = DOMFactory.el("img", "", {
             src: "icons/bond_icon.webp",
             alt: "Frontline",
-            draggable: "false"
+            draggable: "false",
           });
           if (slotType === "support") {
             const imgWrap = DOMFactory.el("div", "servant-slot-frontline-img");
@@ -367,7 +367,7 @@ export const BondApp = {
           const img = DOMFactory.createLazyImg(imgSrc, "servant-slot-portrait", {
             alt: servant.name,
             draggable: "false",
-            ...(isFirstPortrait ? { loading: "eager", fetchpriority: "high" } : {})
+            ...(isFirstPortrait ? { loading: "eager", fetchpriority: "high" } : {}),
           });
           DOMFactory.addAscensionFallback(img, servant.id);
           portraitArea.appendChild(img);
@@ -379,7 +379,7 @@ export const BondApp = {
                 onSelect: (_si, servantId, asc) => this.setServant(ascSlotIndex, servantId, asc),
                 onBack: (backIdx) => {
                   this._refs.ServantSelector.open(backIdx, false, this._createServantCallbacks(backIdx));
-                }
+                },
               });
             });
           }
@@ -402,7 +402,9 @@ export const BondApp = {
         const info = DOMFactory.el("div", "servant-slot-info");
 
         const nameEl = DOMFactory.el("div", "servant-slot-name");
-        nameEl.textContent = servant ? ServantData.getAscensionName(servant.id, slotData.ascension) : slotData.servantId;
+        nameEl.textContent = servant
+          ? ServantData.getAscensionName(servant.id, slotData.ascension)
+          : slotData.servantId;
         info.appendChild(nameEl);
 
         // Type dropdown
@@ -411,9 +413,9 @@ export const BondApp = {
         const typeOpts = [
           { value: "normal", text: "Normal Servant" },
           { value: "support", text: "Support Servant" },
-          { value: "maxbond", text: "Max Bond Servant" }
+          { value: "maxbond", text: "Max Bond Servant" },
         ];
-        typeOpts.forEach(opt => {
+        typeOpts.forEach((opt) => {
           const o = DOMFactory.el("option", null, { value: opt.value });
           o.textContent = opt.text;
           if (opt.value === (slotData.type || "normal")) o.selected = true;
@@ -441,7 +443,7 @@ export const BondApp = {
             id: `slotBond_${i}`,
             min: "0",
             max: String(BOND_CONSTANTS.MAX_BOND_NEEDED),
-            value: String(slotData.bondNeeded || 0)
+            value: String(slotData.bondNeeded || 0),
           });
           inputRow.appendChild(inputLabel);
           inputRow.appendChild(input);
@@ -502,20 +504,19 @@ export const BondApp = {
     // Determine quest bond/run
     const select = document.getElementById("bondQuestSelect");
     const questKey = select.value;
-    let questName = "";
     let bondPerRun = 0;
 
     if (questKey && questKey !== "custom") {
-      const preset = BOND_QUESTS.find(q => q.key === questKey);
+      const preset = BOND_QUESTS.find((q) => q.key === questKey);
       if (preset) {
-        questName = preset.name;
         bondPerRun = preset.bond;
       }
     } else if (questKey === "custom") {
       bondPerRun = Validator.clamp(
-        document.getElementById("customBondPerRun").value, 0, BOND_CONSTANTS.MAX_CUSTOM_BOND
+        document.getElementById("customBondPerRun").value,
+        0,
+        BOND_CONSTANTS.MAX_CUSTOM_BOND,
       );
-      questName = "Custom Quest";
     }
 
     if (bondPerRun <= 0) {
@@ -600,12 +601,17 @@ export const BondApp = {
       let ceBonusPercent = maxBondBonus;
       const appliedCEs = [];
       if (isFrontline) {
-        appliedCEs.push({ id: "frontline", name: "Frontline", bonus: BOND_CONSTANTS.FRONTLINE_BONUS_PCT, image: "icons/bond_icon.webp" });
+        appliedCEs.push({
+          id: "frontline",
+          name: "Frontline",
+          bonus: BOND_CONSTANTS.FRONTLINE_BONUS_PCT,
+          image: "icons/bond_icon.webp",
+        });
       }
-      frontlineSupports.forEach(fs => {
+      frontlineSupports.forEach((fs) => {
         appliedCEs.push({ id: "support_" + fs.servantId, name: fs.name, bonus: 4, image: fs.image, isSupport: true });
       });
-      maxBondServants.forEach(mb => {
+      maxBondServants.forEach((mb) => {
         appliedCEs.push({ id: "maxbond_" + mb.servantId, name: mb.name, bonus: 25, image: mb.image, isMaxBond: true });
       });
 
@@ -614,7 +620,7 @@ export const BondApp = {
       const servantTraits = servant ? ServantData.getTraitsForAscension(servantId, ascension) : [];
       const traitSet = new Set(servantTraits);
       let flatBonus = 0;
-      this.state.ces.forEach(ceEntry => {
+      this.state.ces.forEach((ceEntry) => {
         // Resolve CE from entry (string or group object)
         let ceId, optionId;
         if (typeof ceEntry === "object" && ceEntry.groupId) {
@@ -630,7 +636,7 @@ export const BondApp = {
 
         if (ce.isGroup) {
           // Grouped CE: universal bonus (percentage or flat)
-          const option = ce.options ? ce.options.find(o => o.id === optionId) : null;
+          const option = ce.options ? ce.options.find((o) => o.id === optionId) : null;
           if (option) {
             if (ce.flatBonus > 0) {
               flatBonus += ce.flatBonus;
@@ -640,7 +646,7 @@ export const BondApp = {
                 flatBonus: ce.flatBonus,
                 image: option.image,
                 thumbImage: option.thumbImage,
-                isFlatBonus: true
+                isFlatBonus: true,
               });
             } else if (ce.bonus > 0) {
               ceBonusPercent += ce.bonus;
@@ -649,7 +655,7 @@ export const BondApp = {
                 name: option.name,
                 bonus: ce.bonus,
                 image: option.image,
-                thumbImage: option.thumbImage
+                thumbImage: option.thumbImage,
               });
             }
           }
@@ -665,9 +671,9 @@ export const BondApp = {
       });
 
       // Step 1: bonus = base * bonus% rounded down (just the bonus part)
-      let totalBonus = Math.floor(bondPerRun * ceBonusPercent / 100);
+      let totalBonus = Math.floor((bondPerRun * ceBonusPercent) / 100);
       // Step 2: apply frontline (+0.2) and support (+0.04 each) to multiplier and flat
-      const supportMult = frontlineSupports.length * BOND_CONSTANTS.SUPPORT_BONUS_PCT / 100;
+      const supportMult = (frontlineSupports.length * BOND_CONSTANTS.SUPPORT_BONUS_PCT) / 100;
       const multiplier = 1 + (isFrontline ? BOND_CONSTANTS.FRONTLINE_BONUS_PCT / 100 : 0) + supportMult;
       if (multiplier > 1) {
         totalBonus = Math.floor(totalBonus * multiplier);
@@ -676,7 +682,7 @@ export const BondApp = {
         totalBonus += Math.floor(bondPerRun * BOND_CONSTANTS.FRONTLINE_BONUS_FRACTION);
       }
       if (frontlineSupports.length > 0) {
-        totalBonus += Math.floor(bondPerRun * frontlineSupports.length * BOND_CONSTANTS.SUPPORT_BONUS_PCT / 100);
+        totalBonus += Math.floor((bondPerRun * frontlineSupports.length * BOND_CONSTANTS.SUPPORT_BONUS_PCT) / 100);
       }
       // Step 3: add flat bonus
       totalBonus += flatBonus;
@@ -693,7 +699,7 @@ export const BondApp = {
         runs: Math.ceil(bondNeeded / effectiveBond),
         ceBonus: ceBonusPercent,
         appliedCEs,
-        isFrontline
+        isFrontline,
       });
     }
 
@@ -711,13 +717,13 @@ export const BondApp = {
 
     // Per-servant results grid
     const resultGrid = DOMFactory.el("div", "bond-result-servant-grid");
-    slotResults.forEach(sr => {
+    slotResults.forEach((sr) => {
       const card = DOMFactory.el("div", "bond-result-servant-card");
 
       // Portrait
       if (sr.image) {
         const img = DOMFactory.createLazyImg(sr.image, "servant-slot-portrait", {
-          alt: sr.name
+          alt: sr.name,
         });
         card.appendChild(img);
       } else {
@@ -734,22 +740,24 @@ export const BondApp = {
       // Applied CE images grid
       if (sr.appliedCEs.length > 0) {
         const ceImgGrid = DOMFactory.el("div", "bond-result-ce-grid");
-        sr.appliedCEs.forEach(ce => {
+        sr.appliedCEs.forEach((ce) => {
           if (ce.isMaxBond) {
             // Max bond: servant portrait with bond icon overlay
             const wrap = DOMFactory.el("div", "bond-result-ce-maxbond-wrap");
             const servantImg = DOMFactory.createLazyImg(ce.image, "bond-result-ce-img", {
               alt: ce.name,
-              title: `${ce.name} +${ce.bonus}%`
+              title: `${ce.name} +${ce.bonus}%`,
             });
             DOMFactory.addSimpleFallback(servantImg, "bond-result-ce-fallback", `+${ce.bonus}%`);
             wrap.appendChild(servantImg);
             const icon = DOMFactory.el("img", "bond-result-ce-maxbond-icon", {
               src: "icons/bond_icon.webp",
               alt: "Max Bond",
-              title: "Max Bond"
+              title: "Max Bond",
             });
-            icon.onerror = () => { icon.style.display = "none"; };
+            icon.onerror = () => {
+              icon.style.display = "none";
+            };
             wrap.appendChild(icon);
             ceImgGrid.appendChild(wrap);
           } else if (ce.isSupport) {
@@ -757,29 +765,31 @@ export const BondApp = {
             const wrap = DOMFactory.el("div", "bond-result-ce-maxbond-wrap");
             const servantImg = DOMFactory.createLazyImg(ce.image, "bond-result-ce-img", {
               alt: ce.name,
-              title: `${ce.name} +${ce.bonus}%`
+              title: `${ce.name} +${ce.bonus}%`,
             });
             DOMFactory.addSimpleFallback(servantImg, "bond-result-ce-fallback", `+${ce.bonus}%`);
             wrap.appendChild(servantImg);
             const icon = DOMFactory.el("img", "bond-result-ce-maxbond-icon", {
               src: "icons/fp_icon.webp",
               alt: "Frontline Support",
-              title: "Frontline Support"
+              title: "Frontline Support",
             });
-            icon.onerror = () => { icon.style.display = "none"; };
+            icon.onerror = () => {
+              icon.style.display = "none";
+            };
             wrap.appendChild(icon);
             ceImgGrid.appendChild(wrap);
           } else if (ce.isFlatBonus) {
             const ceImg = DOMFactory.createLazyImg(ce.thumbImage, "bond-result-ce-img", {
               alt: ce.name,
-              title: `${ce.name} +${ce.flatBonus} pts`
+              title: `${ce.name} +${ce.flatBonus} pts`,
             });
             DOMFactory.addSimpleFallback(ceImg, "bond-result-ce-fallback", `+${ce.flatBonus} pts`);
             ceImgGrid.appendChild(ceImg);
           } else {
             const ceImg = DOMFactory.createLazyImg(ce.thumbImage || ce.image, "bond-result-ce-img", {
               alt: ce.name,
-              title: `${ce.name} +${ce.bonus}%`
+              title: `${ce.name} +${ce.bonus}%`,
             });
             DOMFactory.addSimpleFallback(ceImg, "bond-result-ce-fallback", `+${ce.bonus}%`);
             ceImgGrid.appendChild(ceImg);
@@ -790,9 +800,10 @@ export const BondApp = {
 
       // Bond breakdown: base(+total bonus)
       const bondInfo = DOMFactory.el("div", "bond-result-bond-info");
-      bondInfo.textContent = sr.totalBonus > 0
-        ? `${bondPerRun.toLocaleString()}(+${sr.totalBonus.toLocaleString()})`
-        : `${bondPerRun.toLocaleString()}`;
+      bondInfo.textContent =
+        sr.totalBonus > 0
+          ? `${bondPerRun.toLocaleString()}(+${sr.totalBonus.toLocaleString()})`
+          : `${bondPerRun.toLocaleString()}`;
       card.appendChild(bondInfo);
 
       // Runs count
@@ -815,7 +826,9 @@ export const BondApp = {
   saveState() {
     try {
       localStorage.setItem(BOND_STORAGE_KEY, JSON.stringify(this.state));
-    } catch (e) { /* ignore */ }
+    } catch (_e) {
+      /* ignore */
+    }
   },
 
   loadState() {
@@ -828,17 +841,21 @@ export const BondApp = {
       // Migrate old format (single bondNeeded) to new slots format
       let slots;
       if (data.slots && Array.isArray(data.slots)) {
-        slots = data.slots
-          .map(s => ({
-            servantId: s.servantId || null,
-            bondNeeded: Validator.clamp(s.bondNeeded || 0, 0, BOND_CONSTANTS.MAX_BOND_NEEDED),
-            type: ["normal", "support", "maxbond"].includes(s.type) ? s.type : "normal",
-            ascension: (typeof s.ascension === "string" && s.ascension) ? s.ascension : null
-          }));
+        slots = data.slots.map((s) => ({
+          servantId: s.servantId || null,
+          bondNeeded: Validator.clamp(s.bondNeeded || 0, 0, BOND_CONSTANTS.MAX_BOND_NEEDED),
+          type: ["normal", "support", "maxbond"].includes(s.type) ? s.type : "normal",
+          ascension: typeof s.ascension === "string" && s.ascension ? s.ascension : null,
+        }));
       } else {
         slots = [];
         if (data.bondNeeded) {
-          slots.push({ servantId: null, bondNeeded: Validator.clamp(data.bondNeeded, 0, BOND_CONSTANTS.MAX_BOND_NEEDED), type: "normal", ascension: null });
+          slots.push({
+            servantId: null,
+            bondNeeded: Validator.clamp(data.bondNeeded, 0, BOND_CONSTANTS.MAX_BOND_NEEDED),
+            type: "normal",
+            ascension: null,
+          });
         }
       }
 
@@ -848,22 +865,24 @@ export const BondApp = {
       }
 
       return {
-        slots: slots.map(s => ({
+        slots: slots.map((s) => ({
           servantId: s.servantId || null,
           bondNeeded: Validator.clamp(s.bondNeeded || 0, 0, BOND_CONSTANTS.MAX_BOND_NEEDED),
           type: s.type || "normal",
-          ascension: (typeof s.ascension === "string" && s.ascension) ? s.ascension : null
+          ascension: typeof s.ascension === "string" && s.ascension ? s.ascension : null,
         })),
         selectedQuest: typeof data.selectedQuest === "string" ? data.selectedQuest : "",
         customBond: Validator.clamp(data.customBond || 0, 0, BOND_CONSTANTS.MAX_CUSTOM_BOND),
-        ces: Array.isArray(data.ces) ? data.ces.filter(entry => {
-          if (typeof entry === "string" && entry) return true;
-          if (entry && typeof entry === "object" && entry.groupId && entry.optionId) return true;
-          return false;
-        }) : []
+        ces: Array.isArray(data.ces)
+          ? data.ces.filter((entry) => {
+              if (typeof entry === "string" && entry) return true;
+              if (entry && typeof entry === "object" && entry.groupId && entry.optionId) return true;
+              return false;
+            })
+          : [],
       };
-    } catch (e) {
+    } catch (_e) {
       return null;
     }
-  }
+  },
 };

@@ -13,35 +13,39 @@ export const TabNavigator = {
     try {
       const savedTab = localStorage.getItem("fgo_active_tab");
       if (savedTab) {
-        navbar.querySelectorAll(".tab-btn").forEach(btn => {
+        navbar.querySelectorAll(".tab-btn").forEach((btn) => {
           btn.classList.toggle("active", btn.dataset.tab === savedTab);
         });
-        navbar.querySelectorAll(".navbar-dropdown-item").forEach(btn => {
+        navbar.querySelectorAll(".navbar-dropdown-item").forEach((btn) => {
           btn.classList.toggle("active", btn.dataset.tab === savedTab);
         });
-        document.querySelectorAll(".tab-panel").forEach(panel => {
+        document.querySelectorAll(".tab-panel").forEach((panel) => {
           panel.classList.toggle("active", panel.id === "panel-" + savedTab);
         });
       }
-    } catch (e) { /* ignore */ }
+    } catch (_e) {
+      /* ignore */
+    }
 
     // Remove CSS-only tab override — JS now controls tab state
     document.documentElement.removeAttribute("data-tab");
 
     function switchTab(tab) {
-      navbar.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-      navbar.querySelectorAll(".navbar-dropdown-item").forEach(b => b.classList.remove("active"));
-      document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+      navbar.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
+      navbar.querySelectorAll(".navbar-dropdown-item").forEach((b) => b.classList.remove("active"));
+      document.querySelectorAll(".tab-panel").forEach((p) => p.classList.remove("active"));
 
       // Activate matching buttons in both tab bar and dropdown
-      navbar.querySelectorAll('[data-tab="' + tab + '"]').forEach(b => b.classList.add("active"));
+      navbar.querySelectorAll('[data-tab="' + tab + '"]').forEach((b) => b.classList.add("active"));
       document.getElementById("panel-" + tab).classList.add("active");
 
       if (tab === "cefilter") ceFilterInit();
 
       try {
         localStorage.setItem("fgo_active_tab", tab);
-      } catch (e) { /* ignore */ }
+      } catch (_e) {
+        /* ignore */
+      }
 
       closeDropdown();
     }
@@ -84,5 +88,5 @@ export const TabNavigator = {
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") closeDropdown();
     });
-  }
+  },
 };

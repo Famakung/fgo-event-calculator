@@ -1,10 +1,23 @@
 {
   "private": true,
+  "type": "module",
   "scripts": {
     "build": "esbuild src/main.js --bundle --outfile=app.min.js --minify && esbuild src/ce-match-worker.js --bundle --outfile=ce-match-worker.min.js --minify",
-    "dev": "esbuild src/main.js --bundle --outfile=app.bundle.js --sourcemap --watch"
+    "dev": "esbuild src/main.js --bundle --outfile=app.bundle.js --sourcemap --watch",
+    "lint": "npm run lint:js && npm run lint:css && npm run lint:html",
+    "lint:js": "eslint src/ data/",
+    "lint:css": "stylelint styles.css",
+    "lint:html": "htmlhint index.html",
+    "format": "prettier --write \"src/**/*.js\" \"data/**/*.js\" \"styles.css\" \"*.js\" && stylelint --fix styles.css",
+    "format:check": "prettier --check \"src/**/*.js\" \"data/**/*.js\" \"styles.css\" \"*.js\""
   },
   "devDependencies": {
-    "esbuild": "^0.25.0"
+    "@eslint/js": "^10.0.1",
+    "esbuild": "^0.25.0",
+    "eslint": "^10.2.0",
+    "htmlhint": "^1.9.2",
+    "prettier": "^3.8.3",
+    "stylelint": "^17.8.0",
+    "stylelint-config-standard": "^40.0.0"
   }
 }

@@ -1,4 +1,4 @@
-import { ServantData, CEList, CEById, TraitCEs, TraitNames } from "./data.js";
+import { ServantData, CEList, TraitCEs } from "./data.js";
 import { CLASS_FILTERS, RARITY_FILTERS } from "./constants.js";
 import { DOMFactory, CollapsibleFactory, debounce } from "./presentation.js";
 
@@ -60,11 +60,11 @@ export const ServantSelector = {
 
     const frag = document.createDocumentFragment();
 
-    servants.forEach(servant => {
+    servants.forEach((servant) => {
       const item = DOMFactory.el("div", "servant-picker-item");
 
       const img = DOMFactory.createLazyImg(servant.image, null, {
-        alt: servant.name
+        alt: servant.name,
       });
       DOMFactory.addAscensionFallback(img, servant.id);
 
@@ -100,17 +100,19 @@ export const ServantSelector = {
     let result = ServantData.servants;
     const query = this._searchQuery.toLowerCase().trim();
     if (query) {
-      result = result.filter(s =>
-        s.id.toLowerCase().includes(query) || ServantData.getAllNames(s.id).some(n => n.toLowerCase().includes(query))
+      result = result.filter(
+        (s) =>
+          s.id.toLowerCase().includes(query) ||
+          ServantData.getAllNames(s.id).some((n) => n.toLowerCase().includes(query)),
       );
     }
     if (this.classFilters.length > 0) {
       const classSet = new Set(this.classFilters);
-      result = result.filter(s => s.traits.some(t => classSet.has(t)));
+      result = result.filter((s) => s.traits.some((t) => classSet.has(t)));
     }
     if (this.rarityFilters.length > 0) {
       const raritySet = new Set(this.rarityFilters);
-      result = result.filter(s => s.traits.some(t => raritySet.has(t)));
+      result = result.filter((s) => s.traits.some((t) => raritySet.has(t)));
     }
     return result;
   },
@@ -118,27 +120,33 @@ export const ServantSelector = {
   buildFilterArea() {
     const container = document.getElementById("servantFilterArea");
     if (!container) return;
-    CollapsibleFactory.populateFilterArea(container, this._searchQuery,
-      (query) => { this._searchQuery = query; this.filter(); },
-      (content) => { this._buildClassFilter(content); this._buildRarityFilter(content); }
+    CollapsibleFactory.populateFilterArea(
+      container,
+      this._searchQuery,
+      (query) => {
+        this._searchQuery = query;
+        this.filter();
+      },
+      (content) => {
+        this._buildClassFilter(content);
+        this._buildRarityFilter(content);
+      },
     );
   },
 
   _buildClassFilter(container) {
     const { standard, extra } = CLASS_FILTERS;
 
-    const filterDiv = DOMFactory.el("div", "servant-class-filter");
+    const filterDiv = DOMFactory.el("div", "class-filter");
     const selected = new Set(this.classFilters);
 
     const buildRow = (classes) => {
-      const row = DOMFactory.el("div", "servant-class-row");
-      classes.forEach(cls => {
-        const btn = DOMFactory.el("div", "servant-class-btn" +
-          (selected.has(cls.id) ? " active" : ""));
+      classes.forEach((cls) => {
+        const btn = DOMFactory.el("div", "class-btn" + (selected.has(cls.id) ? " active" : ""));
         const img = DOMFactory.el("img", "", {
           src: "icons/classes/" + cls.icon + ".webp",
           alt: cls.label,
-          title: cls.label
+          title: cls.label,
         });
         btn.appendChild(img);
         btn.addEventListener("click", () => {
@@ -152,9 +160,8 @@ export const ServantSelector = {
           this.classFilters = [...selected];
           this.filter();
         });
-        row.appendChild(btn);
+        filterDiv.appendChild(btn);
       });
-      filterDiv.appendChild(row);
     };
 
     buildRow(standard);
@@ -165,12 +172,11 @@ export const ServantSelector = {
   _buildRarityFilter(container) {
     const rarities = RARITY_FILTERS;
 
-    const filterDiv = DOMFactory.el("div", "servant-rarity-filter");
+    const filterDiv = DOMFactory.el("div", "rarity-filter");
     const selected = new Set(this.rarityFilters);
 
-    rarities.forEach(rarity => {
-      const btn = DOMFactory.el("div", "servant-rarity-btn" +
-        (selected.has(rarity.id) ? " active" : ""));
+    rarities.forEach((rarity) => {
+      const btn = DOMFactory.el("div", "rarity-btn" + (selected.has(rarity.id) ? " active" : ""));
       btn.textContent = rarity.label;
       btn.addEventListener("click", () => {
         if (selected.has(rarity.id)) {
@@ -187,7 +193,7 @@ export const ServantSelector = {
     });
 
     container.appendChild(filterDiv);
-  }
+  },
 };
 
 /* ============================================
@@ -250,12 +256,12 @@ export const AscensionSelector = {
     grid.replaceChildren();
 
     const options = ServantData.getAscensionOptions(this.servant.id);
-    options.forEach(asc => {
+    options.forEach((asc) => {
       const item = DOMFactory.el("div", "servant-picker-item");
 
       const imgSrc = ServantData.getImageForAscension(this.servant.id, asc);
       const img = DOMFactory.createLazyImg(imgSrc, null, {
-        alt: ServantData.getAscensionLabel(this.servant.id, asc)
+        alt: ServantData.getAscensionLabel(this.servant.id, asc),
       });
       DOMFactory.addSimpleFallback(img, "servant-slot-portrait-fallback", this.servant.id);
 
@@ -273,7 +279,7 @@ export const AscensionSelector = {
 
       grid.appendChild(item);
     });
-  }
+  },
 };
 
 /* ============================================
@@ -326,7 +332,7 @@ export const ServantDrag = {
     const target = document.elementFromPoint(touch.clientX, touch.clientY);
     const slot = target ? target.closest(".servant-slot") : null;
 
-    grid.querySelectorAll(".servant-slot.drag-over").forEach(s => s.classList.remove("drag-over"));
+    grid.querySelectorAll(".servant-slot.drag-over").forEach((s) => s.classList.remove("drag-over"));
     if (slot && slot.dataset.slotIndex !== undefined) {
       const targetIndex = parseInt(slot.dataset.slotIndex);
       if (targetIndex !== this.dragIndex) {
@@ -351,12 +357,12 @@ export const ServantDrag = {
       }
     }
 
-    grid.querySelectorAll(".servant-slot").forEach(s => {
+    grid.querySelectorAll(".servant-slot").forEach((s) => {
       s.classList.remove("dragging", "drag-over");
     });
     this.dragIndex = null;
     this.isDragging = false;
-  }
+  },
 };
 
 /* ============================================
@@ -412,7 +418,7 @@ export const CESelector = {
 
     const frag = document.createDocumentFragment();
 
-    ces.forEach(ce => {
+    ces.forEach((ce) => {
       const item = DOMFactory.el("div", "servant-picker-item");
 
       const img = DOMFactory.createLazyImg(ce.image, null, { alt: ce.name });
@@ -448,19 +454,18 @@ export const CESelector = {
       this.renderGrid(CEList);
       return;
     }
-    const filtered = CEList.filter(c =>
-      c.id.toLowerCase().includes(q) || c.name.toLowerCase().includes(q)
-    );
+    const filtered = CEList.filter((c) => c.id.toLowerCase().includes(q) || c.name.toLowerCase().includes(q));
     this.renderGrid(filtered);
   },
 
   buildFilterArea() {
     const container = document.getElementById("ceFilterArea");
     if (!container) return;
-    CollapsibleFactory.populateFilterArea(container, this._searchQuery,
-      (query) => { this._searchQuery = query; this.filter(); }
-    );
-  }
+    CollapsibleFactory.populateFilterArea(container, this._searchQuery, (query) => {
+      this._searchQuery = query;
+      this.filter();
+    });
+  },
 };
 
 /* ============================================
@@ -532,7 +537,7 @@ export const CESubSelector = {
     grid.replaceChildren();
 
     const options = this.groupCE.options || [];
-    options.forEach(opt => {
+    options.forEach((opt) => {
       const item = DOMFactory.el("div", "servant-picker-item");
 
       const img = DOMFactory.createLazyImg(opt.image, null, { alt: opt.name });
@@ -555,7 +560,7 @@ export const CESubSelector = {
 
       grid.appendChild(item);
     });
-  }
+  },
 };
 
 /* ============================================
@@ -612,10 +617,9 @@ export const CEFilterPicker = {
 
     const frag = document.createDocumentFragment();
 
-    ces.forEach(ce => {
+    ces.forEach((ce) => {
       const isSelected = this.tempSelected.has(ce.id);
-      const item = DOMFactory.el("div", "servant-picker-item ce-filter-picker-item" +
-        (isSelected ? " selected" : ""));
+      const item = DOMFactory.el("div", "servant-picker-item ce-filter-picker-item" + (isSelected ? " selected" : ""));
       item.dataset.ceId = ce.id;
 
       DOMFactory.appendCheckMark(item);
@@ -657,7 +661,10 @@ export const CEFilterPicker = {
     if (selectedIds.length > 0) {
       for (const selId of selectedIds) {
         const set = this._ceMatchEntries[selId];
-        if (!set) { intersection = new Set(); break; }
+        if (!set) {
+          intersection = new Set();
+          break;
+        }
         if (!intersection) {
           intersection = new Set(set);
         } else {
@@ -668,7 +675,7 @@ export const CEFilterPicker = {
       }
     }
 
-    grid.querySelectorAll(".ce-filter-picker-item").forEach(item => {
+    grid.querySelectorAll(".ce-filter-picker-item").forEach((item) => {
       const ceId = item.dataset.ceId;
       if (this.tempSelected.has(ceId)) {
         item.classList.remove("ce-filter-picker-item--no-match");
@@ -683,7 +690,7 @@ export const CEFilterPicker = {
         item.classList.add("ce-filter-picker-item--no-match");
         return;
       }
-      const hasOverlap = [...intersection].some(idx => entries.has(idx));
+      const hasOverlap = [...intersection].some((idx) => entries.has(idx));
       item.classList.toggle("ce-filter-picker-item--no-match", !hasOverlap);
     });
   },
@@ -695,19 +702,18 @@ export const CEFilterPicker = {
       this.renderGrid(traitCEs);
       return;
     }
-    const filtered = traitCEs.filter(c =>
-      c.id.toLowerCase().includes(q) || c.name.toLowerCase().includes(q)
-    );
+    const filtered = traitCEs.filter((c) => c.id.toLowerCase().includes(q) || c.name.toLowerCase().includes(q));
     this.renderGrid(filtered);
   },
 
   buildFilterArea() {
     const container = document.getElementById("ceFilterPickerArea");
     if (!container) return;
-    CollapsibleFactory.populateFilterArea(container, this._searchQuery,
-      (query) => { this._searchQuery = query; this.filter(); }
-    );
-  }
+    CollapsibleFactory.populateFilterArea(container, this._searchQuery, (query) => {
+      this._searchQuery = query;
+      this.filter();
+    });
+  },
 };
 
 /* ============================================
@@ -744,7 +750,7 @@ export const CEServantOverlap = {
 
   open(entry) {
     if (!this._modal) return;
-    const clickedCEIds = new Set(entry.matchingCEs.map(c => c.id));
+    const clickedCEIds = new Set(entry.matchingCEs.map((c) => c.id));
     const totalCEs = clickedCEIds.size;
     if (totalCEs === 0) return;
 
@@ -759,14 +765,14 @@ export const CEServantOverlap = {
 
     const titleEl = document.getElementById("ceOverlapTitle");
     if (titleEl) {
-      titleEl.textContent = "Servants sharing CEs with " + entry.servant.name;
+      titleEl.textContent = entry.servant.name;
     }
 
     const allMatches = this._getCEMatches();
     this._allEntries = [];
-    allMatches.forEach(other => {
+    allMatches.forEach((other) => {
       if (other.servant.id === entry.servant.id) return;
-      const overlap = other.matchingCEs.filter(ce => clickedCEIds.has(ce.id)).length;
+      const overlap = other.matchingCEs.filter((ce) => clickedCEIds.has(ce.id)).length;
       if (overlap > 0) {
         this._allEntries.push({ entry: other, overlap: overlap });
       }
@@ -796,30 +802,35 @@ export const CEServantOverlap = {
 
     this._buildCEFilter(container);
 
-    const content = DOMFactory.el("div", "ceoverlap-collapsible-content");
+    const content = DOMFactory.el("div", "filter-content");
 
-    content.appendChild(CollapsibleFactory.createSearchInput(this._searchQuery, (query) => {
-      this._searchQuery = query;
-      this.updateFilters();
-    }));
+    content.appendChild(
+      CollapsibleFactory.createSearchInput(this._searchQuery, (query) => {
+        this._searchQuery = query;
+        this.updateFilters();
+      }),
+    );
+
+    const group = DOMFactory.el("div", "filter-group");
 
     const availableClassIds = new Set();
     const availableRarityIds = new Set();
     this._allEntries.forEach(({ entry }) => {
-      entry.servant.traits.forEach(t => {
+      entry.servant.traits.forEach((t) => {
         if (t.startsWith("01")) availableClassIds.add(t);
         if (t.startsWith("04")) availableRarityIds.add(t);
       });
     });
-    this._buildClassFilter(content, availableClassIds);
-    this._buildRarityFilter(content, availableRarityIds);
+    this._buildClassFilter(group, availableClassIds);
+    this._buildRarityFilter(group, availableRarityIds);
 
-    this._buildCountFilter(content, this._getFilteredEntries());
+    this._buildCountFilter(group, this._getFilteredEntries());
+    content.appendChild(group);
     container.appendChild(CollapsibleFactory.build("Filters", content));
 
     // Cache button refs for fast visibility updates
-    this._overlapClassBtns = Array.from(container.querySelectorAll(".ceoverlap-class-btn"));
-    this._overlapRarityBtns = Array.from(container.querySelectorAll(".ceoverlap-rarity-btn"));
+    this._overlapClassBtns = Array.from(container.querySelectorAll(".class-btn"));
+    this._overlapRarityBtns = Array.from(container.querySelectorAll(".rarity-btn"));
 
     this.renderGrid();
   },
@@ -828,9 +839,11 @@ export const CEServantOverlap = {
     const filterDiv = DOMFactory.el("div", "ceoverlap-ce-filter");
     const selected = this._selectedCEFilter;
 
-    this._clickedCEs.forEach(ce => {
-      const btn = DOMFactory.el("div", "servant-picker-item ce-filter-picker-item" +
-        (selected.has(ce.id) ? " selected" : ""));
+    this._clickedCEs.forEach((ce) => {
+      const btn = DOMFactory.el(
+        "div",
+        "servant-picker-item ce-filter-picker-item" + (selected.has(ce.id) ? " selected" : ""),
+      );
       DOMFactory.appendCheckMark(btn);
       const img = DOMFactory.createLazyImg(ce.image, null, { alt: ce.name });
       DOMFactory.addSimpleFallback(img, "servant-slot-portrait-fallback", ce.id);
@@ -860,34 +873,29 @@ export const CEServantOverlap = {
 
     if (this._selectedCEFilter.size > 0) {
       filtered = filtered.filter(({ entry }) =>
-        [...this._selectedCEFilter].every(id =>
-          entry.matchingCEs.some(ce => ce.id === id)
-        )
+        [...this._selectedCEFilter].every((id) => entry.matchingCEs.some((ce) => ce.id === id)),
       );
     }
 
     const query = this._searchQuery.toLowerCase().trim();
     if (query) {
-      filtered = filtered.filter(({ entry }) =>
-        entry.servant.id.toLowerCase().includes(query) ||
-        entry.servant.name.toLowerCase().includes(query) ||
-        ServantData.getAllNames(entry.servant.id).some(n => n.toLowerCase().includes(query))
+      filtered = filtered.filter(
+        ({ entry }) =>
+          entry.servant.id.toLowerCase().includes(query) ||
+          entry.servant.name.toLowerCase().includes(query) ||
+          ServantData.getAllNames(entry.servant.id).some((n) => n.toLowerCase().includes(query)),
       );
     }
 
     if (!options?.skipClassRarity) {
       if (this._classFilters.length > 0) {
         const classSet = new Set(this._classFilters);
-        filtered = filtered.filter(({ entry }) =>
-          entry.servant.traits.some(t => classSet.has(t))
-        );
+        filtered = filtered.filter(({ entry }) => entry.servant.traits.some((t) => classSet.has(t)));
       }
 
       if (this._rarityFilters.length > 0) {
         const raritySet = new Set(this._rarityFilters);
-        filtered = filtered.filter(({ entry }) =>
-          entry.servant.traits.some(t => raritySet.has(t))
-        );
+        filtered = filtered.filter(({ entry }) => entry.servant.traits.some((t) => raritySet.has(t)));
       }
     }
 
@@ -906,42 +914,41 @@ export const CEServantOverlap = {
     const availableClassIds = new Set();
     const availableRarityIds = new Set();
     preFiltered.forEach(({ entry }) => {
-      entry.servant.traits.forEach(t => {
+      entry.servant.traits.forEach((t) => {
         if (t.startsWith("01")) availableClassIds.add(t);
         if (t.startsWith("04")) availableRarityIds.add(t);
       });
     });
 
-    (this._overlapClassBtns || []).forEach(btn => {
+    (this._overlapClassBtns || []).forEach((btn) => {
       const avail = availableClassIds.has(btn.dataset.traitId);
       btn.style.display = avail ? "" : "none";
       if (!avail) btn.classList.remove("active");
     });
-    (this._overlapRarityBtns || []).forEach(btn => {
+    (this._overlapRarityBtns || []).forEach((btn) => {
       const avail = availableRarityIds.has(btn.dataset.traitId);
       btn.style.display = avail ? "" : "none";
       if (!avail) btn.classList.remove("active");
     });
 
-    this._classFilters = this._classFilters.filter(id => availableClassIds.has(id));
-    this._rarityFilters = this._rarityFilters.filter(id => availableRarityIds.has(id));
+    this._classFilters = this._classFilters.filter((id) => availableClassIds.has(id));
+    this._rarityFilters = this._rarityFilters.filter((id) => availableRarityIds.has(id));
   },
 
   _buildCountFilter(container, preFiltered) {
-    const availableCounts = new Set(preFiltered.map(e => e.entry.matchingCEs.length));
+    const availableCounts = new Set(preFiltered.map((e) => e.entry.matchingCEs.length));
     if (availableCounts.size === 0) return;
 
-    this._selectedCounts.forEach(n => {
+    this._selectedCounts.forEach((n) => {
       if (!availableCounts.has(n)) this._selectedCounts.delete(n);
     });
 
-    const filterRow = DOMFactory.el("div", "ceoverlap-filter-row");
+    const filterRow = DOMFactory.el("div", "ce-count-filter");
     const selected = this._selectedCounts;
 
     for (let n = 1; n <= Math.max(...availableCounts); n++) {
       if (!availableCounts.has(n)) continue;
-      const btn = DOMFactory.el("div", "cefilter-match-count-btn" +
-        (selected.has(n) ? " active" : ""));
+      const btn = DOMFactory.el("div", "ce-count-btn" + (selected.has(n) ? " active" : ""));
       btn.textContent = n + " CE";
       btn.addEventListener("click", () => {
         if (selected.has(n)) {
@@ -962,11 +969,11 @@ export const CEServantOverlap = {
     const container = document.getElementById("ceOverlapFilterArea");
     if (!container) return;
 
-    const content = container.querySelector(".ceoverlap-collapsible-content");
-    const oldRow = (content || container).querySelector(".ceoverlap-filter-row");
+    const group = container.querySelector(".filter-group");
+    const oldRow = (group || container).querySelector(".ce-count-filter");
     if (oldRow) oldRow.remove();
 
-    this._buildCountFilter(content || container, preFiltered);
+    this._buildCountFilter(group || container, preFiltered);
     const grid = document.getElementById("ceOverlapGrid");
     if (grid) grid.replaceChildren();
   },
@@ -974,19 +981,17 @@ export const CEServantOverlap = {
   _buildClassFilter(container, availableClassIds) {
     const { standard, extra } = CLASS_FILTERS;
 
-    const filterDiv = DOMFactory.el("div", "ceoverlap-class-filter");
+    const filterDiv = DOMFactory.el("div", "class-filter");
 
     const buildRow = (classes) => {
-      const row = DOMFactory.el("div", "ceoverlap-class-row");
-      classes.forEach(cls => {
+      classes.forEach((cls) => {
         if (!availableClassIds.has(cls.id)) return;
-        const btn = DOMFactory.el("div", "ceoverlap-class-btn" +
-          (this._classFilters.includes(cls.id) ? " active" : ""));
+        const btn = DOMFactory.el("div", "class-btn" + (this._classFilters.includes(cls.id) ? " active" : ""));
         btn.dataset.traitId = cls.id;
         const img = DOMFactory.el("img", "", {
           src: "icons/classes/" + cls.icon + ".webp",
           alt: cls.label,
-          title: cls.label
+          title: cls.label,
         });
         btn.appendChild(img);
         btn.addEventListener("click", () => {
@@ -1001,9 +1006,8 @@ export const CEServantOverlap = {
           this._classFilters = [...selected];
           this._debouncedUpdateFilters();
         });
-        row.appendChild(btn);
+        filterDiv.appendChild(btn);
       });
-      filterDiv.appendChild(row);
     };
 
     buildRow(standard);
@@ -1014,12 +1018,11 @@ export const CEServantOverlap = {
   _buildRarityFilter(container, availableRarityIds) {
     const rarities = RARITY_FILTERS;
 
-    const filterDiv = DOMFactory.el("div", "ceoverlap-rarity-filter");
+    const filterDiv = DOMFactory.el("div", "rarity-filter");
 
-    rarities.forEach(rarity => {
+    rarities.forEach((rarity) => {
       if (!availableRarityIds.has(rarity.id)) return;
-      const btn = DOMFactory.el("div", "ceoverlap-rarity-btn" +
-        (this._rarityFilters.includes(rarity.id) ? " active" : ""));
+      const btn = DOMFactory.el("div", "rarity-btn" + (this._rarityFilters.includes(rarity.id) ? " active" : ""));
       btn.dataset.traitId = rarity.id;
       btn.textContent = rarity.label;
       btn.addEventListener("click", () => {
@@ -1050,7 +1053,7 @@ export const CEServantOverlap = {
     let filtered = preFiltered || this._getFilteredEntries();
 
     if (this._selectedCounts.size > 0) {
-      filtered = filtered.filter(e => this._selectedCounts.has(e.entry.matchingCEs.length));
+      filtered = filtered.filter((e) => this._selectedCounts.has(e.entry.matchingCEs.length));
     }
 
     if (filtered.length === 0) {
@@ -1070,12 +1073,11 @@ export const CEServantOverlap = {
   createServantMiniCard(entry, overlapCEIds) {
     const card = DOMFactory.el("div", "cefilter-servant-card");
 
-    const imgAsc = (!entry.baseMatchesAll && entry.matchedAscensions && entry.matchedAscensions.length > 0)
-      ? (entry.primaryAscension || entry.matchedAscensions[0])
-      : null;
-    const imgSrc = imgAsc
-      ? ServantData.getImageForAscension(entry.servant.id, imgAsc)
-      : entry.servant.image;
+    const imgAsc =
+      !entry.baseMatchesAll && entry.matchedAscensions && entry.matchedAscensions.length > 0
+        ? entry.primaryAscension || entry.matchedAscensions[0]
+        : null;
+    const imgSrc = imgAsc ? ServantData.getImageForAscension(entry.servant.id, imgAsc) : entry.servant.image;
 
     const img = DOMFactory.createLazyImg(imgSrc, "servant-slot-portrait", { alt: entry.servant.name });
     DOMFactory.addAscensionFallback(img, entry.servant.id);
@@ -1091,18 +1093,18 @@ export const CEServantOverlap = {
     if (!entry.baseMatchesAll && entry.matchedAscensions && entry.matchedAscensions.length > 0) {
       const ascLabel = DOMFactory.el("div", "cefilter-ascension-label");
       ascLabel.textContent = entry.matchedAscensions
-        .map(key => ServantData.getAscensionLabel(entry.servant.id, key))
+        .map((key) => ServantData.getAscensionLabel(entry.servant.id, key))
         .join("\n");
       card.appendChild(ascLabel);
     }
 
     if (entry.matchingCEs && entry.matchingCEs.length > 0) {
       const badges = DOMFactory.el("div", "cefilter-match-badges");
-      entry.matchingCEs.forEach(ce => {
-        const badge = DOMFactory.createLazyImg(ce.thumbImage,
-          "cefilter-match-badge" +
-          (overlapCEIds.has(ce.id) ? "" : " cefilter-match-badge--nonshared"),
-          { alt: ce.name, title: ce.name }
+      entry.matchingCEs.forEach((ce) => {
+        const badge = DOMFactory.createLazyImg(
+          ce.thumbImage,
+          "cefilter-match-badge" + (overlapCEIds.has(ce.id) ? "" : " cefilter-match-badge--nonshared"),
+          { alt: ce.name, title: ce.name },
         );
         DOMFactory.addSimpleFallback(badge, "cefilter-match-badge-fallback", ce.id);
         badges.appendChild(badge);
@@ -1111,5 +1113,5 @@ export const CEServantOverlap = {
     }
 
     return card;
-  }
+  },
 };

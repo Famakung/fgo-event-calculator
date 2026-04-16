@@ -15,19 +15,19 @@ export const BOND_CONSTANTS = {
   MAX_BOND_BONUS_PCT: 25,
   SUPPORT_BONUS_PCT: 4,
   FRONTLINE_BONUS_PCT: 20,
-  FRONTLINE_BONUS_FRACTION: 0.2
+  FRONTLINE_BONUS_FRACTION: 0.2,
 };
 
 export const TIER_COLORS = {
   bronze: "#cd7f32",
   silver: "#71717a",
-  gold: "#eab308"
+  gold: "#eab308",
 };
 
 export const QUEST_DROPS = {
   bronze: { primary: "bronze", secondary: "silver" },
   silver: { primary: "silver", secondary: "gold" },
-  gold: { primary: "gold", secondary: "bronze" }
+  gold: { primary: "gold", secondary: "bronze" },
 };
 
 export const CLASS_FILTERS = {
@@ -38,7 +38,7 @@ export const CLASS_FILTERS = {
     { id: "0103", icon: "rider", label: "Rider" },
     { id: "0104", icon: "caster", label: "Caster" },
     { id: "0105", icon: "assassin", label: "Assassin" },
-    { id: "0106", icon: "berserker", label: "Berserker" }
+    { id: "0106", icon: "berserker", label: "Berserker" },
   ],
   extra: [
     { id: "0107", icon: "shielder", label: "Shielder" },
@@ -48,8 +48,8 @@ export const CLASS_FILTERS = {
     { id: "0109", icon: "alterego", label: "Alter Ego" },
     { id: "0117", icon: "foreigner", label: "Foreigner" },
     { id: "0120", icon: "pretender", label: "Pretender" },
-    { id: "0124", icon: "beast", label: "Beast" }
-  ]
+    { id: "0124", icon: "beast", label: "Beast" },
+  ],
 };
 
 export const RARITY_FILTERS = [
@@ -58,11 +58,11 @@ export const RARITY_FILTERS = [
   { id: "0402", label: "2 \u2605" },
   { id: "0403", label: "3 \u2605" },
   { id: "0404", label: "4 \u2605" },
-  { id: "0405", label: "5 \u2605" }
+  { id: "0405", label: "5 \u2605" },
 ];
 
 export const BOND_QUESTS = [
   { key: "fq83", name: "Free Quest Lv.83", bond: 835 },
   { key: "fq84", name: "Free Quest Lv.84", bond: 855 },
-  { key: "gd100", name: "Grand Duel Lv.100\u2605\u2605\u2605", bond: 4748 }
+  { key: "gd100", name: "Grand Duel Lv.100\u2605\u2605\u2605", bond: 4748 },
 ];

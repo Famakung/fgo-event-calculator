@@ -4,7 +4,7 @@ import { Schema, Validator } from "./domain.js";
 export const StateManager = {
   createInitial() {
     const tiers = {};
-    TIERS.forEach(tier => {
+    TIERS.forEach((tier) => {
       tiers[tier] = { need: 0, have: 0, bonus: 0 };
     });
     return {
@@ -12,7 +12,7 @@ export const StateManager = {
       baseDrop: Schema.baseDrop.default,
       primaryMultiplier: Schema.primaryMultiplier.default,
       secondaryMultiplier: Schema.secondaryMultiplier.default,
-      results: null
+      results: null,
     };
   },
 
@@ -23,29 +23,29 @@ export const StateManager = {
         ...state.tiers,
         [tier]: {
           ...state.tiers[tier],
-          [field]: value
-        }
-      }
+          [field]: value,
+        },
+      },
     };
   },
 
   updateSetting(state, key, value) {
     return { ...state, [key]: value };
-  }
+  },
 };
 
 export const Persistence = {
   save(state) {
     try {
       const data = {
-        ...TIERS.flatMap(tier =>
-          TIER_FIELDS.map(field => ({
-            [`${tier}${field}`]: state.tiers[tier][field.toLowerCase()]
-          }))
+        ...TIERS.flatMap((tier) =>
+          TIER_FIELDS.map((field) => ({
+            [`${tier}${field}`]: state.tiers[tier][field.toLowerCase()],
+          })),
         ).reduce((a, b) => ({ ...a, ...b }), {}),
         baseDrop: state.baseDrop,
         primaryMultiplier: state.primaryMultiplier,
-        secondaryMultiplier: state.secondaryMultiplier
+        secondaryMultiplier: state.secondaryMultiplier,
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
       return true;
@@ -66,14 +66,11 @@ export const Persistence = {
 
       const state = StateManager.createInitial();
 
-      TIERS.forEach(tier => {
-        TIER_FIELDS.forEach(field => {
+      TIERS.forEach((tier) => {
+        TIER_FIELDS.forEach((field) => {
           const key = `${tier}${field}`;
           if (key in sanitized) {
-            state.tiers[tier][field.toLowerCase()] = Validator.validate(
-              sanitized[key],
-              Schema.tier[field]
-            );
+            state.tiers[tier][field.toLowerCase()] = Validator.validate(sanitized[key], Schema.tier[field]);
           }
         });
       });
@@ -93,5 +90,5 @@ export const Persistence = {
       console.warn("Failed to load:", e);
       return null;
     }
-  }
+  },
 };

@@ -10,10 +10,10 @@ export const UIBuilder = {
   // DOM cache
   elements: {},
 
-  buildMaterialsGrid(container, state) {
+  buildMaterialsGrid(container, _state) {
     // Elements already exist in HTML — cache input refs and add icon error handlers
-    TIERS.forEach(tier => {
-      TIER_FIELDS.forEach(field => {
+    TIERS.forEach((tier) => {
+      TIER_FIELDS.forEach((field) => {
         const id = `${tier}${field}`;
         this.elements[id] = document.getElementById(id);
       });
@@ -23,7 +23,10 @@ export const UIBuilder = {
       if (card) {
         const bgImg = card.querySelector(".bg-layer");
         const fgImg = card.querySelector(".fg-layer");
-        if (bgImg) bgImg.onerror = () => { bgImg.style.display = "none"; };
+        if (bgImg)
+          bgImg.onerror = () => {
+            bgImg.style.display = "none";
+          };
         if (fgImg) {
           fgImg.onerror = () => {
             const fallback = document.createElement("div");
@@ -40,12 +43,15 @@ export const UIBuilder = {
   loadQuestIcons() {
     // Add error handlers to existing quest drop icons in HTML
     Object.entries(QUEST_DROPS).forEach(([quest, drops]) => {
-      [drops.primary, drops.secondary].forEach(material => {
+      [drops.primary, drops.secondary].forEach((material) => {
         const container = document.getElementById(`${quest}Quest_${material}_icon`);
         if (container) {
           const bgImg = container.querySelector(".bg-layer");
           const fgImg = container.querySelector(".fg-layer");
-          if (bgImg) bgImg.onerror = () => { bgImg.style.display = "none"; };
+          if (bgImg)
+            bgImg.onerror = () => {
+              bgImg.style.display = "none";
+            };
           if (fgImg) {
             fgImg.onerror = () => {
               const fallback = document.createElement("div");
@@ -58,7 +64,7 @@ export const UIBuilder = {
         }
       });
     });
-  }
+  },
 };
 
 /* ============================================
@@ -70,7 +76,7 @@ export const ViewManager = {
     const primaryMult = state.primaryMultiplier / 100;
     const secondaryMult = state.secondaryMultiplier / 100;
 
-    TIERS.forEach(questTier => {
+    TIERS.forEach((questTier) => {
       const drops = QUEST_DROPS[questTier];
       const primaryBonus = state.tiers[drops.primary].bonus;
       const secondaryBonus = state.tiers[drops.secondary].bonus;
@@ -94,7 +100,7 @@ export const ViewManager = {
     const results = document.getElementById("results");
     if (results) results.classList.add("visible");
 
-    TIERS.forEach(tier => {
+    TIERS.forEach((tier) => {
       const deficitEl = document.getElementById(`${tier}Deficit`);
       if (deficitEl) deficitEl.textContent = Math.max(0, Math.ceil(deficits[tier]));
 
@@ -110,8 +116,8 @@ export const ViewManager = {
   },
 
   syncInputsFromState(state) {
-    TIERS.forEach(tier => {
-      TIER_FIELDS.forEach(field => {
+    TIERS.forEach((tier) => {
+      TIER_FIELDS.forEach((field) => {
         const input = UIBuilder.elements[`${tier}${field}`];
         if (input) {
           input.value = state.tiers[tier][field.toLowerCase()];
@@ -122,7 +128,7 @@ export const ViewManager = {
     document.getElementById("baseDrop").value = state.baseDrop;
     document.getElementById("primaryMultiplier").value = state.primaryMultiplier;
     document.getElementById("secondaryMultiplier").value = state.secondaryMultiplier;
-  }
+  },
 };
 
 /* ============================================
@@ -135,7 +141,7 @@ export const EventHandler = {
     }, DEBOUNCE_MS);
 
     // Tier bonus inputs
-    TIERS.forEach(tier => {
+    TIERS.forEach((tier) => {
       const input = UIBuilder.elements[`${tier}Bonus`];
       if (input) {
         input.addEventListener("input", (e) => {
@@ -147,7 +153,7 @@ export const EventHandler = {
     });
 
     // Base drop and multiplier inputs
-    ["baseDrop", "primaryMultiplier", "secondaryMultiplier"].forEach(key => {
+    ["baseDrop", "primaryMultiplier", "secondaryMultiplier"].forEach((key) => {
       const input = document.getElementById(key);
       if (input) {
         input.addEventListener("input", (e) => {
@@ -163,7 +169,7 @@ export const EventHandler = {
     if (calcBtn) {
       calcBtn.addEventListener("click", () => app.calculate());
     }
-  }
+  },
 };
 
 /* ============================================
@@ -177,10 +183,7 @@ export const App = {
     this.state = Persistence.load() || StateManager.createInitial();
 
     // Build UI
-    UIBuilder.buildMaterialsGrid(
-      document.getElementById("materialsGrid"),
-      this.state
-    );
+    UIBuilder.buildMaterialsGrid(document.getElementById("materialsGrid"), this.state);
     // Sync inputs
     ViewManager.syncInputsFromState(this.state);
 
@@ -196,17 +199,12 @@ export const App = {
 
   calculate() {
     // Read all inputs
-    TIERS.forEach(tier => {
-      TIER_FIELDS.forEach(field => {
+    TIERS.forEach((tier) => {
+      TIER_FIELDS.forEach((field) => {
         const input = UIBuilder.elements[`${tier}${field}`];
         if (input) {
           const value = Validator.validate(input.value, Schema.tier[field]);
-          this.state = StateManager.updateTier(
-            this.state,
-            tier,
-            field.toLowerCase(),
-            value
-          );
+          this.state = StateManager.updateTier(this.state, tier, field.toLowerCase(), value);
         }
       });
     });
@@ -217,7 +215,7 @@ export const App = {
     // Calculate
     const needs = {};
     const haves = {};
-    TIERS.forEach(tier => {
+    TIERS.forEach((tier) => {
       needs[tier] = this.state.tiers[tier].need;
       haves[tier] = this.state.tiers[tier].have;
     });
@@ -230,25 +228,17 @@ export const App = {
     const primaryMult = this.state.primaryMultiplier / 100;
     const secondaryMult = this.state.secondaryMultiplier / 100;
 
-    TIERS.forEach(questTier => {
+    TIERS.forEach((questTier) => {
       const drops = QUEST_DROPS[questTier];
       dropRates[questTier] = {
         primary: {
           tier: drops.primary,
-          rate: Calculator.calcDropRate(
-            base,
-            this.state.tiers[drops.primary].bonus,
-            primaryMult
-          )
+          rate: Calculator.calcDropRate(base, this.state.tiers[drops.primary].bonus, primaryMult),
         },
         secondary: {
           tier: drops.secondary,
-          rate: Calculator.calcDropRate(
-            base,
-            this.state.tiers[drops.secondary].bonus,
-            secondaryMult
-          )
-        }
+          rate: Calculator.calcDropRate(base, this.state.tiers[drops.secondary].bonus, secondaryMult),
+        },
       };
     });
 
@@ -266,5 +256,5 @@ export const App = {
 
     // Show results
     ViewManager.showResults(deficits, result.runs);
-  }
+  },
 };

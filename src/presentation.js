@@ -5,7 +5,7 @@ export const DOMFactory = {
     const element = document.createElement(tag);
     if (className) {
       if (Array.isArray(className)) {
-        className.forEach(c => element.classList.add(c));
+        className.forEach((c) => element.classList.add(c));
       } else {
         element.className = className;
       }
@@ -55,7 +55,7 @@ export const DOMFactory = {
       fb.textContent = fallbackText;
       img.replaceWith(fb);
     };
-  }
+  },
 };
 
 function debounce(fn, delay) {
@@ -68,11 +68,11 @@ function debounce(fn, delay) {
 
 export const CollapsibleFactory = {
   build(title, content) {
-    const wrapper = DOMFactory.el("div", "ceoverlap-collapsible collapsed");
-    const header = DOMFactory.el("div", "ceoverlap-collapsible-header");
+    const wrapper = DOMFactory.el("div", "filter collapsed");
+    const header = DOMFactory.el("div", "filter-header");
     const label = DOMFactory.el("span", "");
     label.textContent = title;
-    const arrow = DOMFactory.el("span", "ceoverlap-collapsible-arrow");
+    const arrow = DOMFactory.el("span", "filter-arrow");
     arrow.textContent = "\u25BC";
     header.appendChild(label);
     header.appendChild(arrow);
@@ -85,7 +85,7 @@ export const CollapsibleFactory = {
   },
 
   createSearchInput(query, onSearch) {
-    const searchInput = DOMFactory.el("input", "servant-search ceoverlap-search");
+    const searchInput = DOMFactory.el("input", "search-filter");
     searchInput.type = "text";
     searchInput.placeholder = "Search by ID or name...";
     searchInput.value = query;
@@ -98,11 +98,13 @@ export const CollapsibleFactory = {
 
   populateFilterArea(container, query, onSearch, buildExtra) {
     container.replaceChildren();
-    const content = DOMFactory.el("div", "ceoverlap-collapsible-content");
+    const content = DOMFactory.el("div", "filter-content");
     content.appendChild(CollapsibleFactory.createSearchInput(query, onSearch));
-    if (buildExtra) buildExtra(content);
+    const group = DOMFactory.el("div", "filter-group");
+    if (buildExtra) buildExtra(group);
+    content.appendChild(group);
     container.appendChild(CollapsibleFactory.build("Filters", content));
-  }
+  },
 };
 
 export { debounce };

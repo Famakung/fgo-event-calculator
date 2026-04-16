@@ -1,6 +1,6 @@
-import { DEBOUNCE_MS, CLASS_FILTERS, RARITY_FILTERS } from "./constants.js";
+import { CLASS_FILTERS, RARITY_FILTERS } from "./constants.js";
 import { TraitMatcher } from "./domain.js";
-import { ServantData, CEList, CEById, TraitCEs, TraitNames } from "./data.js";
+import { ServantData, CEById, TraitCEs, TraitNames } from "./data.js";
 import { DOMFactory, CollapsibleFactory, debounce } from "./presentation.js";
 
 /* === Worker setup for off-thread CE match computation === */
@@ -15,7 +15,7 @@ function getWorker() {
     console.warn("Worker creation failed:", e);
     return null;
   }
-  _worker.onerror = function(e) {
+  _worker.onerror = function (e) {
     console.warn("Worker error:", e.message);
     if (_workerResolve) {
       const resolve = _workerResolve;
@@ -23,7 +23,7 @@ function getWorker() {
       resolve(null);
     }
   };
-  _worker.onmessage = function(e) {
+  _worker.onmessage = function (e) {
     if (e.data.type === "result" && _workerResolve) {
       const resolve = _workerResolve;
       _workerResolve = null;
@@ -45,16 +45,7 @@ function initWorker() {
     type: "init",
     servants: ServantData.servants,
     traitCEs: TraitCEs,
-    traitNames: TraitNames
-  });
-}
-
-function computeWorker() {
-  const worker = getWorker();
-  if (!worker) return Promise.resolve(null);
-  return new Promise(resolve => {
-    _workerResolve = resolve;
-    worker.postMessage({ type: "compute" });
+    traitNames: TraitNames,
   });
 }
 
@@ -67,7 +58,7 @@ export const CEFilterApp = {
     rarityFilters: [],
     matchCounts: [],
     matchCustomCounts: [],
-    currentPage: 1
+    currentPage: 1,
   },
 
   _allCEMatchesCache: null,
@@ -78,7 +69,7 @@ export const CEFilterApp = {
 
   _getPageSize() {
     const w = window.innerWidth;
-    const cols = w >= 1200 ? 6 : w >= 1000 ? 5 : w >= 800 ? 4 : w >= 600 ? 3 : 2;
+    const cols = w >= 1120 ? 6 : w >= 940 ? 5 : w >= 760 ? 4 : w >= 580 ? 3 : 2;
     return cols * 5;
   },
 
@@ -110,7 +101,7 @@ export const CEFilterApp = {
     if (this._callbacks.initOverlap) this._callbacks.initOverlap();
 
     // Build collapsible filter area with search, class, rarity, CE count
-    const filterArea = document.getElementById("cefilterFilterArea");
+    const filterArea = document.getElementById("cefilter-filter-area");
     if (filterArea) {
       CollapsibleFactory.populateFilterArea(
         filterArea,
@@ -121,18 +112,18 @@ export const CEFilterApp = {
           this.render();
         },
         (content) => {
-          const classDiv = DOMFactory.el("div", "cefilter-class-filter");
+          const classDiv = DOMFactory.el("div", "class-filter");
           classDiv.id = "cefilterClassFilter";
           content.appendChild(classDiv);
 
-          const rarityDiv = DOMFactory.el("div", "cefilter-rarity-filter");
+          const rarityDiv = DOMFactory.el("div", "rarity-filter");
           rarityDiv.id = "cefilterRarityFilter";
           content.appendChild(rarityDiv);
 
-          const countDiv = DOMFactory.el("div", "cefilter-match-count-filter");
+          const countDiv = DOMFactory.el("div", "ce-count-filter");
           countDiv.id = "cefilterMatchCount";
           content.appendChild(countDiv);
-        }
+        },
       );
     }
 
@@ -156,7 +147,7 @@ export const CEFilterApp = {
   _processWorkerResults(data) {
     // Rebuild matchingCEIds as Sets and CE match index
     const { results, index } = data;
-    results.forEach(entry => {
+    results.forEach((entry) => {
       entry.matchingCEIds = new Set(entry.matchingCEIds);
     });
     this._allCEMatchesCache = results;
@@ -178,23 +169,20 @@ export const CEFilterApp = {
     let filtered = entries;
     const query = (this.state.searchQuery || "").toLowerCase().trim();
     if (query) {
-      filtered = filtered.filter(s =>
-        s.servant.id.toLowerCase().includes(query) ||
-        s.servant.name.toLowerCase().includes(query) ||
-        ServantData.getAllNames(s.servant.id).some(n => n.toLowerCase().includes(query))
+      filtered = filtered.filter(
+        (s) =>
+          s.servant.id.toLowerCase().includes(query) ||
+          s.servant.name.toLowerCase().includes(query) ||
+          ServantData.getAllNames(s.servant.id).some((n) => n.toLowerCase().includes(query)),
       );
     }
     if (this.state.classFilters.length > 0) {
       const classSet = new Set(this.state.classFilters);
-      filtered = filtered.filter(s =>
-        s.servant.traits.some(t => classSet.has(t))
-      );
+      filtered = filtered.filter((s) => s.servant.traits.some((t) => classSet.has(t)));
     }
     if (this.state.rarityFilters.length > 0) {
       const raritySet = new Set(this.state.rarityFilters);
-      filtered = filtered.filter(s =>
-        s.servant.traits.some(t => raritySet.has(t))
-      );
+      filtered = filtered.filter((s) => s.servant.traits.some((t) => raritySet.has(t)));
     }
     return filtered;
   },
@@ -210,15 +198,13 @@ export const CEFilterApp = {
     const selected = new Set(this.state.classFilters);
 
     const buildRow = (classes) => {
-      const row = DOMFactory.el("div", "cefilter-class-row");
-      classes.forEach(cls => {
-        const btn = DOMFactory.el("div", "cefilter-class-btn" +
-          (selected.has(cls.id) ? " active" : ""));
+      classes.forEach((cls) => {
+        const btn = DOMFactory.el("div", "class-btn" + (selected.has(cls.id) ? " active" : ""));
         btn.dataset.traitId = cls.id;
         const img = DOMFactory.el("img", "", {
           src: `icons/classes/${cls.icon}.webp`,
           alt: cls.label,
-          title: cls.label
+          title: cls.label,
         });
         btn.appendChild(img);
         btn.addEventListener("click", () => {
@@ -233,14 +219,13 @@ export const CEFilterApp = {
           this.state.currentPage = 1;
           this._debouncedRender();
         });
-        row.appendChild(btn);
+        container.appendChild(btn);
       });
-      container.appendChild(row);
     };
 
     buildRow(standard);
     buildRow(extra);
-    this._classBtns = Array.from(container.querySelectorAll(".cefilter-class-btn"));
+    this._classBtns = Array.from(container.querySelectorAll(".class-btn"));
   },
 
   buildRarityFilter() {
@@ -252,9 +237,8 @@ export const CEFilterApp = {
     container.replaceChildren();
     const selected = new Set(this.state.rarityFilters);
 
-    rarities.forEach(rarity => {
-      const btn = DOMFactory.el("div", "cefilter-rarity-btn" +
-        (selected.has(rarity.id) ? " active" : ""));
+    rarities.forEach((rarity) => {
+      const btn = DOMFactory.el("div", "rarity-btn" + (selected.has(rarity.id) ? " active" : ""));
       btn.dataset.traitId = rarity.id;
       btn.textContent = rarity.label;
       btn.addEventListener("click", () => {
@@ -271,34 +255,26 @@ export const CEFilterApp = {
       });
       container.appendChild(btn);
     });
-    this._rarityBtns = Array.from(container.querySelectorAll(".cefilter-rarity-btn"));
+    this._rarityBtns = Array.from(container.querySelectorAll(".rarity-btn"));
   },
 
   filterByCEs(results) {
-    const selectedCEObjs = this.state.selectedCEs
-      .map(id => CEById.get(id))
-      .filter(ce => ce != null);
+    const selectedCEObjs = this.state.selectedCEs.map((id) => CEById.get(id)).filter((ce) => ce != null);
 
     if (selectedCEObjs.length === 0) return results;
 
-    const selectedIds = new Set(selectedCEObjs.map(c => c.id));
+    const selectedIds = new Set(selectedCEObjs.map((c) => c.id));
     if (this.state.mode === "all") {
-      return results.filter(entry =>
-        selectedCEObjs.every(sel => entry.matchingCEIds.has(sel.id))
-      );
+      return results.filter((entry) => selectedCEObjs.every((sel) => entry.matchingCEIds.has(sel.id)));
     }
     if (this.state.mode === "any") {
-      return results.filter(entry =>
-        entry.matchingCEs.some(m => selectedIds.has(m.id))
-      );
+      return results.filter((entry) => entry.matchingCEs.some((m) => selectedIds.has(m.id)));
     }
     // "custom" mode — filter by how many selected CEs match
     const matchCustomCounts = this.state.matchCustomCounts;
     const customCountSet = new Set(matchCustomCounts);
-    return results.filter(entry => {
-      const matchedCount = selectedCEObjs.filter(sel =>
-        entry.matchingCEIds.has(sel.id)
-      ).length;
+    return results.filter((entry) => {
+      const matchedCount = selectedCEObjs.filter((sel) => entry.matchingCEIds.has(sel.id)).length;
       if (matchCustomCounts.length > 0) {
         return customCountSet.has(matchedCount);
       }
@@ -326,13 +302,12 @@ export const CEFilterApp = {
     const maxCount = ceCount;
 
     // Remove stale selections
-    this.state.matchCustomCounts = this.state.matchCustomCounts.filter(n => n >= 1 && n <= maxCount);
+    this.state.matchCustomCounts = this.state.matchCustomCounts.filter((n) => n >= 1 && n <= maxCount);
 
     const selected = new Set(this.state.matchCustomCounts);
 
     for (let n = 1; n <= maxCount; n++) {
-      const btn = DOMFactory.el("div", "cefilter-match-count-btn" +
-        (selected.has(n) ? " active" : ""));
+      const btn = DOMFactory.el("div", "ce-count-btn" + (selected.has(n) ? " active" : ""));
       btn.textContent = n;
       btn.addEventListener("click", () => {
         if (selected.has(n)) {
@@ -352,11 +327,14 @@ export const CEFilterApp = {
     const container = document.getElementById("cefilterMatchCount");
     if (!container) return;
 
-    const availableCounts = new Set(ceFiltered.map(r => r.matchingCEs.length));
-    if (availableCounts.size === 0) { container.replaceChildren(); return; }
+    const availableCounts = new Set(ceFiltered.map((r) => r.matchingCEs.length));
+    if (availableCounts.size === 0) {
+      container.replaceChildren();
+      return;
+    }
 
     // Remove stale selections
-    this.state.matchCounts = this.state.matchCounts.filter(n => availableCounts.has(n));
+    this.state.matchCounts = this.state.matchCounts.filter((n) => availableCounts.has(n));
 
     container.replaceChildren();
 
@@ -365,8 +343,7 @@ export const CEFilterApp = {
 
     for (let n = 0; n <= maxCount; n++) {
       if (!availableCounts.has(n)) continue;
-      const btn = DOMFactory.el("div", "cefilter-match-count-btn" +
-        (selected.has(n) ? " active" : ""));
+      const btn = DOMFactory.el("div", "ce-count-btn" + (selected.has(n) ? " active" : ""));
       btn.textContent = n + " CE";
       btn.addEventListener("click", () => {
         if (selected.has(n)) {
@@ -391,7 +368,7 @@ export const CEFilterApp = {
       return;
     }
 
-    this.state.selectedCEs.forEach(ceId => {
+    this.state.selectedCEs.forEach((ceId) => {
       const ce = CEById.get(ceId);
       if (!ce) return;
 
@@ -408,7 +385,7 @@ export const CEFilterApp = {
       const removeBtn = DOMFactory.el("button", "cefilter-chip-remove", { type: "button" });
       removeBtn.textContent = "\u2715";
       removeBtn.addEventListener("click", () => {
-        this.state.selectedCEs = this.state.selectedCEs.filter(id => id !== ceId);
+        this.state.selectedCEs = this.state.selectedCEs.filter((id) => id !== ceId);
         this.state.currentPage = 1;
         this.render();
       });
@@ -424,9 +401,7 @@ export const CEFilterApp = {
     const modeRow = document.querySelector(".cefilter-mode-row");
     if (!grid) return;
 
-    const selectedCEObjs = this.state.selectedCEs
-      .map(id => CEById.get(id))
-      .filter(ce => ce != null);
+    const selectedCEObjs = this.state.selectedCEs.map((id) => CEById.get(id)).filter((ce) => ce != null);
 
     if (selectedCEObjs.length >= 2) {
       if (modeRow) modeRow.style.display = "flex";
@@ -438,29 +413,29 @@ export const CEFilterApp = {
       }
     }
 
-    let base = ceFiltered || this._lastCEFiltered || [];
+    const base = ceFiltered || this._lastCEFiltered || [];
 
     // Hide class/rarity buttons not present in CE-filtered results
     const availableClassIds = new Set();
     const availableRarityIds = new Set();
     base.forEach(({ servant }) => {
-      servant.traits.forEach(t => {
+      servant.traits.forEach((t) => {
         if (t.startsWith("01")) availableClassIds.add(t);
         if (t.startsWith("04")) availableRarityIds.add(t);
       });
     });
-    (this._classBtns || []).forEach(btn => {
+    (this._classBtns || []).forEach((btn) => {
       const avail = availableClassIds.has(btn.dataset.traitId);
       btn.style.display = avail ? "" : "none";
       if (!avail) btn.classList.remove("active");
     });
-    (this._rarityBtns || []).forEach(btn => {
+    (this._rarityBtns || []).forEach((btn) => {
       const avail = availableRarityIds.has(btn.dataset.traitId);
       btn.style.display = avail ? "" : "none";
       if (!avail) btn.classList.remove("active");
     });
-    this.state.classFilters = this.state.classFilters.filter(id => availableClassIds.has(id));
-    this.state.rarityFilters = this.state.rarityFilters.filter(id => availableRarityIds.has(id));
+    this.state.classFilters = this.state.classFilters.filter((id) => availableClassIds.has(id));
+    this.state.rarityFilters = this.state.rarityFilters.filter((id) => availableRarityIds.has(id));
 
     // Apply search, class, and rarity filters
     let filtered = this._applySearchClassRarity(base);
@@ -468,7 +443,7 @@ export const CEFilterApp = {
     // Apply match count filter
     if (this.state.matchCounts.length > 0) {
       const countSet = new Set(this.state.matchCounts);
-      filtered = filtered.filter(s => countSet.has(s.matchingCEs.length));
+      filtered = filtered.filter((s) => countSet.has(s.matchingCEs.length));
     }
 
     const pageSize = this._getPageSize();
@@ -487,26 +462,34 @@ export const CEFilterApp = {
     // Reuse existing placeholder cards from inline script to avoid LCP render delay
     const existingCards = isFirstPage ? grid.querySelectorAll(":scope > .cefilter-servant-card") : null;
 
-    pageSlice.forEach(({ servant, matchingCEs, allTraitNames, matchedAscensions, baseMatchesAll, primaryAscension }, idx) => {
-      const cardAttrs = isFirstCard ? { ...eagerAttrs, fetchpriority: "high" } : eagerAttrs;
-      isFirstCard = false;
-      const existing = existingCards && existingCards[idx];
-      frag.appendChild(this._buildCard({ servant, matchingCEs, allTraitNames, matchedAscensions, baseMatchesAll, primaryAscension }, cardAttrs, existing));
-    });
+    pageSlice.forEach(
+      ({ servant, matchingCEs, allTraitNames, matchedAscensions, baseMatchesAll, primaryAscension }, idx) => {
+        const cardAttrs = isFirstCard ? { ...eagerAttrs, fetchpriority: "high" } : eagerAttrs;
+        isFirstCard = false;
+        const existing = existingCards && existingCards[idx];
+        frag.appendChild(
+          this._buildCard(
+            { servant, matchingCEs, allTraitNames, matchedAscensions, baseMatchesAll, primaryAscension },
+            cardAttrs,
+            existing,
+          ),
+        );
+      },
+    );
 
     grid.replaceChildren(frag);
     this._renderPagination(totalPages);
   },
 
-  _buildCard({ servant, matchingCEs, allTraitNames, matchedAscensions, baseMatchesAll, primaryAscension }, eagerAttrs, existingCard) {
+  _buildCard(
+    { servant, matchingCEs, allTraitNames, matchedAscensions, baseMatchesAll, primaryAscension },
+    eagerAttrs,
+    existingCard,
+  ) {
     const card = DOMFactory.el("div", "cefilter-servant-card");
 
-    const imgAsc = (!baseMatchesAll && matchedAscensions.length > 0)
-      ? (primaryAscension || matchedAscensions[0])
-      : null;
-    const imgSrc = imgAsc
-      ? ServantData.getImageForAscension(servant.id, imgAsc)
-      : servant.image;
+    const imgAsc = !baseMatchesAll && matchedAscensions.length > 0 ? primaryAscension || matchedAscensions[0] : null;
+    const imgSrc = imgAsc ? ServantData.getImageForAscension(servant.id, imgAsc) : servant.image;
 
     let img;
     if (existingCard) {
@@ -523,7 +506,7 @@ export const CEFilterApp = {
     if (!img) {
       img = DOMFactory.createLazyImg(imgSrc, "servant-slot-portrait", {
         alt: servant.name,
-        ...eagerAttrs
+        ...eagerAttrs,
       });
     }
     DOMFactory.addAscensionFallback(img, servant.id);
@@ -531,8 +514,14 @@ export const CEFilterApp = {
       img.style.cursor = "pointer";
       img.onclick = () => {
         if (this._callbacks.openOverlap) {
-          this._callbacks.openOverlap({ servant, matchingCEs, allTraitNames,
-            matchedAscensions, baseMatchesAll, primaryAscension });
+          this._callbacks.openOverlap({
+            servant,
+            matchingCEs,
+            allTraitNames,
+            matchedAscensions,
+            baseMatchesAll,
+            primaryAscension,
+          });
         }
       };
     } else {
@@ -540,28 +529,24 @@ export const CEFilterApp = {
     }
     card.appendChild(img);
 
-    const displayName = imgAsc
-      ? ServantData.getAscensionName(servant.id, imgAsc) || servant.name
-      : servant.name;
+    const displayName = imgAsc ? ServantData.getAscensionName(servant.id, imgAsc) || servant.name : servant.name;
     const nameEl = DOMFactory.el("div", "cefilter-servant-name");
     nameEl.textContent = displayName;
     card.appendChild(nameEl);
 
     if (!baseMatchesAll && matchedAscensions.length > 0) {
       const ascLabel = DOMFactory.el("div", "cefilter-ascension-label");
-      ascLabel.textContent = matchedAscensions
-        .map(key => ServantData.getAscensionLabel(servant.id, key))
-        .join("\n");
+      ascLabel.textContent = matchedAscensions.map((key) => ServantData.getAscensionLabel(servant.id, key)).join("\n");
       card.appendChild(ascLabel);
     }
 
     if (matchingCEs.length > 0) {
       const badges = DOMFactory.el("div", "cefilter-match-badges");
-      matchingCEs.forEach(ce => {
+      matchingCEs.forEach((ce) => {
         const badge = DOMFactory.createLazyImg(ce.thumbImage, "cefilter-match-badge", {
           alt: ce.name,
           title: ce.name,
-          ...eagerAttrs
+          ...eagerAttrs,
         });
         DOMFactory.addSimpleFallback(badge, "cefilter-match-badge-fallback", ce.id);
         badge.style.cursor = "pointer";
@@ -582,7 +567,7 @@ export const CEFilterApp = {
   },
 
   _renderPagination(totalPages) {
-    ["cefilterPaginationTop", "cefilterPaginationBottom"].forEach(id => {
+    ["cefilterPaginationTop", "cefilterPaginationBottom"].forEach((id) => {
       const container = document.getElementById(id);
       if (!container) return;
       container.replaceChildren();
@@ -628,49 +613,55 @@ export const CEFilterApp = {
     if (this._allCEMatchesCache) return this._allCEMatchesCache;
     const traitCEs = TraitCEs;
     const relevantTraitIds = new Set();
-    traitCEs.forEach(ce => {
-      ce.traits.forEach(t => relevantTraitIds.add(t));
-      ce.traitGroups.forEach(group => group.forEach(t => relevantTraitIds.add(t)));
+    traitCEs.forEach((ce) => {
+      ce.traits.forEach((t) => relevantTraitIds.add(t));
+      ce.traitGroups.forEach((group) => group.forEach((t) => relevantTraitIds.add(t)));
     });
 
     const results = [];
 
-    ServantData.servants.forEach(servant => {
+    ServantData.servants.forEach((servant) => {
       const traitSets = TraitMatcher.getAllTraitSets(servant);
 
       if (!servant.hasAscensions) {
-        const matchingCEs = traitCEs.filter(ce => TraitMatcher.matches(servant.traitSet, ce));
+        const matchingCEs = traitCEs.filter((ce) => TraitMatcher.matches(servant.traitSet, ce));
 
-        const relevantTraits = servant.traits
-          .filter(t => relevantTraitIds.has(t))
-          .map(t => TraitNames[t] || t);
+        const relevantTraits = servant.traits.filter((t) => relevantTraitIds.has(t)).map((t) => TraitNames[t] || t);
 
         results.push({
-          servant, matchingCEs, allTraitNames: relevantTraits,
-          matchedAscensions: [], baseMatchesAll: true,
-          matchingCEIds: new Set(matchingCEs.map(c => c.id))
+          servant,
+          matchingCEs,
+          allTraitNames: relevantTraits,
+          matchedAscensions: [],
+          baseMatchesAll: true,
+          matchingCEIds: new Set(matchingCEs.map((c) => c.id)),
         });
       } else {
-        const ascResults = traitSets.map(set => ({
+        const ascResults = traitSets.map((set) => ({
           key: set.key,
           traits: set.traits,
-          matchingCEs: traitCEs.filter(ce => TraitMatcher.matches(set.traitSet, ce))
+          matchingCEs: traitCEs.filter((ce) => TraitMatcher.matches(set.traitSet, ce)),
         }));
 
         const groups = new Map();
-        ascResults.forEach(ar => {
-          const key = ar.matchingCEs.map(c => c.id).sort().join(',');
+        ascResults.forEach((ar) => {
+          const key = ar.matchingCEs
+            .map((c) => c.id)
+            .sort()
+            .join(",");
           if (!groups.has(key)) groups.set(key, []);
           groups.get(key).push(ar);
         });
 
-        const nonEmptyGroups = [...groups.entries()]
-          .filter(([_, entries]) => entries[0].matchingCEs.length > 0);
+        const nonEmptyGroups = [...groups.entries()].filter(([_, entries]) => entries[0].matchingCEs.length > 0);
         if (nonEmptyGroups.length === 0) {
           results.push({
-            servant, matchingCEs: [], allTraitNames: [],
-            matchedAscensions: [], baseMatchesAll: true,
-            matchingCEIds: new Set()
+            servant,
+            matchingCEs: [],
+            allTraitNames: [],
+            matchedAscensions: [],
+            baseMatchesAll: true,
+            matchingCEIds: new Set(),
           });
           return;
         }
@@ -678,30 +669,32 @@ export const CEFilterApp = {
         if (nonEmptyGroups.length === 1) {
           const entries = nonEmptyGroups[0][1];
           const matchingCEs = entries[0].matchingCEs;
-          const mergedTraits = [...new Set(entries.flatMap(e => e.traits))];
-          const relevantTraits = mergedTraits
-            .filter(t => relevantTraitIds.has(t))
-            .map(t => TraitNames[t] || t);
+          const mergedTraits = [...new Set(entries.flatMap((e) => e.traits))];
+          const relevantTraits = mergedTraits.filter((t) => relevantTraitIds.has(t)).map((t) => TraitNames[t] || t);
 
           results.push({
-            servant, matchingCEs, allTraitNames: relevantTraits,
-            matchedAscensions: [], baseMatchesAll: true,
-            matchingCEIds: new Set(matchingCEs.map(c => c.id))
+            servant,
+            matchingCEs,
+            allTraitNames: relevantTraits,
+            matchedAscensions: [],
+            baseMatchesAll: true,
+            matchingCEIds: new Set(matchingCEs.map((c) => c.id)),
           });
         } else {
           nonEmptyGroups.forEach(([_, entries]) => {
             const matchingCEs = entries[0].matchingCEs;
-            const ascKeys = entries.map(e => e.key);
-            const mergedTraits = [...new Set(entries.flatMap(e => e.traits))];
-            const relevantTraits = mergedTraits
-              .filter(t => relevantTraitIds.has(t))
-              .map(t => TraitNames[t] || t);
+            const ascKeys = entries.map((e) => e.key);
+            const mergedTraits = [...new Set(entries.flatMap((e) => e.traits))];
+            const relevantTraits = mergedTraits.filter((t) => relevantTraitIds.has(t)).map((t) => TraitNames[t] || t);
 
             results.push({
-              servant, matchingCEs, allTraitNames: relevantTraits,
-              matchedAscensions: ascKeys, baseMatchesAll: false,
+              servant,
+              matchingCEs,
+              allTraitNames: relevantTraits,
+              matchedAscensions: ascKeys,
+              baseMatchesAll: false,
               primaryAscension: ascKeys[0],
-              matchingCEIds: new Set(matchingCEs.map(c => c.id))
+              matchingCEIds: new Set(matchingCEs.map((c) => c.id)),
             });
           });
         }
@@ -713,12 +706,12 @@ export const CEFilterApp = {
     // Build CE->entry index for CEFilterPicker overlap detection
     this._ceMatchEntriesIndex = {};
     results.forEach((entry, idx) => {
-      entry.matchingCEs.forEach(ce => {
+      entry.matchingCEs.forEach((ce) => {
         if (!this._ceMatchEntriesIndex[ce.id]) this._ceMatchEntriesIndex[ce.id] = new Set();
         this._ceMatchEntriesIndex[ce.id].add(idx);
       });
     });
 
     return results;
-  }
+  },
 };
