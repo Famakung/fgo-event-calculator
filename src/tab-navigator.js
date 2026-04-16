@@ -2,7 +2,7 @@
    TAB NAVIGATION
    ============================================ */
 export const TabNavigator = {
-  init(ceFilterInit) {
+  init(ceFilterInit, bondInit) {
     const navbar = document.querySelector(".navbar");
     if (!navbar) return;
 
@@ -40,6 +40,7 @@ export const TabNavigator = {
       document.getElementById("panel-" + tab).classList.add("active");
 
       if (tab === "cefilter") ceFilterInit();
+      if (tab === "bond") bondInit();
 
       try {
         localStorage.setItem("fgo_active_tab", tab);

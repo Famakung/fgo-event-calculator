@@ -54,6 +54,8 @@ export const BondApp = {
   },
 
   init() {
+    if (this._initialized) return;
+    this._initialized = true;
     const saved = this.loadState();
     this.state = saved || {
       slots: Array.from({ length: SERVANT_MAX_SLOTS }, () => ({

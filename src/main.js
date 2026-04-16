@@ -57,7 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
     BondApp.init();
   };
 
-  TabNavigator.init(initCEFilter);
+  TabNavigator.init(initCEFilter, initBond);
 
   // Eagerly init ONLY the active tab
   if (activeTab === "event") {
@@ -68,10 +68,9 @@ document.addEventListener("DOMContentLoaded", () => {
     initCEFilter();
   }
 
-  // Defer non-active tabs to idle time
+  // Defer Event Shop to idle (hydrates static HTML only — no image fetches)
   const rIC = window.requestIdleCallback || ((cb) => setTimeout(cb, 1));
   rIC(() => {
     if (activeTab !== "event") App.init();
-    if (activeTab !== "bond") initBond();
   });
 });
