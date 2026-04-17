@@ -372,7 +372,7 @@ export const CEFilterApp = {
       const ce = CEById.get(ceId);
       if (!ce) return;
 
-      const chip = DOMFactory.el("div", "cefilter-chip");
+      const chip = DOMFactory.el("div", ["cefilter-chip", "flex-row"]);
 
       const img = DOMFactory.createLazyImg(ce.thumbImage, null, { alt: ce.name });
       DOMFactory.addSimpleFallback(img, "cefilter-match-badge-fallback", ce.id);
@@ -382,7 +382,7 @@ export const CEFilterApp = {
       nameSpan.textContent = ce.name;
       chip.appendChild(nameSpan);
 
-      const removeBtn = DOMFactory.el("button", "cefilter-chip-remove", { type: "button" });
+      const removeBtn = DOMFactory.el("button", ["cefilter-chip-remove", "flex-row"], { type: "button" });
       removeBtn.textContent = "\u2715";
       removeBtn.addEventListener("click", () => {
         this.state.selectedCEs = this.state.selectedCEs.filter((id) => id !== ceId);
@@ -541,7 +541,7 @@ export const CEFilterApp = {
     }
 
     if (matchingCEs.length > 0) {
-      const badges = DOMFactory.el("div", "cefilter-match-badges");
+      const badges = DOMFactory.el("div", ["ce-badges", "grid-micro"]);
       matchingCEs.forEach((ce) => {
         const badge = DOMFactory.createLazyImg(ce.thumbImage, "cefilter-match-badge", {
           alt: ce.name,

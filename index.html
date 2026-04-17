@@ -54,7 +54,7 @@
           <div class="card">
             <div class="card-inner">
               <div class="card-title">Shop Requirements</div>
-            <div class="materials-grid" id="materialsGrid">
+            <div class="materials-grid grid" id="materialsGrid">
               <div class="material-card" data-tier="bronze">
                 <div class="material-icon-wrapper">
                   <div class="material-icon" id="bronzeIcon">
@@ -257,7 +257,7 @@
                 />
               </div>
             </div>
-            <div class="quest-drops-grid" id="questDropsGrid">
+            <div class="quest-drops-grid grid" id="questDropsGrid">
               <div class="quest-drops-item" data-tier="bronze">
                 <div class="quest-drops-title">Bronze Quest</div>
                 <div class="drop-line">
@@ -399,7 +399,7 @@
             <div class="card results-card">
               <div class="card-inner">
                 <div class="card-title">Items Needed</div>
-              <div class="deficit-grid" id="deficitGrid">
+              <div class="deficit-grid grid" id="deficitGrid">
                 <div class="deficit-item" data-tier="bronze">
                   <div class="deficit-label">Bronze</div>
                   <div class="deficit-value" id="bronzeDeficit">0</div>
@@ -416,7 +416,7 @@
 
               <div class="quest-results">
                 <div class="quest-title">Recommended Quest Runs</div>
-                <div class="quest-grid" id="questGrid">
+                <div class="quest-grid grid" id="questGrid">
                   <div class="quest-item" data-tier="bronze">
                     <div class="quest-name">Bronze Quest</div>
                     <div class="quest-count" id="bronzePlay">0</div>
@@ -443,7 +443,7 @@
           <div class="card">
             <div class="card-inner">
               <div class="card-title">Bond Points Requirements</div>
-            <div class="servant-grid" id="servantGrid"></div>
+            <div class="servant-grid grid" id="servantGrid"></div>
             </div>
           </div>
 
@@ -534,7 +534,7 @@
               </div>
               <div id="cefilter-filter-area"></div>
               <div class="cefilter-pagination" id="cefilterPaginationTop"></div>
-              <div class="cefilter-results-grid" id="cefilterResults"></div>
+              <div class="cefilter-results-grid grid" id="cefilterResults"></div>
               <script>(function(){try{var t=localStorage.getItem("fgo_active_tab");if(t&&t!=="cefilter")return;var g=document.getElementById("cefilterResults");if(!g)return;var mq=window.matchMedia;var cols=mq("(min-width:1120px)").matches?6:mq("(min-width:940px)").matches?5:mq("(min-width:760px)").matches?4:mq("(min-width:580px)").matches?3:2;var count=cols*5;var f=document.createDocumentFragment();for(var i=1;i<=count;i++){var id=i<10?"00"+i:i<100?"0"+i:""+i;var d=document.createElement("div");d.className="cefilter-servant-card";var m=document.createElement("img");m.className="servant-slot-portrait";m.src="servants/"+id+"/000.webp";m.loading="eager";m.decoding="async";if(i===1)m.fetchPriority="high";d.appendChild(m);f.appendChild(d)}g.appendChild(f)}catch(e){}})();</script>
               <div class="cefilter-pagination" id="cefilterPaginationBottom"></div>
             </div>
@@ -555,7 +555,7 @@
               </button>
             </div>
             <div id="servantFilterArea"></div>
-            <div class="servant-picker-grid" id="servantPickerGrid"></div>
+            <div class="servant-picker-grid grid-sm" id="servantPickerGrid"></div>
           </div>
         </div>
 
@@ -582,7 +582,7 @@
                 &#10005;
               </button>
             </div>
-            <div class="servant-picker-grid" id="ascensionPickerGrid"></div>
+            <div class="servant-picker-grid grid-sm" id="ascensionPickerGrid"></div>
           </div>
         </div>
 
@@ -600,7 +600,7 @@
               </button>
             </div>
             <div id="ceFilterArea"></div>
-            <div class="servant-picker-grid" id="cePickerGrid"></div>
+            <div class="servant-picker-grid grid-sm" id="cePickerGrid"></div>
           </div>
         </div>
 
@@ -624,7 +624,7 @@
                 &#10005;
               </button>
             </div>
-            <div class="servant-picker-grid" id="ceSubPickerGrid"></div>
+            <div class="servant-picker-grid grid-sm" id="ceSubPickerGrid"></div>
           </div>
         </div>
 
@@ -642,7 +642,7 @@
               </button>
             </div>
             <div id="ceFilterPickerArea"></div>
-            <div class="servant-picker-grid" id="ceFilterPickerGrid"></div>
+            <div class="servant-picker-grid grid-sm" id="ceFilterPickerGrid"></div>
           </div>
         </div>
 

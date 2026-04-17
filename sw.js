@@ -1,11 +1,24 @@
-const CACHE_NAME = "fgo-calc-v18";
+const CACHE_NAME = "fgo-calc-v19";
 
 // Compute base path from service worker location (works on GitHub Pages subdirs)
 const BASE = new URL(".", self.location.href).pathname;
 
 const CLASS_ICON_NAMES = [
-  "saber", "archer", "lancer", "rider", "caster", "assassin", "berserker",
-  "shielder", "ruler", "avenger", "mooncancer", "alterego", "foreigner", "pretender", "beast",
+  "saber",
+  "archer",
+  "lancer",
+  "rider",
+  "caster",
+  "assassin",
+  "berserker",
+  "shielder",
+  "ruler",
+  "avenger",
+  "mooncancer",
+  "alterego",
+  "foreigner",
+  "pretender",
+  "beast",
 ];
 
 const STATIC_ASSETS = [

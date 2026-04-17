@@ -741,7 +741,7 @@ export const BondApp = {
 
       // Applied CE images grid
       if (sr.appliedCEs.length > 0) {
-        const ceImgGrid = DOMFactory.el("div", "bond-result-ce-grid");
+        const ceImgGrid = DOMFactory.el("div", ["ce-badges", "grid-micro"]);
         sr.appliedCEs.forEach((ce) => {
           if (ce.isMaxBond) {
             // Max bond: servant portrait with bond icon overlay

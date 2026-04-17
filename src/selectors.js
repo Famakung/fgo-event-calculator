@@ -836,7 +836,7 @@ export const CEServantOverlap = {
   },
 
   _buildCEFilter(container) {
-    const filterDiv = DOMFactory.el("div", "ceoverlap-ce-filter");
+    const filterDiv = DOMFactory.el("div", ["ceoverlap-ce-filter", "grid-mini"]);
     const selected = this._selectedCEFilter;
 
     this._clickedCEs.forEach((ce) => {
@@ -1099,7 +1099,7 @@ export const CEServantOverlap = {
     }
 
     if (entry.matchingCEs && entry.matchingCEs.length > 0) {
-      const badges = DOMFactory.el("div", "cefilter-match-badges");
+      const badges = DOMFactory.el("div", ["ce-badges", "grid-micro"]);
       entry.matchingCEs.forEach((ce) => {
         const badge = DOMFactory.createLazyImg(
           ce.thumbImage,

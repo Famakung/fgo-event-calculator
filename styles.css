@@ -374,15 +374,6 @@ html[data-tab="event"] #panel-event {
   color: var(--accent);
 }
 
-.bond-result-servant-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 160px));
-  gap: 12px;
-  justify-content: center;
-  margin-bottom: 16px;
-  width: 100%;
-}
-
 .bond-result-servant-card {
   display: flex;
   flex-direction: column;
@@ -442,23 +433,11 @@ html[data-tab="event"] #panel-event {
   color: var(--accent);
 }
 
-.bond-result-maxbond-grid {
-  display: inline-flex;
-  gap: 4px;
-  align-items: center;
-}
-
-.bond-result-ce-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 4px;
-  margin-bottom: 6px;
-}
-
 .bond-result-ce-img {
   width: 32px;
   height: 32px;
   border-radius: 6px;
+  border: 2px solid var(--border);
   object-fit: cover;
 }
 
@@ -492,11 +471,48 @@ html[data-tab="event"] #panel-event {
 }
 
 /* Servant Slots */
-.servant-grid {
+.grid,
+.bond-result-servant-grid,
+.ce-grid,
+.cefilter-results-grid,
+.ceoverlap-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 160px));
   justify-content: center;
-  gap: 12px;
+  gap: 8px;
+}
+
+.grid {
+  padding: 8px;
+}
+
+.grid-sm {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 100px));
+  gap: 8px;
+  padding: 8px;
+  justify-content: center;
+}
+
+.grid-mini {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 64px));
+  gap: 8px;
+  padding: 8px;
+  justify-content: center;
+}
+
+.grid-micro {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 32px));
+  gap: 4px;
+  padding: 4px;
+  justify-content: center;
+}
+
+.flex-row {
+  display: inline-flex;
+  align-items: center;
 }
 
 .bond-group-label {
@@ -592,6 +608,7 @@ html[data-tab="event"] #panel-event {
   width: var(--portrait-lg);
   height: var(--portrait-lg);
   border-radius: 10px;
+  border: 2px solid var(--border);
   object-fit: cover;
   flex-shrink: 0;
 }
@@ -677,12 +694,6 @@ html[data-tab="event"] #panel-event {
 }
 
 /* Craft Essences */
-.ce-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 160px));
-  gap: 12px;
-  justify-content: center;
-}
 
 .ce-slot {
   display: flex;
@@ -797,8 +808,6 @@ html[data-tab="event"] #panel-event {
 }
 
 .cefilter-chip {
-  display: inline-flex;
-  align-items: center;
   gap: 6px;
   padding: 4px 10px;
   background: var(--accent-light);
@@ -813,6 +822,7 @@ html[data-tab="event"] #panel-event {
   width: 32px;
   height: 32px;
   border-radius: 4px;
+  border: 2px solid var(--border);
   object-fit: cover;
 }
 
@@ -826,8 +836,6 @@ html[data-tab="event"] #panel-event {
   line-height: 1;
   min-width: 24px;
   min-height: 24px;
-  display: inline-flex;
-  align-items: center;
   justify-content: center;
 }
 
@@ -908,14 +916,6 @@ html[data-tab="event"] #panel-event {
   color: var(--accent);
 }
 
-.cefilter-results-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 160px));
-  gap: 8px;
-  justify-content: center;
-  padding: 8px;
-}
-
 .cefilter-servant-card {
   display: flex;
   flex-direction: column;
@@ -941,11 +941,8 @@ html[data-tab="event"] #panel-event {
   margin-bottom: 6px;
 }
 
-.cefilter-match-badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2px;
-  justify-content: center;
+.ce-badges {
+  width: 100%;
   margin-bottom: 4px;
 }
 
@@ -953,6 +950,7 @@ html[data-tab="event"] #panel-event {
   width: 32px;
   height: 32px;
   border-radius: 6px;
+  border: 2px solid var(--border);
   object-fit: cover;
   cursor: pointer;
   transition:
@@ -1054,10 +1052,10 @@ html[data-tab="event"] #panel-event {
   height: 100px;
 }
 
-.ce-filter-picker-item .ce-filter-check {
+.ce-filter-check {
   position: absolute;
   top: 0;
-  right: 8px;
+  right: 9px;
   width: 18px;
   height: 18px;
   border-radius: 50%;
@@ -1085,10 +1083,6 @@ html[data-tab="event"] #panel-event {
 
 /* CE Overlap Modal */
 .ceoverlap-ce-filter {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, 64px);
-  gap: 8px;
-  justify-content: center;
   margin-bottom: 12px;
 }
 
@@ -1103,6 +1097,7 @@ html[data-tab="event"] #panel-event {
 .ceoverlap-ce-filter .servant-picker-item img {
   width: 60px;
   height: 60px;
+  border: none;
   margin-bottom: 0;
 }
 
@@ -1110,9 +1105,11 @@ html[data-tab="event"] #panel-event {
   display: none;
 }
 
-.ceoverlap-ce-filter .ce-filter-check {
-  top: -8px;
-  right: -8px;
+@media (width < 760px) {
+  .ceoverlap-ce-filter .ce-filter-check {
+    top: -8px;
+    right: -8px;
+  }
 }
 
 .ceoverlap-ce-filter .servant-picker-item.selected {
@@ -1122,13 +1119,6 @@ html[data-tab="event"] #panel-event {
 .ceoverlap-scroll {
   overflow-y: auto;
   flex: 1;
-}
-
-.ceoverlap-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 160px));
-  gap: 8px;
-  justify-content: center;
 }
 
 .cefilter-match-badge--nonshared {
@@ -1286,12 +1276,8 @@ html[data-tab="event"] #panel-event {
 }
 
 .servant-picker-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, 100px);
-  gap: 8px;
   overflow-y: auto;
   flex: 1;
-  justify-content: center;
 }
 
 .servant-picker-item {
@@ -1311,6 +1297,7 @@ html[data-tab="event"] #panel-event {
   width: var(--portrait-lg);
   height: var(--portrait-lg);
   border-radius: 8px;
+  border: 2px solid var(--border);
   object-fit: cover;
   margin-bottom: 4px;
 }
@@ -1353,21 +1340,15 @@ html[data-tab="event"] #panel-event {
 /* ============================================
    7. MATERIALS GRID
    ============================================ */
-.materials-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
-  min-width: 0;
-}
 
 .material-card {
-  padding: 16px 12px;
+  padding: 8px 12px;
   border-radius: var(--radius-sm);
   text-align: center;
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease;
-  min-width: 0;
+  max-width: 160px;
   overflow: hidden;
 }
 
@@ -1520,12 +1501,6 @@ html[data-tab="event"] #panel-event {
   text-align: center;
 }
 
-.quest-drops-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
-}
-
 .quest-drops-item {
   background: var(--bg);
   padding: 16px;
@@ -1632,14 +1607,6 @@ html[data-tab="event"] #panel-event {
   margin-top: 20px;
 }
 
-/* Deficit Grid */
-.deficit-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
 .deficit-item {
   text-align: center;
   padding: 16px;
@@ -1683,12 +1650,6 @@ html[data-tab="event"] #panel-event {
   margin-bottom: 20px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-}
-
-.quest-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
 }
 
 .quest-item {
@@ -1902,17 +1863,11 @@ html[data-tab="event"] #panel-event {
     max-width: 580px;
   }
 
-  .materials-grid,
-  .quest-drops-grid,
-  .deficit-grid,
-  .quest-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  .servant-grid,
+  .grid,
   .bond-result-servant-grid,
   .ce-grid,
-  .cefilter-results-grid {
+  .cefilter-results-grid,
+  .ceoverlap-grid {
     grid-template-columns: repeat(3, minmax(0, 160px));
   }
 }
@@ -1932,16 +1887,16 @@ html[data-tab="event"] #panel-event {
     grid-template-columns: repeat(4, minmax(0, 160px));
   }
 
-  .servant-modal-content {
-    max-width: 540px;
-  }
-
   .ceoverlap-grid {
     grid-template-columns: repeat(3, minmax(0, 160px));
   }
 
+  .servant-modal-content {
+    max-width: 540px;
+  }
+
   .ceoverlap-ce-filter {
-    grid-template-columns: repeat(auto-fit, 100px);
+    grid-template-columns: repeat(auto-fit, minmax(0, 100px));
     gap: 8px;
   }
 
@@ -1955,6 +1910,7 @@ html[data-tab="event"] #panel-event {
   .ceoverlap-ce-filter .servant-picker-item img {
     width: var(--portrait-lg);
     height: var(--portrait-lg);
+    border: 2px solid var(--border);
     margin-bottom: 4px;
   }
 
@@ -1978,12 +1934,12 @@ html[data-tab="event"] #panel-event {
     grid-template-columns: repeat(5, minmax(0, 160px));
   }
 
-  .servant-modal-content {
-    max-width: 720px;
-  }
-
   .ceoverlap-grid {
     grid-template-columns: repeat(4, minmax(0, 160px));
+  }
+
+  .servant-modal-content {
+    max-width: 720px;
   }
 }
 
