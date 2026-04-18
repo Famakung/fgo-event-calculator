@@ -1,0 +1,7 @@
+# Generated build outputs
+app.min.js
+app.js
+ce-match-worker.min.js
+styles.min.css
+chunks/
+node_modules/
